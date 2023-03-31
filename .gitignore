@@ -1,0 +1,10 @@
+__pycache__/
+venv
+.venv
+env
+.env
+media/
+secret.json
+*.log
+*.sso
+*.ora
