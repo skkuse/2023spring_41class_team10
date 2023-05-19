@@ -6,6 +6,7 @@ class Problem(models.Model):
     title = models.CharField(max_length=500)
     level = models.IntegerField()
     description = models.TextField()
+    
 
     def __str__(self):
         """String for representing the MyModelName object (in Admin site etc.)."""
