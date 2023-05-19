@@ -6,3 +6,6 @@ urlpatterns = [
     path('v0/list', views_sample.ProblemListView.as_view(), name='ProblemListSample'),
     path('v1/list', views.ProblemListView.as_view(), name='ProblemList'),
 ]
+# urlpatterns = [
+#     path('', views.index, name='index'),
+# ]
