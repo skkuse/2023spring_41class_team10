@@ -1,13 +1,12 @@
 from django.db import models
 
-# Create your models here.
-
 class Problem(models.Model):
   id = models.AutoField(primary_key=True)
   title = models.CharField(max_length=500)
   level = models.IntegerField()
   description = models.TextField()
-  
+  create_at = models.DateTimeField(auto_now_add=True)
+
 class AlgorithmField(models.Model):
   id = models.AutoField(primary_key=True)
   field = models.CharField(max_length=100)
@@ -27,7 +26,7 @@ class Testcase(models.Model):
 class Execution(models.Model):
   id = models.AutoField(primary_key=True)
   problem = models.ForeignKey(Problem, models.CASCADE)
-  lang = models.CharField()
+  lang = models.CharField(max_length=50)
   create_at = models.DateTimeField(auto_now_add=True)
   status = models.CharField(max_length=20)
   exec_time = models.FloatField()
@@ -37,15 +36,18 @@ class Execution(models.Model):
 class Submission(models.Model):
   id = models.AutoField(primary_key=True)
   problem = models.ForeignKey(Problem, models.CASCADE)
-  lang = models.CharField()
+  lang = models.CharField(max_length=50)
   create_at = models.DateTimeField(auto_now_add=True)
   status = models.CharField(max_length=20)
   exec_time = models.FloatField()
   user = models.BigIntegerField()
+  num_pass = models.IntegerField()
 
 class UserCodeHistory(models.Model):
   id = models.AutoField(primary_key=True)
   user = models.BigIntegerField()
+  problem = models.ForeignKey(Problem, models.CASCADE)
   version = models.IntegerField()
   code = models.TextField()
   memo = models.TextField()
+  create_at = models.DateTimeField(auto_now_add=True)
