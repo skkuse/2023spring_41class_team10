@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # 'login',
     # 'accounts',
+    "users",
     'problems',
     'codes',
     'lectures',
