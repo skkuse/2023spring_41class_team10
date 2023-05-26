@@ -5,4 +5,5 @@ urlpatterns = [
     # 문제 리스트 API
     path('v0/list', views_sample.ProblemListView.as_view(), name='ProblemListSample'),
     path('v1/list', views.ProblemListView.as_view(), name='ProblemList'),
+    path('v1/<problem_id>/submit/', views.ProblemSubmitView.as_view(), name='problem_submit'),
 ]
