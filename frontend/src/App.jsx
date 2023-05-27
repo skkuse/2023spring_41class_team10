@@ -1,7 +1,7 @@
 import { useState, React } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
-import { Home, Profile, Auth, Problem } from './pages'
+import { Home, Profile, Auth, Problem, Notice,Questions } from './pages'
 import { GuestRoute, Navbar } from './components'
 
 import './App.css'
@@ -21,6 +21,8 @@ function App() {
           <Route path="/problem/:slug" element={<Problem />} />
           <Route path="/profile/:username" element={<Profile />} /> {/*남의 프로필*/}
           <Route path="/@:username" element={<Profile />} /> {/*본인 프로필*/} {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
+          <Route path="/notice" element={<Notice />}/>
+          <Route path="/questions" element={<Questions />}/>
         </Routes>
       </main>
       <footer>
