@@ -5,7 +5,7 @@ from backend.settings import BASE_DIR
 import json
 import os
 
-from problem_desc.models import *
+from problems.models import *
 # from users.models import User
 
 import subprocess   # For execution user's code
@@ -132,10 +132,7 @@ class ProblemExecView(APIView):
             user = request.user.id,
             result = output
             )
-            return Response(get_fail_res("Execution Failed: Timeout!"))
-        
-        # Fail Case, Create Table
-        
+            return Response(get_fail_res("Execution Failed: Timeout!"))        
         
         # Success Case, Create Table
         Execution.objects.create(
