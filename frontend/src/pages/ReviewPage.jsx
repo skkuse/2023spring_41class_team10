@@ -22,12 +22,7 @@ const Titleh1 = styled.h1`
 
 const MoreDescriptionContainer = styled.div`
     display: flex;
-    justify-content: space-around;
-`;
-
-const ActualDescriptionContainer = styled.div`
-    margin: 0 5px;
-    text-align: left;
+    justify-content: right;
 `;
 
 const ChooseLanguageContainer = styled.div`
@@ -57,7 +52,7 @@ const LanguageDiv = styled.div`
     width: 80px;
 `
 
-const SolvingContainer = styled.div`
+const ReviewContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,31 +66,52 @@ const TypingContainer = styled.textarea`
     margin-bottom: 1vh;
 `;
 
-const InputOutputContainer = styled.div`
+const Titleh2 = styled.h2`
+    margin: 5px 0;
+`;
+
+const CodeCompareContainer = styled.div`
     display: flex;
     justify-content: space-around;
     width: 100%;
 `;
 
-const InputContainer = styled.div`
+const OriginalCodeContainer = styled.div`
     label {
         display: block;
     }
     width: 100%;
-    margin-right: 2vw;
+    margin-right: 4vw;
 `;
 
-const OutputContainer = styled.div`
+const FeedbackContainer = styled.div`
     label {
         display: block;
     }
     width: 100%;
+`;
+
+const CodeReviewContainer = styled.div`
+    label {
+        display: block;
+    }
+    width: 100%;
+`;
+
+const CodeReviewDiv = styled.div`
+    width: 100%;
+    background-color: white;
+    border-radius: 3vw;
+    padding: 15px;
+    min-height: 15vh;
+    margin-bottom: 1vh;
 `;
 
 const Controllers = styled.div`
     display: flex;
     justify-content: center;
 `;
+
 
 const Button = styled.button`
     background-color: ${props => props.color};
@@ -123,91 +139,77 @@ const data = {
     updatedAt : tempdate1,
   }
 
-function Problem() {
-    
+const reviewData = {
+    originalCode : "(test)\nint main() {\n\tprintf(\"Hello World\");\n}",
+    feedbackCode : "(test)\nint main() {\n\tprintf(\"Hello World\");\n\treturn 0;\n}",
+    review : "(test) 당신의 코드는 마치 바보가 쓴 것과 같습니다.\n기본적으로 C언어에서 Hello World를 출력하기 위해서는 심윤보 님이 사용하신 코드와 같은 형식을 이용하면 되지만, int main이 끝날 때 return 0를 해주는 것이 좋습니다.",
+  }
+
+function Review() {
     //const { data } = useProblemQuery() // 나중에 백엔드 연결하면 바꾸기
     const { title, problemNumber, problemCategory, problemLevel, programmingLanguage, description, createdAt, updatedAt } = data;
-    const [codeTyped, setCodeTyped] = useState("Type your code here.");
-    const [inputTyped, setInputTyped] = useState("Type your input here.");
-    const [outputValue, setOutputValue] = useState("Default Output");
+    const { originalCode, feedbackCode, review} = reviewData;
+    const [username, setUsername] = useState("심윤보");
 
-    const handleCodeChange=(e)=>{
-        setCodeTyped(e.target.value);
-    }
-    const handleInputChange=(e)=>{
-        setInputTyped(e.target.value);
-    }
+
     const handleButtonClick=(e)=>{
         console.log("button clicked ", e);
-        if(e.target.innerText == "Back"){
-            // Go back page
-            console.log("back clicked");
-        } else if (e.target.innerText == "Run"){
-            // Run Code
-            console.log("run clicked");
-        } else if (e.target.innerText == "Stop"){
-            // Stop running code
-            console.log("stop clicked");
-        } else if (e.target.innerText == "Submit"){
-            // Submit code
-            console.log("submit clicked");
-        }
+        if(e.target.value == "Exit"){
+            // Exit to problem list page
+            console.log("exit clicked ", e);
+        } 
     }
 
     return (
         <Container>
         <DescriptionContainer>
             <TitleContainer>
-                <Titleh1>문제 풀이</Titleh1>
+                <Titleh1>코드 리뷰</Titleh1>
                 <hr style={{ height: '3px' }} />
                 {/* problem metadata component */}
                 <p>| #{problemNumber} | {title} | {problemCategory} | {problemLevel} |</p>
                 <MoreDescriptionContainer>
-                    <ActualDescriptionContainer>
-                        &lt;문제설명&gt;
-                        {description}
-                    </ActualDescriptionContainer>
                     <ChooseLanguageContainer>
-                        <LangDiv>언어 선택</LangDiv>
+                        <LangDiv>선택한 언어</LangDiv>
                         <LanguageDiv> C </LanguageDiv>
                     </ChooseLanguageContainer>
                 </MoreDescriptionContainer>
             </TitleContainer>
         </DescriptionContainer>
 
-        <SolvingContainer>
-            <TypingContainer
-                value={codeTyped}
-                onChange={handleCodeChange}
-                rows={20}
-            />
-            <InputOutputContainer>
-                <InputContainer>
-                    <label>Input</label>
+        <ReviewContainer>
+            <Titleh2>Answer</Titleh2>
+            <CodeCompareContainer>
+                <OriginalCodeContainer>
+                    <label>{username} 님</label>
                     <TypingContainer
-                        value={inputTyped}
-                        onChange={handleInputChange}
-                        rows={10}
-                    />
-                </InputContainer>
-                <OutputContainer>
-                    <label>Output</label>
-                    <TypingContainer
-                        value={outputValue}
-                        rows={10}
+                        value={originalCode}
+                        rows={15}
                         readOnly={true}
                     />
-                </OutputContainer>
-            </InputOutputContainer>
+                </OriginalCodeContainer>
+                <FeedbackContainer>
+                    <label>ChatGPT 보완</label>
+                    <TypingContainer
+                        value={feedbackCode}
+                        rows={15}
+                        readOnly={true}
+                    />
+                </FeedbackContainer>
+            </CodeCompareContainer>
+            <Titleh2>Code Review</Titleh2>
+            <CodeReviewContainer>
+                <label>ChatGPT의 코드 리뷰</label>
+                <CodeReviewDiv>
+                    {review}
+                </CodeReviewDiv>
+            </CodeReviewContainer>
             <Controllers>
-                <Button onClick={handleButtonClick} color={'#C6DBDA'}> Back </Button>
-                <Button onClick={handleButtonClick} color={'#FEF0D6'}> Run </Button>
-                <Button onClick={handleButtonClick} color={'#FACFCF'}> Stop </Button>
-                <Button onClick={handleButtonClick} color={'#D9CFDE'}> Submit </Button>
+                <Button onClick={handleButtonClick} color={'white'}> Exit </Button>
             </Controllers>
-        </SolvingContainer>
+        </ReviewContainer>
         <hr />
         </Container>
     )
 }
-export default Problem
+export default Review
