@@ -6,7 +6,6 @@ import json
 import os
 
 from problems.models import *
-# from users.models import User
 
 import subprocess   # For execution user's code
 import time         # For measure execution time
@@ -118,21 +117,37 @@ class ProblemExecView(APIView):
         # Remove Execution files
         file_list = os.listdir(self.dir_path)
         for file_name in file_list:
+            if file_name == ".keep":
+                continue
             file_path = os.path.join(self.dir_path, file_name)
             os.remove(file_path)
         
         # When execution fail due to timeout, return Error Response
-        if result.returncode != 0:
-            # Fail Case, Create Table
+        if result.returncode < 0:
+            # Timeout Case, Create Table
             Execution.objects.create(
             problem = target_problem,
             lang = language,
-            status = "Error",
+            status = "Timeout",
             exec_time = execution_time,
-            user = request.user.id,
+            user = 1,
+            # user = request.user.id,
             result = output
             )
             return Response(get_fail_res("Execution Failed: Timeout!"))        
+        
+        # Error Case, Create Table
+        if result.returncode > 0:
+            Execution.objects.create(
+                problem = target_problem,
+                lang = language,
+                status = "Error",
+                exec_time = execution_time,
+                user = 1,
+                # user = request.user.id,
+                result = result.stderr
+            )
+            return Response(get_fail_res("Execution Failed: Error!      " + result.stderr))
         
         # Success Case, Create Table
         Execution.objects.create(
@@ -140,7 +155,8 @@ class ProblemExecView(APIView):
             lang = language,
             status = "Success",
             exec_time = execution_time,
-            user = request.user.id,
+            user = 1,
+            # user = request.user.id,
             result = output
         )
         
@@ -154,13 +170,13 @@ class ProblemExecView(APIView):
         return Response(response_data)
 
     def create_new_file(self, code, extension):
-        self.dir_path = os.path.join(BASE_DIR, "/problems/temp_file_dir")
+        self.dir_path = os.path.join(BASE_DIR, "problems/temp_file_dir")
         
         if not os.path.exists(self.dir_path):
-            os.makedirs(self.dir_path)
+            os.makedirs(self.dir_path, exist_ok=True)
         
-        file_path = os.path.join(self.dir_path+"/temp"+extension)
-        with open(file_path, "w") as file:
+        self.file_path = os.path.join(self.dir_path, "temp"+extension)
+        with open(self.file_path, "w") as file:
             file.write(code)
             
             
@@ -180,27 +196,30 @@ class ProblemCodeSaveView(APIView):
         except Problem.DoesNotExist:
             return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
         
-        history = UserCodeHistory.objects.filter(user = request.user.id, problem = target_problem)
+        # "user = 1" is just for test
+        history = UserCodeHistory.objects.filter(user = 1, problem = target_problem)
         if history.exists():
             user_history = history.last()
             UserCodeHistory.objects.create(
-                user = request.user.id,
+                user = 1,
+                # user = request.user.id,
                 problem = target_problem,
                 version = user_history.version + 1,
                 code = user_code,
                 memo = ""
             )
+            message = "Save time: " + str(user_history.version+1)
         else:
             UserCodeHistory.objects.create(
-                user = request.user.id,
+                user = 1,
+                # user = request.user.id,
                 problem = target_problem,
                 version = 1,
                 code = user_code,
                 memo = ""
             )
-        
-        message = ""
-        
+            message = "First Save"
+                
         response_data = {
             "id" : id,
             "message" : message
