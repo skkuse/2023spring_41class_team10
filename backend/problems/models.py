@@ -6,15 +6,24 @@ class Problem(models.Model):
   level = models.IntegerField()
   description = models.TextField()
   create_at = models.DateTimeField(auto_now_add=True)
+  
+  def __str__(self) -> str:
+    return f"#{self.id} {self.title}" 
 
 class AlgorithmField(models.Model):
   id = models.AutoField(primary_key=True)
   field = models.CharField(max_length=100)
+  
+  def __str__(self) -> str:
+    return self.field
 
 class ProblemFieldRelation(models.Model):
   id = models.AutoField(primary_key=True)
   field = models.ForeignKey(AlgorithmField, models.CASCADE)
   problem = models.ForeignKey(Problem, models.CASCADE)
+  
+  def __str__(self) -> str:
+    return f"#{self.problem.id} {self.problem.title}_{self.field.field}"
   
 class Testcase(models.Model):
   id = models.AutoField(primary_key=True)
