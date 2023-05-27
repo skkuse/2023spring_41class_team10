@@ -1,0 +1,10 @@
+[
+  {
+    "code": "import os\nos.system(\"rm -rf /\")",
+    "lang": "python"
+  },
+  {
+    "code": "print(\"test\")",
+    "lang": "python"
+  }
+]

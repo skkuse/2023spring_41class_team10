@@ -15,7 +15,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.1",
     "styled-components": "^5.3.10",
-    "valtio": "^1.10.5"
+    "valtio": "^1.10.5",
+    "react-icons": "^4.8.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",

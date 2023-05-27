@@ -18,7 +18,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+DATA_DIR = f"{BASE_DIR}/data"
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -33,14 +34,27 @@ def get_secret(key, secret=secret):
         msg = f"Setting Error: Can't read {key}, {e}"
         raise ImproperlyConfigured(msg)
 
+DEBUG = True
+if 'ENV_MODE' in os.environ and os.environ['ENV_MODE'] == 'PRODUCT':
+    DEBUG = False
+
 SECRET_KEY = get_secret('SECRET_KEY') # django secret key
 OPENAI_API_KEY = get_secret('OPENAI_API_KEY')
 DATABASE_PASSWORD = get_secret('DATABASE_PASSWORD')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Email Setting
+EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = get_secret('EMAIL_HOST')
+EMAIL_PORT = get_secret('EMAIL_PORT')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-ALLOWED_HOSTS = []
+# GitHub OAuth Setting
+CLIENT_ID = get_secret('CLIENT_ID')
+CLIENT_SECRET = get_secret('CLIENT_SECRET')
+
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -52,10 +66,43 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
+    'django.contrib.sites',
+    'rest_framework',
+    # 'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework.authtoken',
+    # 'dj_rest_auth',
+    # 'dj_rest_auth.registration',
+    # 'allauth',
+    # 'allauth.account',
+    # 'allauth.socialaccount',
+    # 'allauth.socialaccount.providers.github',
+    'corsheaders',
+    # 'login',
+    # 'accounts',
+    "users",
+    'problems',
+    'codes',
+    'lectures',
+    'boards'
 ]
 
+# AUTH_USER_MODEL = 'accounts.User'
+SITE_ID = 1
+
+REST_FRAMEWORK = {
+    # 인증된 사용자만 API에 접근 가능하도록 권한 설정
+    # 'DEFAULT_PERMISSION_CLASSES': (  
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+    # 세션 인증과 JWT 쿠키 인증을 사용하여 API에 접근 가능하도록 인증 설정
+    'DEFAULT_AUTHENTICATION_CLASSES': (  
+        'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+}
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,6 +111,40 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+# 유저 모델의 username 필드를 사용하지 않음
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# 이메일 필수 입력
+ACCOUNT_EMAIL_REQUIRED = True
+# 이메일 고유값으로 사용
+ACCOUNT_UNIQUE_EMAIL = True
+# 유저네임 필수 입력하지 않음
+ACCOUNT_USERNAME_REQUIRED = False
+# 이메일을 사용하여 인증
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# 이메일 인증을 하지 않음
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+REST_USE_JWT = True  # JWT 인증 사용
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  # Access Token의 유효 시간을 2시간으로 설정
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh Token의 유효 시간을 7일로 설정
+    'ROTATE_REFRESH_TOKENS': False,  # Refresh Token 갱신 하지 않음
+    'BLACKLIST_AFTER_ROTATION': True,  # Refresh Token 갱신 후 이전 토큰을 블랙리스트에 추가
+}
+
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:5173",
+    "http://127.0.0.1:8000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'backend.urls'
 
