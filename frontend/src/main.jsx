@@ -6,6 +6,7 @@ import axios from 'axios'
 import App from './App'
 import './index.css'
 
+
 const queryClient = new QueryClient();
 
 ReactDOM.render(
