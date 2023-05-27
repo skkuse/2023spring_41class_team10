@@ -1,6 +1,112 @@
-import { React, useState } from 'react'
+import React, { useState } from 'react'
+import styled from 'styled-components';
 import { } from '../components'
 import { useProblemQuery } from '../hooks'
+
+const Container = styled.div`
+    width: 90%;
+    margin: auto;
+`;
+
+const DescriptionContainer = styled.div`
+    text-align: center;
+    margin-bottom: 2vh;
+`;
+
+const TitleContainer = styled.div`
+`;
+
+const Titleh1 = styled.h1`
+`;
+
+const MoreDescriptionContainer = styled.div`
+    display: flex;
+    justify-content: space-around;
+`;
+
+const ActualDescriptionContainer = styled.div`
+    margin: 0 5px;
+    text-align: left;
+`;
+
+const ChooseLanguageContainer = styled.div`
+    display: flex;
+    background-color: #CCCCCC;
+    padding: 4px;
+    margin: 0 5px;
+    border-radius: 4px;
+    width: 180px;
+    height: 30px;
+    align-items: center;
+    justify-content: space-around;
+`;
+const LangDiv = styled.div`
+    font-size: 14px;
+    font-weight: bold;
+`
+
+const LanguageDiv = styled.div`
+    background-color: black;
+    color: white;
+    padding: 2px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    height: 16px;
+    width: 80px;
+`
+
+const SolvingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 5vh;
+`;
+
+const TypingContainer = styled.textarea`
+    background-color: black;
+    color: white;
+    width: 100%;
+    margin-bottom: 1vh;
+`;
+
+const InputOutputContainer = styled.div`
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+`;
+
+const InputContainer = styled.div`
+    label {
+        display: block;
+    }
+    width: 100%;
+    margin-right: 2vw;
+`;
+
+const OutputContainer = styled.div`
+    label {
+        display: block;
+    }
+    width: 100%;
+`;
+
+const Controllers = styled.div`
+    display: flex;
+    justify-content: center;
+`;
+
+const Button = styled.button`
+    background-color: ${props => props.color};
+    width: 60px;
+    height: 30px;
+    margin: 5px;
+    font-size: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
 
 //백엔드 연결 전 테스트용 데이터
 const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString()
@@ -48,72 +154,62 @@ function Problem() {
     }
 
     return (
-    <div className="container">
-
-        <div className="description-container">
-            <div className="title-container">
-                <h1>{title}</h1>
-                <hr style={{height:'3px'}}/>
+        <Container>
+        <DescriptionContainer>
+            <TitleContainer>
+                <Titleh1>문제 풀이</Titleh1>
+                <hr style={{ height: '3px' }} />
                 {/* problem metadata component */}
-                <p>| {problemNumber} | {problemCategory} | {problemLevel} | {programmingLanguage} |</p>
-                <div style={{display:'flex'}} className="more-description-container">
-                    <div className="actual-description-container"> 
-                        &lt;문제설명&gt; 
+                <p>| #{problemNumber} | {title} | {problemCategory} | {problemLevel} |</p>
+                <MoreDescriptionContainer>
+                    <ActualDescriptionContainer>
+                        &lt;문제설명&gt;
                         {description}
-                    </div>
-                    <div style={{display:'flex', backgroundColor:'lightgray'}} className="choose-language-container">
-                        <p>언어 선택</p>
-                        <div style={{backgroundColor:'black', color:'white'}}> C </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </ActualDescriptionContainer>
+                    <ChooseLanguageContainer>
+                        <LangDiv>언어 선택</LangDiv>
+                        <LanguageDiv> C </LanguageDiv>
+                    </ChooseLanguageContainer>
+                </MoreDescriptionContainer>
+            </TitleContainer>
+        </DescriptionContainer>
 
-      <div className="solving-container">
-        <div className="typing-container">
-            <textarea
+        <SolvingContainer>
+            <TypingContainer
                 name="postContent"
                 value={codeTyped}
                 onChange={handleCodeChange}
                 rows={20}
-                cols={100}
-                style={{backgroundColor:'black', color:'white'}}
             />
-        </div>
-        <div className="input-output-container" style={{display:'flex'}}>
-            <div className="input-container">
-                <label>Input</label>
-                <textarea
-                    name="postContent"
-                    value={inputTyped}
-                    onChange={handleInputChange}
-                    rows={10}
-                    cols={50}
-                    style={{backgroundColor:'black', color:'white'}}
-                />
-            </div>
-            <div className="output-container">
-                <label>Output</label>
-                <textarea
-                    name="postContent"
-                    value={outputValue}
-                    rows={10}
-                    cols={50}
-                    style={{backgroundColor:'black', color:'white'}}
-                    readOnly={true}
-                />
-            </div>
-        </div>
-        <div className="controllers">
-            <button onClick={handleButtonClick} style={{backgroundColor:'#C6DBDA'}}> Back </button>
-            <button onClick={handleButtonClick} style={{backgroundColor:'#FEF0D6'}}> Run </button>
-            <button onClick={handleButtonClick} style={{backgroundColor:'#FACFCF'}}> Stop </button>
-            <button onClick={handleButtonClick} style={{backgroundColor:'#D9CFDE'}}> Submit </button>
-        </div>
-      </div>
-      <hr />
-    </div>
+            <InputOutputContainer>
+                <InputContainer>
+                    <label>Input</label>
+                    <TypingContainer
+                        name="postContent"
+                        value={inputTyped}
+                        onChange={handleInputChange}
+                        rows={10}
+                    />
+                </InputContainer>
+                <OutputContainer>
+                    <label>Output</label>
+                    <TypingContainer
+                        name="postContent"
+                        value={outputValue}
+                        rows={10}
+                        readOnly={true}
+                    />
+                </OutputContainer>
+            </InputOutputContainer>
+            <Controllers>
+                <Button onClick={handleButtonClick} color={'#C6DBDA'}> Back </Button>
+                <Button onClick={handleButtonClick} color={'#FEF0D6'}> Run </Button>
+                <Button onClick={handleButtonClick} color={'#FACFCF'}> Stop </Button>
+                <Button onClick={handleButtonClick} color={'#D9CFDE'}> Submit </Button>
+            </Controllers>
+        </SolvingContainer>
+        <hr />
+        </Container>
     )
 }
-
 export default Problem
