@@ -14,3 +14,4 @@ class UserAdmin(admin.ModelAdmin):
     return obj.field.field 
 
 admin.site.register(User, UserAdmin)
+
