@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "title": "title1",
+    "algorithm": ["BFS", "DFS"],
+    "level": 1
+  },
+  {
+    "id": 2,
+    "title": "title2",
+    "algorithm": ["Tree"],
+    "level": 2
+  }
+]

@@ -16,4 +16,4 @@ ReactDOM.render(
     </QueryClientProvider>
   </React.StrictMode>,
   document.getElementById('root')
-)
+);
