@@ -2,7 +2,7 @@ import { useState, React } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import styled from 'styled-components';
 
-import { Home, Profile, Auth, Problem, Review, Produce, Notice, Questions } from './pages'
+import { Main, Home, Profile, Auth, Problem, Review, Produce, Notice, Questions } from './pages'
 import { LoginView, NoticeView } from './routes/'
 
 import { GuestRoute, Navbar } from './components'
@@ -23,7 +23,8 @@ function App() {
       </header>
       <Main>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Main/>} />
+          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<LoginView />} />
           <Route path="/login2" element={<Auth />} /> {/* 추가해야함: 현재 로그인되어있지 않은 상태에서만 입장 가능, 로그인 되어있을 시 home으로 navigate (GuestRoute.jsx 참고)*/}
           <Route path="/problem/:slug" element={<Problem />} /> {/* http://localhost:5173/problem/1 */}
