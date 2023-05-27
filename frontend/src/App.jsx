@@ -1,11 +1,16 @@
 import { useState, React } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import styled from 'styled-components';
 
-import { Home, Profile, Auth, Problem } from './pages'
-import { LoginView, NoticeView, RootLayout } from './routes/'
+import { Home, Profile, Auth, Problem, Review } from './pages'
+import { LoginView, NoticeView } from './routes/'
 import { GuestRoute, Navbar } from './components'
 
 import './App.css'
+
+const Main = styled.main`
+    background-color:#f2f2f2;
+`
 
 function App() {
   const [count, setCount] = useState(0)
@@ -15,17 +20,18 @@ function App() {
       <header>
         <Navbar />
       </header>
-      <main>
+      <Main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginView />} />
           <Route path="/login2" element={<Auth />} /> {/* 추가해야함: 현재 로그인되어있지 않은 상태에서만 입장 가능, 로그인 되어있을 시 home으로 navigate (GuestRoute.jsx 참고)*/}
-          <Route path="/problem/:slug" element={<Problem />} />
+          <Route path="/problem/:slug" element={<Problem />} /> {/* http://localhost:5173/problem/1 */}
+          <Route path="/problem/:slug/review" element={<Review />} /> {/* http://localhost:5173/problem/1/review */}
           <Route path="/profile/:username" element={<Profile />} /> {/*남의 프로필*/}
           <Route path="/@:username" element={<Profile />} /> {/*본인 프로필*/} {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
           <Route path="/notice" element={<NoticeView />} />
         </Routes>
-      </main>
+      </Main>
       <footer>
         <div className="container">
           <Link to="/" className="logo-font">
