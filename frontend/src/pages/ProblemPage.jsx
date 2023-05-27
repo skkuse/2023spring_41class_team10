@@ -18,6 +18,8 @@ const TitleContainer = styled.div`
 `;
 
 const Titleh1 = styled.h1`
+    margin: 0 auto;
+    padding: 10px 0;
 `;
 
 const MoreDescriptionContainer = styled.div`
