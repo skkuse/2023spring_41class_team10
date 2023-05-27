@@ -5,7 +5,7 @@ from backend.settings import BASE_DIR
 import json
 import os
 
-from problem_desc.models import Problem, Testcase, UserCodeHistory
+from problem_desc.models import *
 # from users.models import User
 
 import subprocess   # For execution user's code
@@ -23,10 +23,37 @@ def get_fail_res(msg):
 
 class ProblemDescView(APIView):
     
-    def get(self, request):
+    def get(self, request, id):
+        
+        # Check whether the problem exists
+        try:
+            target_problem = Problem.objects.get(id=id)
+        except Problem.DoesNotExist:
+            return Response(get_fail_res("Description Failed!: Don't Exist Problem!"))
+        
+        # Check whether the relation exists
+        try:
+            relation = ProblemFieldRelation.objects.get(problem = target_problem)
+        except ProblemFieldRelation.DoesNotExist:
+            return Response(get_fail_res("Description Failed!: Don't Exist ProblemFieldRelation!"))
+        target_field = relation.field
+
+        # Check whether the Testcase exists
+        try:
+            target_tc = Testcase.objects.get(problem = target_problem)
+        except Testcase.DoesNotExist:
+            return Response(get_fail_res("Description Failed!: Don't Exist Testcase!"))
+        sample_tc = ""
+        if target_tc.is_sample:
+            sample_tc = target_tc.testcase
         
         response_data = {
-            
+            "id" : target_problem.id,
+            "title" : target_problem.title,
+            "field" : target_field.field,
+            "level" : target_problem.level,
+            "description" : target_problem.description,
+            "tc_sample" : sample_tc
         }
         
         return Response(response_data)
@@ -41,6 +68,12 @@ class ProblemExecView(APIView):
         code = body.get("code", "")
         language = body.get("lang", "python")
         tc_user = body.get("tc_user", "")
+        
+        # Check whether the problem exists
+        try:
+            target_problem = Problem.objects.get(id=id)
+        except Problem.DoesNotExist:
+            return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
         
         if language == "python":
             # Create a new Python file
@@ -76,6 +109,7 @@ class ProblemExecView(APIView):
             end_time = time.time()
             output = result.stdout
         
+        execution_time = end_time-start_time
         
         # Remove Execution files
         file_list = os.listdir(self.dir_path)
@@ -83,19 +117,39 @@ class ProblemExecView(APIView):
             file_path = os.path.join(self.dir_path, file_name)
             os.remove(file_path)
         
+        
+        
         # When execution fail due to timeout, return Fail Response
         if result.returncode != 0:
-            return Response(get_fail_res("Execution Failed: Timeout"))
+            # Fail Case, Create Table
+            Execution.objects.create(
+            problem = target_problem,
+            lang = language,
+            status = "Fail",
+            exec_time = execution_time,
+            user = request.user.id,
+            result = output
+            )
+            return Response(get_fail_res("Execution Failed: Timeout!"))
+        
+        # Success Case, Create Table
+        Execution.objects.create(
+            problem = target_problem,
+            lang = language,
+            status = "Success",
+            exec_time = execution_time,
+            user = request.user.id,
+            result = output
+        )
         
         # Execution Success
         response_data = {
             "id" : id,
             "result" : output,
-            "exec_time" : end_time-start_time
+            "exec_time" : execution_time
         }
         
         return Response(response_data)
-
 
     def create_new_file(self, code, extension):
         self.dir_path = os.path.join(BASE_DIR, "/problem_desc/temp_file_dir")
@@ -114,12 +168,26 @@ class ProblemCodeSaveView(APIView):
         language = body.get("lang", "python")
         tc_user = body.get("tc_user", "")
         
-        UserCodeHistory.objects.create(
-            problem = id,
-            version=1,
-            code = user_code,
-            memo = ""
-        )
+        # Check whether the problem exists
+        try:
+            target_problem = Problem.objects.get(id=id)
+        except Problem.DoesNotExist:
+            return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
+        
+        history = UserCodeHistory.objects.filter(user = request.user.id, problem = target_problem)
+        if history.exists():
+            user_history = history.first()
+            user_history.version += 1
+            user_history.code = user_code
+            user_history.save()
+        else:
+            UserCodeHistory.objects.create(
+                user = request.user.id,
+                problem = target_problem,
+                version = 1,
+                code = user_code,
+                memo = ""
+            )
         
         message = ""
         
