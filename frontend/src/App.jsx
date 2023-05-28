@@ -1,34 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, React } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import styled from 'styled-components';
+
+import { Home, Profile, Auth, Problem, Review, Produce, Notice, Questions } from './pages'
+import { LoginView, NoticeView } from './routes/'
+
+import { GuestRoute, Navbar } from './components'
+
 import './App.css'
+
+const Main = styled.main`
+    background-color:#f2f2f2;
+`
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <Router>
+      <header>
+        <Navbar />
+      </header>
+      <Main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginView />} />
+          <Route path="/login2" element={<Auth />} /> {/* 추가해야함: 현재 로그인되어있지 않은 상태에서만 입장 가능, 로그인 되어있을 시 home으로 navigate (GuestRoute.jsx 참고)*/}
+          <Route path="/problem/:slug" element={<Problem />} /> {/* http://localhost:5173/problem/1 */}
+          <Route path="/problem/:slug/review" element={<Review />} /> {/* http://localhost:5173/problem/1/review */}
+          <Route path="/@:username" element={<Profile />} /> {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
+          <Route path="/notice" element={<Notice />}/>
+          <Route path="/questions" element={<Questions />}/>
+          <Route path="/produce" element={<Produce />} />  {/* produce page(문제 추가 페이지): 허가된 관리자만 입장할 수 있도록 설정해야함*/}
+
+        </Routes>
+      </Main>
+      <footer>
+        <div className="container">
+          <Link to="/" className="logo-font">
+            BePro
+          </Link>
+          <span className="attribution">
+            AI based programming education platform, BePro, from Software Engineering class SWE3002_41 of <a href="https://skku.edu">Thinkster</a>. Code &amp; design
+            licensed under MIT.
+          </span>
+        </div>
+      </footer>
+    </Router>
   )
 }
 

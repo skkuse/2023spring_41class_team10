@@ -1,37 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { QueryClient, QueryClientProvider } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
+import axios from 'axios'
+import App from './App'
+import './index.css'
 
-import LoginView from './routes/LoginView';
-import NoticeView from './routes/NoticeView';
 
-import RootLayout from './routes/RootLayout';
-import App from './App';
-import './index.css';
+const queryClient = new QueryClient();
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    children: [
-      {
-        path: '/',
-        element: <App />
-      },
-      {
-        path: '/login',
-        element: <LoginView />
-      },
-      {
-        path: '/notice',
-        element: <NoticeView />
-      }
-    ]
-  }
-]);
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} containerElement="div" />
+    </QueryClientProvider>
+  </React.StrictMode>,
+  document.getElementById('root')
 );

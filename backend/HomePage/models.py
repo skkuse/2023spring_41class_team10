@@ -10,4 +10,4 @@ class Problem(models.Model):
 
     def __str__(self):
         """String for representing the MyModelName object (in Admin site etc.)."""
-        return self.field_name
+        return self.id

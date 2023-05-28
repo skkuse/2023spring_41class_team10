@@ -15,9 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.shortcuts import redirect
+from users import views
 urlpatterns = [
+    path('', lambda req: redirect('/login/')),
     path('admin/', admin.site.urls),
+    path('login/', views.LoginView.as_view(), name='github_login_callback'),
+    path('login/github/callback/', views.GitHubLoginView.as_view(), name='github_login_callback'),
     path('problems/', include('problems.urls')),
     path('HomePage/', include('HomePage.urls')),
 ]
