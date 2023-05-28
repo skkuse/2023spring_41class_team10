@@ -24,4 +24,5 @@ urlpatterns = [
     path('login/github/callback/', views.GitHubLoginView.as_view(), name='github_login_callback'),
     path('problems/', include('problems.urls')),
     path('codes/', include('codes.urls')),
+    path('users/', include('users.urls'))
 ]
