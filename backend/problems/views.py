@@ -8,6 +8,9 @@ import logging
 
 from problems.models import Problem, Testcase, Submission
 
+# def index(request):
+#     return HttpResponse("Hello, world. You're at the problems index.")
+
 class ProblemListView(APIView):
     def get(self, request):
         return Response(None)
