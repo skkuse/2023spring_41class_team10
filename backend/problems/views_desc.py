@@ -70,6 +70,7 @@ class ProblemExecView(APIView):
         
         code = body.get("code", "")
         language = body.get("lang", "python")
+        language = language.lower()
         tc_user = body.get("tc_user", "")
         
         # Check whether the problem exists
@@ -87,7 +88,7 @@ class ProblemExecView(APIView):
             result = subprocess.run(['python3', self.file_path, tc_user], capture_output=True, text=True, timeout=3)
             end_time = time.time()
             output = result.stdout
-        elif language == "C":
+        elif language == "c":
             # Create a new C file
             self.create_new_file(code, ".c")
             
@@ -99,7 +100,7 @@ class ProblemExecView(APIView):
             result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
             end_time = time.time()
             output = result.stdout
-        elif language == "C++":
+        elif language == "cpp":
             # Create a new C++ file
             self.create_new_file(code, ".cc")
             

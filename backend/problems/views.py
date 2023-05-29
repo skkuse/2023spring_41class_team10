@@ -3,17 +3,65 @@ from rest_framework.views import APIView
 
 import json
 import re
+import os
 import time
+import subprocess
 import logging
 
-from problems.models import Problem, Testcase, Submission
+from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation
+from backend.settings import EXECUTE_DIR
+
+def get_fail_res(msg):
+    """ 
+    Create fail Response
+    """
+    return {
+        'status': "fail",
+        'message': msg
+    }
 
 # def index(request):
 #     return HttpResponse("Hello, world. You're at the problems index.")
 
 class ProblemListView(APIView):
+    """ Problem List View
+    url        : problems/v1/list/
+    Returns :
+        GET     : id, problem_title, algorithm_field, level
+    """
     def get(self, request):
-        return Response(None)
+        
+        problems = Problem.objects.all()
+        
+        if not problems.exists():
+            return Response(get_fail_res("ProblemListView Failed!: Any problems in Problem Table"))
+        
+        problem_list = []
+        for prob in problems:
+            prob_obj = {}
+            prob_obj["id"] = prob.id
+            prob_obj["title"] = prob.title
+            prob_obj["level"] = prob.level
+            
+            relations = ProblemFieldRelation.objects.filter(problem = prob)
+            
+            if not relations.exists():
+                return Response(get_fail_res("ProblemListView Failed!: No Relation with problem"))
+            
+            field_list = []
+            for relation in relations:
+                field_list.append(relation.field.field)
+            
+            prob_obj["field"] = field_list
+            problem_list.append(prob_obj)
+        
+        response_data = {
+            "status": "Success",
+            "message": "Problem List Info",
+            "data": problem_list
+        }
+        
+        return Response(response_data)
 
 
 class ProblemSubmitView(APIView):
@@ -31,7 +79,7 @@ class ProblemSubmitView(APIView):
         # json data 파싱하여 code와 language 저장
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
-        lang = body.get("lang", "python")
+        lang = body.get("language", "python")
         
         # 코드 안전성 체크
         is_safe = check_safe_code(code, lang)
@@ -50,9 +98,40 @@ class ProblemSubmitView(APIView):
             
         num_testcase = len(testcases)
         res["num_tc"] = num_testcase
-        # TODO: Execute Code
-
-        # TODO: Create Submit History
+        
+        # Execute Code
+        for tc in testcases:
+            exec_res = execution_code(code, lang, tc.testcase, tc.result)
+            res["exec_time"] = exec_res["exec_time"]
+            if exec_res["result"] == "PASS":
+                res["num_pass"] += 1
+                
+        if res["num_pass"] == res["num_tc"]:
+            res["result"] = "PASS"
+        else:
+            res["result"] = "FAIL"
+            
+        # Remove Unnecessary Files
+        need_file = [".keep", "c.sh", "cpp.sh", "python.sh", "java.sh"]
+        file_list = os.listdir(EXECUTE_DIR)
+        for file_name in file_list:
+            if file_name in need_file:
+                continue
+            file_path = os.path.join(EXECUTE_DIR, file_name)
+            os.remove(file_path)
+        
+        
+        # Create Submit History
+        Submission.objects.create(
+            problem = problem,
+            lang = lang,
+            status = res["result"],
+            exec_time = res["exec_time"],
+            user = 1,
+            # user = request.user.id,
+            num_pass = res["num_pass"]
+        )
+        
         return Response(res)
 
 
@@ -69,10 +148,8 @@ def check_safe_code(code, lang):
     is_safe = False
     if lang.lower() == "python":
         is_safe = check_safe_python(code)
-    elif lang.lower() == "c":
-        pass
-    elif lang.lower() == "cpp":
-        pass
+    elif lang.lower() == "c" or lang.lower() == "cpp":
+        is_safe = check_safe_c_cpp(code)
     elif lang.lower() == "java":
         pass
 
@@ -99,3 +176,131 @@ def check_safe_python(code):
             return False
 
     return True
+
+def check_safe_c_cpp(code):
+    # 파이썬 코드에서 위협 패턴을 찾아 검증
+    # threat_patterns: ChatGPT가 제안한 위협 패턴 목록  
+    threat_patterns = [
+            r'system\(.',  # system command
+            r'chmod\(',  # Permission Change
+            r'popen\(.',  # Communicate using pipe
+            r'fopen\(',  # Malicious File Change
+            r'exec\(',  # exec 함수 사용
+            r'sprintf\(',  # Malicious String Overflow
+            r'setuid\(',  # Change User Process UserID
+        ]
+
+    # 위협 패턴 확인
+    for pattern in threat_patterns:
+        if re.search(pattern, code):
+            print(f"Find threat_patterns {pattern}")
+            return False
+
+    return True
+
+
+# TODO: Make check_safe_java(code)
+
+
+def execution_code(code, lang, testcase, answer):
+    """ Receives the code, lang, and test case &
+        Executes the code in a way that fits the lang to return the test case result.
+
+    Args:
+        code (str): 유저가 입력한 프로그래밍 코드
+        lang (str): 유저가 선택한 프로그래밍 언어
+        testcase (str): Testcase of Problem
+        answer (str): Answer of Testcase
+
+    Returns:
+        result (dic): Result of Testcase & Execution Time
+    """
+    result = {}
+    
+    # Normalize answer
+    answer = answer.replace('\r\n', '\n')
+    
+    # Case 1. python
+    if lang == "python":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".py", testcase)
+
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "python.sh")
+        
+        # Measure Execution start time and Execute .py
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # Case 2. C
+    elif lang == "c":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".c", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "c.sh")
+        
+        # Measure Execution start time and Execute .c
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # Case 3. C++
+    elif lang == "cpp":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".cc", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "cpp.sh")
+
+        # Measure Execution start time and Execute .cc
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+    
+    # TODO: Incomplete Case 4. JAVA
+    elif lang == "java":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".java", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "java.sh")
+        
+        # Measure Execution start time and Execute .c
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+    
+    # Measure Execution end time
+    end_time = time.time()
+    result["exec_time"] = end_time - start_time
+        
+    if re.returncode < 0:
+        result["result"] = "Timeout"
+    elif re.returncode > 0:
+        result["result"] = "Error"  + re.stderr.strip()
+    else:
+        if re.stdout[:-1] == answer:
+            result["result"] = "PASS"
+        else:
+            result["result"] = "FAIL"
+        
+    return result
+
+def create_new_file(code, extension, testcase):        
+        if not os.path.exists(EXECUTE_DIR):
+            os.makedirs(EXECUTE_DIR, exist_ok=True)
+        
+        # Case Java, file name is Main
+        if extension == ".java":
+            file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
+            with open(file_path, "w") as file:
+                file.write(code)
+                
+        # Other Case, file name is temp
+        else:
+            file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
+            with open(file_path, "w") as file:
+                file.write(code)
+        
+            
+        test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
+        with open(test_file_path, "w") as file:
+            file.write(testcase)
