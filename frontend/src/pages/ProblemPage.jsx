@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components';
 import { } from '../components'
 import { useProblemQuery } from '../hooks'
+import ProblemInfo from '../components/ProblemInfo';
 
 const Container = styled.div`
     width: 90%;

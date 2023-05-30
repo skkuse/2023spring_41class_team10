@@ -10,6 +10,7 @@ const QuestionsContainer = styled.div`
   align-items: center;
   padding: 2rem;
   background-color: #f2f2f2;
+  margin-bottom:100px;
 `;
 
 const TitleContainer = styled.div`

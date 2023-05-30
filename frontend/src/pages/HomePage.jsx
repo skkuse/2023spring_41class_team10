@@ -3,23 +3,40 @@ import { useAuth } from '../hooks';
 import ProblemInfo from '../components/ProblemInfo';
 import Lectures from '../components/Lectures';
 import styled from 'styled-components';
+import RecomLectures from '../components/RecomLecture';
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background-color: #f2f2f2;
+  padding: 2rem;
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
+const BodyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 200px;
+  padding: 2rem;
+`;
+
+const TitleContainer = styled.div`
+  margin-bottom: 2rem;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Titleh1 = styled.h1`
+  font-size: 2rem;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 const LecturesContainer = styled.div`
   margin: 2rem;
+  flex-direction: column;
+  margin-bottom: 100px;
 `;
 
 const ProcessingLectDiv = styled.div`
@@ -36,9 +53,8 @@ const QuestionsContainer = styled.div`
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 80%;
+  margin-bottom: 100px;
 `;
 
 const ProcessingQuesDiv = styled.div`
@@ -47,8 +63,18 @@ const ProcessingQuesDiv = styled.div`
   margin-bottom: 0.5rem;
 `;
 
+const ProcessingList = styled.div`
+  align-items: center;
+  justify-content: center;
+`
+
 const RecommendContainer = styled.div`
   margin-top: 2rem;
+`;
+
+const RecomList = styled.div`
+  margin:20px;
+  display:flex
 `;
 
 const RecommendDiv = styled.div`
@@ -77,7 +103,6 @@ function HomePage() {
       problemLevel: '3',
       problemStatus: 'processing'
     },
-    // Add more problems as needed
   ];
 
   const lectures = [
@@ -91,7 +116,6 @@ function HomePage() {
       title: 'Lecture 2',
       progress: 70,
     },
-    // Add more lectures as needed
   ];
 
 
@@ -101,7 +125,11 @@ function HomePage() {
 
   return (
     <Container>
-      <Title>Home</Title>
+    <TitleContainer>
+      <Titleh1>Home</Titleh1>
+      <hr style={{ height: '3px' }} />
+      </TitleContainer>
+      <BodyContainer>
       <LecturesContainer>
         <ProcessingLectDiv>진행 중인 강의</ProcessingLectDiv>
         <LectureList>
@@ -117,6 +145,7 @@ function HomePage() {
       </LecturesContainer>
       <QuestionsContainer>
         <ProcessingQuesDiv>풀고 있는 문제</ProcessingQuesDiv>
+        <ProcessingList>
         {processingProblems.map((problem) => (
           <ProblemInfo
             key={problem.slug}
@@ -127,11 +156,21 @@ function HomePage() {
             problemStatus={problem.problemStatus}
           />
         ))}
+        </ProcessingList>
       </QuestionsContainer>
       <RecommendContainer>
         <RecommendDiv>추천 강의</RecommendDiv>
-        {/* Render recommendations here */}
+        <RecomList>
+        {lectures.map((lecture, index) => (
+          <Lectures
+            key={index}
+            youtubeLink={lecture.youtubeLink}
+            title={lecture.title}
+          />
+        ))}            
+        </RecomList>
       </RecommendContainer>
+      </BodyContainer>
     </Container>
   );
 }

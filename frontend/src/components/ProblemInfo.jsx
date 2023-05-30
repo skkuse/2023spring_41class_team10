@@ -1,14 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const SquareContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
-  grid-template-rows: repeat(1, 1fr);
-  width: 80%;
-  height: 50px;
   border-radius: 4px;
   border: 0.1px solid;
+  height: 50px;
   margin: 1rem;
 `;
 
@@ -21,6 +20,14 @@ const SquareItem = styled.div`
 
 const WideSquareItem = styled(SquareItem)`
   flex: 2;
+`;
+
+const ProblemLink = styled(Link)`
+  text-decoration: none;
+  color: #000;
+  width: 80%;
+  height: 50px;
+  margin-bottom:20px;
 `;
 
 function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus }) {
@@ -37,12 +44,14 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
   }
 
   return (
-    <SquareContainer style={{ backgroundColor }}>
-      <SquareItem>{problemNumber}</SquareItem>
-      <WideSquareItem>{title}</WideSquareItem>
-      <SquareItem>{problemCategory}</SquareItem>
-      <SquareItem>{problemLevel}</SquareItem>
-    </SquareContainer>
+    <ProblemLink to={`/problem/${problemNumber}`}>
+      <SquareContainer style={{ backgroundColor }}>
+        <SquareItem>{problemNumber}</SquareItem>
+        <WideSquareItem>{title}</WideSquareItem>
+        <SquareItem>{problemCategory}</SquareItem>
+        <SquareItem>{problemLevel}</SquareItem>
+      </SquareContainer>
+    </ProblemLink>
   );
 }
 
