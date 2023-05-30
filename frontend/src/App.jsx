@@ -9,7 +9,7 @@ import { GuestRoute, Navbar } from './components'
 
 import './App.css'
 
-const Main = styled.main`
+const MainBack = styled.main`
     background-color:#f2f2f2;
 `
 
@@ -21,7 +21,7 @@ function App() {
       <header>
         <Navbar />
       </header>
-      <Main>
+      <MainBack>
         <Routes>
           <Route path="/" element={<Main/>} />
           <Route path="/home" element={<Home />} />
@@ -35,7 +35,7 @@ function App() {
           <Route path="/produce" element={<Produce />} />  {/* produce page(문제 추가 페이지): 허가된 관리자만 입장할 수 있도록 설정해야함*/}
 
         </Routes>
-      </Main>
+      </MainBack>
       <footer>
         <div className="container">
           <Link to="/" className="logo-font">
