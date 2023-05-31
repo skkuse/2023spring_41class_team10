@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
+import { useHistory } from 'react-router-dom';
+import axios from 'axios';
+
 import styled from 'styled-components';
 import { } from '../components'
+
 
 const Container = styled.div`
     width: 90%;
@@ -122,6 +126,8 @@ function Produce() {
         testCase: "",
     });
 
+    const history = useHistory();
+
     const handleTitleChange=(e)=>{
         let tempdata = problemData;
         tempdata.title = e.target.value;
@@ -151,9 +157,27 @@ function Produce() {
     const handleButtonClick=(e)=>{
         console.log("button clicked ", e);
         if(e.target.value == "Submit"){
-            // submit new problem
             console.log("submit clicked ", e);
+            postNewProblem();
         } 
+    }
+
+    const postNewProblem = async() => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.post('http://127.0.0.1:8000/problems/v1/create', problemData, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            console.log('response', response);
+            if (response.status === 200) {
+                console.log(response.data.message);
+                history.push("/home");
+            };
+        } catch (error) {
+            console.error('Failed to post new problem:', error);
+        }
     }
 
     return (
