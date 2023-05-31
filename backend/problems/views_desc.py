@@ -173,48 +173,54 @@ class ProblemExecView(APIView):
             
             
 class ProblemCodeSaveView(APIView):
-    
+    """ 유저가 문제 풀이코드를 임시저장
+
+    url        : problems/v1/<id>/save/
+    Returns :
+        POST   : status, message, id
+    """
+
     def post(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
         body = json.loads(request.body.decode('utf-8'))
-        
-        
         user_code = body.get("code", "")
         language = body.get("lang", "python")
-        tc_user = body.get("tc_user", "")
-        
+
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
         except Problem.DoesNotExist:
             return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
-        
-        # "user = 1" is just for test
-        history = UserCodeHistory.objects.filter(user = 1, problem = target_problem)
+
+        history = UserCodeHistory.objects.filter(user=user_id, problem=target_problem).order_by("-id")
         if history.exists():
-            user_history = history.last()
+            user_history = history.first()
             UserCodeHistory.objects.create(
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 problem = target_problem,
                 version = user_history.version + 1,
                 code = user_code,
-                memo = ""
+                memo = "",
+                lang = language
             )
             message = "Save time: " + str(user_history.version+1)
         else:
             UserCodeHistory.objects.create(
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 problem = target_problem,
                 version = 1,
                 code = user_code,
-                memo = ""
+                memo = "",
+                lang = language
             )
             message = "First Save"
-                
+
         response_data = {
             "id" : id,
-            "message" : message
+            "message" : message,
+            "status" : "success"
         }
         
         return Response(response_data)
