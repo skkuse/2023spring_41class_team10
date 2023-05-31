@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import styled from 'styled-components';
@@ -126,7 +126,7 @@ function Produce() {
         testCase: "",
     });
 
-    const history = useHistory();
+    const navigate  = useNavigate();
 
     const handleTitleChange=(e)=>{
         let tempdata = problemData;
@@ -173,7 +173,7 @@ function Produce() {
             console.log('response', response);
             if (response.status === 200) {
                 console.log(response.data.message);
-                history.push("/home");
+                navigate("/home");
             };
         } catch (error) {
             console.error('Failed to post new problem:', error);
