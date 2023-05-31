@@ -49,7 +49,7 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
   } else if (problemStatus === 'ai') {
     backgroundColor = '#D9CFDE';
   }
-  let categories = problemCategory.join(', ');
+  let categories = Array.isArray(problemCategory) ? problemCategory.join(', ') : problemCategory;
 
   return (
     <ProblemLink to={isActive ? `/problem/${problemNumber}` : '#'}>
