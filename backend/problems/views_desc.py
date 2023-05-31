@@ -210,7 +210,7 @@ class ProblemCodeSaveView(APIView):
                 memo = "",
                 lang = language
             )
-            message = "Save time: " + str(user_history.version+1)
+            message = f"버전 {str(user_history.version+1)}가 저장되었습니다."
         else:
             UserCodeHistory.objects.create(
                 user = user_id,
@@ -220,7 +220,7 @@ class ProblemCodeSaveView(APIView):
                 memo = "",
                 lang = language
             )
-            message = "First Save"
+            message = "저장되었습니다."
 
         response_data = {
             "id" : id,
@@ -228,4 +228,49 @@ class ProblemCodeSaveView(APIView):
             "status" : "success"
         }
         
+        return Response(response_data)
+
+class ProblemCodeLoadView(APIView) :
+    """저장 코드 불러오기
+
+    url        : problems/v1/<id>/load/
+    Returns :
+        POST   : status, message, id
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+
+        # Check whether the problem exists
+        try:
+            target_problem = Problem.objects.get(id=id)
+        except Problem.DoesNotExist:
+            return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
+
+        try:
+            history = UserCodeHistory.objects.filter(user=user_id, problem=target_problem).order_by("-id").first()
+            data = {
+                "id": history.problem.id,
+                "code": history.code,
+                "lang": history.lang
+            }
+            create_date = str(history.create_at)[:19]
+            message = f"{create_date}에 저장된 코드를 불러왔습니다.(버전 {history.version})"
+        except Exception as e:
+            message = "저장된 코드가 없습니다."
+            print(message, e)
+            data = {
+                "id": id,
+                "code": "",
+                "lang": ""
+            }
+
+        response_data = {
+            "id" : id,
+            "message" : message,
+            "status" : "success",
+            "data": data
+        }
+
         return Response(response_data)
