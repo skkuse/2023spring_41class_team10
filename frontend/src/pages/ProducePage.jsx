@@ -62,7 +62,6 @@ const Controllers = styled.div`
     justify-content: center;
 `;
 
-
 const Button = styled.button`
     background-color: ${props => props.color};
     width: 60px;
@@ -73,6 +72,33 @@ const Button = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
+`;
+
+const SquareContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  border-radius: 10px;
+  border: 0.1px solid black;
+  height: 26px;
+  margin: 1rem;
+  padding: 4px 0;
+  background-color: white;
+  box-shadow: 2px 4px 4px #cccccc;
+`;
+
+const SquareItem = styled.input`
+  text-align: center;
+  border: none;
+  border-left: 2px solid;
+`;
+
+const WideSquareItem = styled(SquareItem)`
+  flex: 2;
+`;
+
+const LefttSquareItem = styled(SquareItem)`
+  border-left: 0px;
+  user-select: none;
 `;
 
 //백엔드 연결 전 테스트용 데이터
@@ -93,39 +119,33 @@ function Produce() {
         problemCategory : "",
         problemLevel : "",
         description : "",
-        programmingLanguage : "",
         testCase: "",
     });
 
     const handleTitleChange=(e)=>{
-        let data = problemData;
-        data.title = e.target.value;
-        setProblemData(data);
+        let tempdata = problemData;
+        tempdata.title = e.target.value;
+        setProblemData(tempdata);
     }
     const handleCategoryChange=(e)=>{
-        let data = problemData;
-        data.problemCategory = e.target.value;
-        setProblemData(data);
+        let tempdata = problemData;
+        tempdata.problemCategory = e.target.value;
+        setProblemData(tempdata);
     }
     const handleLevelChange=(e)=>{
-        let data = problemData;
+        let tempdata = problemData;
         data.problemLevel = e.target.value;
-        setProblemData(data);
+        setProblemData(tempdata);
     }
     const handleDescriptionChange=(e)=>{
-        let data = problemData;
-        data.description = e.target.value;
-        setProblemData(data);
-    }
-    const handleLanguageChange=(e)=>{
-        let data = problemData;
-        data.programmingLanguage = e.target.value;
-        setProblemData(data);
+        let tempdata = problemData;
+        tempdata.description = e.target.value;
+        setProblemData(tempdata);
     }
     const handleTestcaseChange=(e)=>{
-        let data = problemData;
-        data.testCase = e.target.value;
-        setProblemData(data);
+        let tempdata = problemData;
+        tempdata.testCase = e.target.value;
+        setProblemData(tempdata);
     }
 
     const handleButtonClick=(e)=>{
@@ -142,26 +162,21 @@ function Produce() {
             <TitleContainer>
                 <Titleh1>문제 추가 (관리자)</Titleh1>
                 <hr style={{ height: '3px' }} />
-                {/* problem metadata component */}
+                <SquareContainer>
+                    <LefttSquareItem type="text" defaultValue="#번호 자동지정"/>
+                    <WideSquareItem type="text" placeholder="문제 제목" onChange={handleTitleChange}/>
+                    <SquareItem type="text" placeholder="문제 종류" onChange={handleCategoryChange}/>
+                    <SquareItem type="text" placeholder="문제 레벨" onChange={handleLevelChange}/>
+                </SquareContainer>
             </TitleContainer>
         </DescriptionContainer>
 
         <ReviewContainer>
             <CodeReviewContainer>
-                <Titleh2>허용된 언어</Titleh2>
-                <CodeReviewDiv>
-                <TypingContainer
-                    value={data.programmingLanguage}
-                    onChange={handleLanguageChange}
-                    rows={3}
-                />
-                </CodeReviewDiv>
-            </CodeReviewContainer>
-            <CodeReviewContainer>
                 <Titleh2>문제 설명</Titleh2>
                 <CodeReviewDiv>
                 <TypingContainer
-                    value={data.description}
+                    placeholder="문제 설명 추가"
                     onChange={handleDescriptionChange}
                     rows={10}
                 />
@@ -171,7 +186,7 @@ function Produce() {
                 <Titleh2>테스트 케이스</Titleh2>
                 <CodeReviewDiv>
                 <TypingContainer
-                    value={data.testCase}
+                    placeholder="테스트 케이스 추가"
                     onChange={handleTestcaseChange}
                     rows={8}
                 />

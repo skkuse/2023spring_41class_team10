@@ -7,7 +7,7 @@ const SquareContainer = styled.div`
   grid-template-columns: 1fr 2fr 1fr 1fr;
   border-radius: 10px;
   border: 0.1px solid black;
-  height: 30px;
+  height: 26px;
   margin: 1rem;
   padding: 4px 0;
   background-color: white;
@@ -27,12 +27,6 @@ const WideSquareItem = styled(SquareItem)`
 
 const RightSquareItem = styled(SquareItem)`
   border-right: 0px;
-`;
-
-const VerticalLine = styled.div`
-  height: 100%;
-  width: 1px;
-  background-color: #909090;
 `;
 
 const ProblemLink = styled(Link)`
@@ -58,7 +52,7 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
 
   return (
     <ProblemLink to={isActive ? `/problem/${problemNumber}` : '#'}>
-      <SquareContainer style={{ backgroundColor }}>
+      <SquareContainer>
         <SquareItem>{problemNumber} </SquareItem>
         <WideSquareItem>{title}</WideSquareItem>
         <SquareItem>{problemCategory}</SquareItem>
