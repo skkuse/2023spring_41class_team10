@@ -54,8 +54,8 @@ class SubmissionAdmin(admin.ModelAdmin):
     return obj.problem.title
 
 class UserCodeHistoryAdmin(admin.ModelAdmin):
-  search_fields = ["id", "user", "problem__title", "version", "user"]
-  list_display = ("id", "user", "get_problem", "version", "get_short_code", "memo", "create_at")
+  search_fields = ["id", "user", "problem__title", "version", "user", "lang"]
+  list_display = ("id", "user", "get_problem", "version", "get_short_code", "memo", "create_at", "lang")
   @admin.display(description='problem', ordering='problem__title')
   def get_problem(self, obj):
     return obj.problem.title
