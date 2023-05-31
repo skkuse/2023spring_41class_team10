@@ -168,7 +168,7 @@ function Review() {
                 <Titleh1>코드 리뷰</Titleh1>
                 <hr style={{ height: '3px' }} />
                 {/* problem metadata component */}
-                <ProblemInfo problemNumber={problemNumber} title={title} problemCategory={problemCategory} problemLevel={problemLevel} />
+                <ProblemInfo problemNumber={problemNumber} title={title} problemCategory={problemCategory} problemLevel={problemLevel} isActive={false}/>
                 <MoreDescriptionContainer>
                     <ChooseLanguageContainer>
                         <LangDiv>선택한 언어</LangDiv>
