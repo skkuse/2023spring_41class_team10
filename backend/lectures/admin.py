@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Lecture, SoftwareField, LectureFieldRelation, LectureHistory
 
-
 class LectureAdmin(admin.ModelAdmin):
   search_fields = ["id", "title"]
   list_display = ("id", "title", "video_link", "author_id", "create_at")

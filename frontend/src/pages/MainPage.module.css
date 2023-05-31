@@ -1,0 +1,446 @@
+.mainpage {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .div {
+    background-color: #ffffff;
+    border: 1px none;
+    height: 1825px;
+    overflow: hidden;
+    position: relative;
+    width: 1440px;
+  }
+  
+  .overlap {
+    height: 762px;
+    left: -318px;
+    position: absolute;
+    top: 2px;
+    width: 1961px;
+  }
+  
+  .herocenter {
+    background-color: #f2f2f2;
+    height: 700px;
+    left: 318px;
+    position: absolute;
+    top: 62px;
+    width: 1440px;
+  }
+
+  .centerBtn {
+    height: 64px;
+    left: 580px;
+    position: absolute;
+    top: 450px;
+    width: 280px;
+    background-color: rgb(0,0,0);
+    color: rgb(255,255,255);
+  }
+  
+  .subtitle {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 22px;
+    font-weight: 400;
+    left: 500px;
+    letter-spacing: 0;
+    line-height: 30.9px;
+    position: absolute;
+    text-align: center;
+    top: 350px;
+    white-space: nowrap;
+    width: 440px;
+  }
+  
+  .title {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 64px;
+    font-weight: 500;
+    height: 53px;
+    left: 327px;
+    letter-spacing: 0;
+    line-height: 52.5px;
+    position: absolute;
+    text-align: center;
+    top: 185px;
+    white-space: nowrap;
+    width: 787px;
+  }
+  
+  .group {
+    height: 443px;
+    left: 1244px;
+    position: absolute;
+    top: 247px;
+    width: 717px;
+  }
+  
+  .vector {
+    height: 143px;
+    left: 143px;
+    position: absolute;
+    top: 287px;
+    width: 143px;
+  }
+  
+  .img {
+    height: 143px;
+    left: 287px;
+    position: absolute;
+    top: 143px;
+    width: 143px;
+  }
+  
+  .vector2 {
+    height: 143px;
+    left: 400px;
+    position: absolute;
+    top: 143px;
+    width: 143px;
+  }
+
+  .vector4 {
+    height: 143px;
+    left: 300px;
+    position: absolute;
+    top: 143px;
+    width: 143px;
+  }
+  
+  .vector5 {
+    height: 143px;
+    left: 430px;
+    position: absolute;
+    top: 143px;
+    width: 143px;
+  }
+
+  .ellipse {
+    border: 2px solid;
+    border-color: #000000;
+    border-radius: 71.74px;
+    height: 143px;
+    left: 143px;
+    position: absolute;
+    top: 2px;
+    width: 143px;
+  }
+  
+  .ellipse2 {
+    background-color: #000000;
+    border: 2px solid;
+    border-radius: 17.94px;
+    height: 36px;
+    left: 0;
+    position: absolute;
+    top: 287px;
+    width: 36px;
+  }
+  
+  .ellipse3 {
+    background-color: #000000;
+    border: 2px solid;
+    border-radius: 17.94px;
+    height: 36px;
+    left: 682px;
+    position: absolute;
+    top: 109px;
+    width: 36px;
+  }
+  
+  .ellipse4 {
+    border: 2px solid;
+    border-color: #000000;
+    border-radius: 71.74px;
+    height: 143px;
+    left: 309px;
+    position: absolute;
+    top: 300px;
+    width: 143px;
+  }
+  
+  .rectangle {
+    background-color: #000000;
+    border: 2px solid;
+    height: 143px;
+    left: 430px;
+    position: absolute;
+    top: 0;
+    width: 143px;
+  }
+  
+  .group23 {
+    height: 443px;
+    left: 0;
+    position: absolute;
+    top: 62px;
+    width: 717px;
+  }
+  
+  .naviationleft {
+    background-color: #ffffff;
+    height: 64px;
+    left: 318px;
+    position: absolute;
+    top: 0;
+    width: 1440px;
+  }
+
+  .loginBtn {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 40px;
+    right: 160px;
+    position: absolute;
+    top: 12px;
+    width: 140px;
+    background-color: #ffffff;
+  }
+
+  .signupBtn {
+    height: 40px;
+    right: 10px;
+    position: absolute;
+    top: 12px;
+    width: 140px;
+    background-color: rgb(0,0,0);
+    color: rgb(255,255,255);
+ }
+  
+  .links {
+    height: 22px;
+    left: 1175px;
+    position: absolute;
+    top: 21px;
+    width: 47px;
+  }
+  
+  .link {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 22px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+  }
+  
+  .links2 {
+    height: 22px;
+    left: 156px;
+    position: absolute;
+    top: 21px;
+    width: 165px;
+  }
+  
+  .textwrapper {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 22px;
+    left: 80px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+  }
+  
+  .mainpagebeforeloginlogo {
+    height: 58px;
+    left: 20px;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 101px;
+    cursor: pointer;
+  }
+  
+  .rectangle2 {
+    background-color: #f2f2f2;
+    height: 174px;
+    left: 0;
+    position: absolute;
+    top: 4615px;
+    width: 1441px;
+  }
+  
+  .overlapgroup4 {
+    height: 1061px;
+    left: 0;
+    position: absolute;
+    top: 764px;
+    width: 1440px;
+  }
+
+  .overlapgroup5 {
+    height: 1061px;
+    left: 0;
+    position: absolute;
+    top: 1578px;
+    width: 1440px;
+  }
+  
+  .postssquare {
+    background-image: url(/imgs/rectangle.png);
+    background-size: 100% 100%;
+    height: 821px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 1440px;
+  }
+  
+  .cardsqare {
+    height: 502px;
+    left: 135px;
+    position: absolute;
+    top: 267px;
+    width: 370px;
+  }
+  
+  .subtitle2 {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 14px;
+    font-weight: 400;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 19px;
+    position: absolute;
+    top: 481px;
+    white-space: nowrap;
+    width: 370px;
+  }
+  
+  .title2 {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 24px;
+    font-weight: 400;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 32.6px;
+    position: absolute;
+    top: 403px;
+    white-space: nowrap;
+    width: 370px;
+  }
+
+  .title3 {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 24px;
+    font-weight: 400;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 32.6px;
+    position: absolute;
+    top: 380px;
+    white-space: nowrap;
+    width: 370px;
+  }
+  
+  .mainpagebeforeloginelement {
+    height: 370px;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 370px;
+  }
+  
+  .cardsquare {
+    height: 502px;
+    left: 535px;
+    position: absolute;
+    top: 267px;
+    width: 370px;
+  }
+  
+  .mainpagebeforeloginoverlapgroup {
+    background-color: #000000;
+    background-image: url(/imgs/service-1.png);
+    background-position: 50% 50%;
+    background-size: cover;
+    height: 370px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 370px;
+  }
+  
+  .cardsquare3 {
+    height: 502px;
+    left: 935px;
+    position: absolute;
+    top: 267px;
+    width: 370px;
+  }
+  
+  .overlapgroup1 {
+    background-color: #000000;
+    height: 370px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 370px;
+  }
+  
+  .element001101 {
+    height: 369px;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 1px;
+    width: 370px;
+  }
+  
+  .p {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    left: 320px;
+    letter-spacing: 0;
+    line-height: 27.4px;
+    position: absolute;
+    text-align: center;
+    top: 123px;
+    white-space: nowrap;
+    width: 800px;
+  }
+  
+  .title4 {
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 24px;
+    font-weight: 400;
+    left: 509px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    text-align: center;
+    top: 69px;
+    width: 422px;
+  }
+  
+  .nav_font {
+    font-family: "Roboto", Helvetica; font-size: 18px; font-weight: 400; color: rgb(0, 0, 0); line-height: normal;
+    height: 22px;
+    left: 0;
+    letter-spacing: 0;
+    position: absolute;
+    top: 0;
+}

@@ -32,6 +32,9 @@ class Testcase(models.Model):
   result = models.TextField()
   is_sample = models.BooleanField()
 
+  def __str__(self) -> str:
+    return f"#{self.problem.id} {self.problem.title}"
+
 class Execution(models.Model):
   id = models.AutoField(primary_key=True)
   problem = models.ForeignKey(Problem, models.CASCADE)
