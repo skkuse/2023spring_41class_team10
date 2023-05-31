@@ -1,16 +1,46 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { } from '../components'
-import { useAuth, useProfileQuery } from '../hooks'
-import { useEffect } from 'react'
+import React from 'react';
+import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
+import ProblemInfo from '../components/ProblemInfo';
+import Lectures from '../components/Lectures';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f2f2;
+  padding: 2rem;
+`;
+
+const BodyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 200px;
+  padding: 2rem;
+`;
+
+const TitleContainer = styled.div`
+  margin-bottom: 2rem;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Titleh1 = styled.h1`
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+`;
 
 const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  background-color: #f2f2f2;
+`;
+
+const ButtonContainer = styled.div`
+margin-top: 1rem;
+display: flex;
 `;
 
 const ProfileImage = styled.img`
@@ -28,8 +58,27 @@ const ProfileUsername = styled.h2`
 
 const ProfileGithub = styled.a`
   font-size: 1rem;
-  color: #007bff;
-  text-decoration: none;
+  background-color: #ccc;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  margin-right: 2rem;
+  color: #333;
+
+  &:hover {
+    color: #0056b3;
+  }
+`;
+
+const LogoutButton = styled.button`
+  font-size: 1rem;
+  background-color: #ccc;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
   transition: color 0.3s ease;
 
   &:hover {
@@ -37,55 +86,144 @@ const ProfileGithub = styled.a`
   }
 `;
 
+const RecentQuestions = styled.div`
+  margin-top: 1rem;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const RecentQuesDiv = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+`;
+
+const RecentQuesList = styled.div`
+margin-top: 2rem;
+`;
+
+const RecentLecList = styled.div`
+  margin-top: 2rem;
+  display: flex;
+`;
+
+const RecentLectures = styled.div`
+  margin-top: 2rem;
+`;
+
+const RecentLecDiv = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  display: flex;
+`;
+
+
 function ProfilePage() {
-    const { data } = useProfileQuery()
-    const { authUser } = useAuth()
-    const { username, github } = data.profile
-    const canUpdateProfile = authUser?.username === username
-    const [toast, setToast] = useState(false);
-    const copyUrl = async () => {
-        await navigator.clipboard.writeText(url); // 링크 복사 부분
-        setToast(true);
-      };
+   /*const { data } = useProfileQuery();
+  const { authUser, logout } = useAuth();
+  const { username, github } = data.profile;
+  const canUpdateProfile = authUser?.username === username;*/
 
-    React.useEffect(() => {
-    setAuthorFilter()
-    }, [username, setAuthorFilter])
 
-    return (
-    <ProfileContainer>
+  
+  const data = [
+    {
+        username: 'Jiyun',
+        github: 'https://github.com/mery0816'
+    }
+  ];
+
+  const processingProblems = [
+    {
+      slug: '1',
+      title: 'Test Problem 1',
+      problemNumber: '1',
+      problemCategory: 'I/O',
+      problemLevel: '2',
+      problemStatus: 'processing'
+    },
+    {
+      slug: '2',
+      title: 'Test Problem 2',
+      problemNumber: '2',
+      problemCategory: 'Looping',
+      problemLevel: '3',
+      problemStatus: 'processing'
+    },
+  ];
+
+  const lectures = [
+    {
+      youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
+      title: 'Lecture 1',
+      progress: 30,
+    },
+    {
+      youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
+      title: 'Lecture 2',
+      progress: 70,
+    },
+  ];
+  
+  const handleLogout = () => {
+    // Handle logout functionality here
+    logout();
+  };
+
+  const handleClick = () => {
+    window.open(data[0].github, '_blank');
+  };
+
+  return (
+    <Container>
+    <TitleContainer>
+      <Titleh1>Profile</Titleh1>
+      <hr style={{ height: '3px' }} />
+      
+      <ProfileContainer>
         <ProfileImage
-        src="https://example.com/profile-image.jpg" // Replace with the actual image URL
-        alt="Profile Image"
+          src="https://img.youtube.com/vi/k75oGRMiENk/0.jpg"
+          alt="Profile Image"
         />
-        <ProfileUsername>{username}</ProfileUsername>
-        <ProfileGithub href={github} target="_blank" rel="noopener noreferrer">
-        Visit GitHub Profile
-        </ProfileGithub>
-        {canUpdateProfile ? ( // 본인 프로필일 경우, username(닉네임)을 변경할 수 있도록
-            <UpdateProfileForm onSubmit={handleUpdateProfile}>
-                <UpdateProfileInput
-                type="text"
-                value={newUsername}
-                onChange={handleUsernameChange}
-                placeholder="New Username"
-                />
-                <UpdateProfileButton type="submit">이름 변경하기</UpdateProfileButton>
-            </UpdateProfileForm>
-            ) : ( // 본인 프로필 아닐 경우 변경 못하다록
-            <p>You can only update your own profile.</p>
-        )}
-        {toast && (
-        <Toast
-          setToast={setToast}
-          text={
-            canUpdateProfile
-              ? '프로필이 성공적으로 변경되었습니다!'
-              : "잘못된 user입니다."
-          }
-        />
-      )}
-    </ProfileContainer>
-    )
+        <ProfileUsername>{data[0].username}</ProfileUsername>
+        <ButtonContainer>
+        <ProfileGithub onClick={handleClick}>Visit GitHub Profile</ProfileGithub>
+      <LogoutButton onClick={handleLogout}>GitHub 계정 로그아웃</LogoutButton>
+      </ButtonContainer>
+      </ProfileContainer>
+      </TitleContainer>
+      <BodyContainer>
+      <RecentQuestions>
+        <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
+        <RecentQuesList>
+        {processingProblems.map((problem) => (
+          <ProblemInfo
+            key={problem.slug}
+            problemNumber={problem.problemNumber}
+            title={problem.title}
+            problemCategory={problem.problemCategory}
+            problemLevel={problem.problemLevel}
+            problemStatus={problem.problemStatus}
+          />
+        ))}
+        </RecentQuesList>
+      </RecentQuestions>
+      <RecentLectures>
+        <RecentLecDiv>최근 본 강의</RecentLecDiv>
+        <RecentLecList>
+        {lectures.map((lecture, index) => (
+          <Lectures
+            key={index}
+            youtubeLink={lecture.youtubeLink}
+            title={lecture.title}
+            progress={lecture.progress}
+          />
+        ))}
+        </RecentLecList>
+      </RecentLectures>
+      </BodyContainer>
+    </Container>
+  );
 }
-export default ProfilePage
+
+export default ProfilePage;

@@ -21,18 +21,6 @@ const LectureImage = styled.img`
   margin-bottom: 8px;
 `;
 
-const LectureProgress = styled.div`
-  background-color: #eee;
-  height: 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-`;
-
-const ProgressIndicator = styled.div`
-  height: 100%;
-  background-color: #007bff;
-  border-radius: 4px;
-`;
 
 const Lectures = ({ youtubeLink, title, progress }) => {
   // Extract the YouTube video ID from the link
@@ -48,9 +36,6 @@ const Lectures = ({ youtubeLink, title, progress }) => {
         alt="Lecture Thumbnail"
       />
       <LectureTitle>{title}</LectureTitle>
-      <LectureProgress>
-        <ProgressIndicator style={{ width: `${progress}%` }} />
-      </LectureProgress>
     </CardContainer>
   );
 };

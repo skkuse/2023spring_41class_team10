@@ -1,54 +1,178 @@
-import React from 'react'
-import { } from '../components'
-import { useAuth } from '../hooks'
-
-import styled from "styled-components"
+import React from 'react';
+import { useAuth } from '../hooks';
+import ProblemInfo from '../components/ProblemInfo';
+import Lectures from '../components/Lectures';
+import styled from 'styled-components';
+import RecomLectures from '../components/RecomLecture';
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  background-color: #f2f2f2;
+  padding: 2rem;
+`;
+
+const BodyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 200px;
+  padding: 2rem;
+`;
+
+const TitleContainer = styled.div`
+  margin-bottom: 2rem;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Titleh1 = styled.h1`
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+`;
+
+const LecturesContainer = styled.div`
+  margin: 2rem;
+  flex-direction: column;
+  margin-bottom: 100px;
+`;
+
+const ProcessingLectDiv = styled.div`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+`;
+
+const LectureList = styled.div`
+  display: flex;
+`;
+
+const QuestionsContainer = styled.div`
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin-bottom: 100px;
+`;
+
+const ProcessingQuesDiv = styled.div`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+`;
+
+const ProcessingList = styled.div`
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #f2f2f2;
+`
+
+const RecommendContainer = styled.div`
+  margin-top: 2rem;
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
+const RecomList = styled.div`
+  margin:20px;
+  display:flex
 `;
 
-const Subtitle = styled.h2`
+const RecommendDiv = styled.div`
+  margin-top: 2rem;
   font-size: 1.5rem;
-  color: #666;
-`;
-
-const Button = styled.button`
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
+  font-weight: bold;
 `;
 
 function HomePage() {
-  const { isAuth } = useAuth()
+  const { isAuth } = useAuth();
+
+  const problems = [
+    {
+      slug: '1',
+      title: 'Test Problem 1',
+      problemNumber: '1',
+      problemCategory: 'I/O',
+      problemLevel: '2',
+      problemStatus: 'complete'
+    },
+    {
+      slug: '2',
+      title: 'Test Problem 2',
+      problemNumber: '2',
+      problemCategory: 'Looping',
+      problemLevel: '3',
+      problemStatus: 'processing'
+    },
+  ];
+
+  const lectures = [
+    {
+      youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
+      title: 'Lecture 1',
+      progress: 30,
+    },
+    {
+      youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
+      title: 'Lecture 2',
+      progress: 70,
+    },
+  ];
+
+
+  const processingProblems = problems.filter(
+    (problem) => problem.problemStatus === 'processing'
+  );
 
   return (
     <Container>
-      <Title>BePro</Title>
-      <Subtitle>미래형 AI 코딩 교육 플랫폼</Subtitle>
-      <Button>지금 가입하기</Button>
+    <TitleContainer>
+      <Titleh1>Home</Titleh1>
+      <hr style={{ height: '3px' }} />
+      </TitleContainer>
+      <BodyContainer>
+      <LecturesContainer>
+        <ProcessingLectDiv>진행 중인 강의</ProcessingLectDiv>
+        <LectureList>
+        {lectures.map((lecture, index) => (
+          <Lectures
+            key={index}
+            youtubeLink={lecture.youtubeLink}
+            title={lecture.title}
+            progress={lecture.progress}
+          />
+        ))}
+        </LectureList>
+      </LecturesContainer>
+      <QuestionsContainer>
+        <ProcessingQuesDiv>풀고 있는 문제</ProcessingQuesDiv>
+        <ProcessingList>
+        {processingProblems.map((problem) => (
+          <ProblemInfo
+            key={problem.slug}
+            problemNumber={problem.problemNumber}
+            title={problem.title}
+            problemCategory={problem.problemCategory}
+            problemLevel={problem.problemLevel}
+            problemStatus={problem.problemStatus}
+          />
+        ))}
+        </ProcessingList>
+      </QuestionsContainer>
+      <RecommendContainer>
+        <RecommendDiv>추천 강의</RecommendDiv>
+        <RecomList>
+        {lectures.map((lecture, index) => (
+          <Lectures
+            key={index}
+            youtubeLink={lecture.youtubeLink}
+            title={lecture.title}
+          />
+        ))}            
+        </RecomList>
+      </RecommendContainer>
+      </BodyContainer>
     </Container>
-  )
+  );
 }
 
 export default HomePage;
