@@ -1,13 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from backend.settings import BASE_DIR
-
-import json
-import os
 
 from lectures.models import *
 from problems.models import *
-from django.db.models import Max
 
 def get_fail_res(msg):
     """ 
@@ -19,71 +14,36 @@ def get_fail_res(msg):
     }
 
 
-class ProblemLoadView(APIView):
-
+class SubmissionHistoryView(APIView):
     def get(self, request):
-        # id: problem id
-        user_id = 1
-    
-        filtered_histories = UserCodeHistory.objects.filter(user=user_id)
-        if not filtered_histories.exists():
-            return Response(get_fail_res("History does not exists"))
-
-
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
         
+        LIMIT = 5
+        # user의 제출 history 조회, 제출을을 내림차순으로 정렬
+        user_id = request.user.id
+        user_submissions = Submission.objects.filter(user=user_id).order_by("-create_at")
 
-        code_histories = []
-        titles = []
-        for history in filtered_histories:
-            if history.problem.title not in titles:
-                # code_histories.append({
-                #     "user_id" : user_id,
-                #     "title" : history.problem.title,
-                #     "problem_id" : history.problem.id,
-                #     "submit_at" : history.create_at,
-                #     "result" : "test"
-                # })
-                data = {
-                    "user_id" : user_id,
-                    "title" : history.problem.title,
-                    "problem_id" : history.problem.id,
-                    "submit_at" : history.create_at,
-                    "result" : "temp"
-                }
-                # submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=history.create_at)
-                latest_submit = Submission.objects.filter(user=user_id, problem=history.problem).aggregate(max_create_at=Max('create_at'))
-                latest_create_at = latest_submit['max_create_at']
-                submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=latest_create_at).first()
-
-                # if not submit.exists():
-                    # return Response(get_fail_res("Submission history does not exists"))
-                    
-                # for sub in submit:
-                    # data["result"] = sub.status
-                data["result"] = submit.status
-                code_histories.append(data)
-            else:
-                for hist in code_histories:
-                    if hist["title"] == history.problem.title:
-                        hist["submit_at"] = history.create_at
-                        # submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=history.create_at)
-                        latest_submit = Submission.objects.filter(user=user_id, problem=history.problem).aggregate(max_create_at=Max('create_at'))
-                        latest_create_at = latest_submit['max_create_at']
-                        submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=latest_create_at).first()
-                        hist["result"] = submit.status
-                        # if not submit.exists():
-                        #     return Response(get_fail_res("Submission history does not exists"))
-                        # for sub in submit:
-                        #     hist["result"] = sub.status
-            titles.append(history.problem.title)
+        data = []
+        for submission in user_submissions[:LIMIT]:
+            obj = {
+                "user_id" : user_id,
+                "title" : submission.problem.title,
+                "problem_id" : submission.problem.id,
+                "submit_at" : submission.create_at,
+                "result" : submission.status
+            }
+            data.append(obj)
 
         response_data = {
-                "status": "200",
-                "message": "Success",
-                "data": code_histories
-            }
+            "status": "success",
+            "message": f"recent {len(data)} submissions",
+            "data": data
+        }
+
         return Response(response_data)
-    
+
+
 class LectureHistoryView(APIView):
 
     def get(self, request):
