@@ -78,7 +78,16 @@ const Button = styled.button`
     justify-content: center;
 `;
 
+const ProblemInfoContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`
+
 const SquareContainer = styled.div`
+  max-width: 800px;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
   border-radius: 10px;
@@ -186,12 +195,14 @@ function Produce() {
             <TitleContainer>
                 <Titleh1>문제 추가 (관리자)</Titleh1>
                 <hr style={{ height: '3px' }} />
-                <SquareContainer>
-                    <LefttSquareItem type="text" defaultValue="#번호 자동지정"/>
-                    <WideSquareItem type="text" placeholder="문제 제목" onChange={handleTitleChange}/>
-                    <SquareItem type="text" placeholder="문제 종류" onChange={handleCategoryChange}/>
-                    <SquareItem type="text" placeholder="문제 레벨" onChange={handleLevelChange}/>
-                </SquareContainer>
+                <ProblemInfoContainer>
+                    <SquareContainer>
+                        <LefttSquareItem type="text" defaultValue="#번호 자동지정"/>
+                        <WideSquareItem type="text" placeholder="문제 제목" onChange={handleTitleChange}/>
+                        <SquareItem type="text" placeholder="문제 종류" onChange={handleCategoryChange}/>
+                        <SquareItem type="text" placeholder="문제 레벨" onChange={handleLevelChange}/>
+                    </SquareContainer>
+                </ProblemInfoContainer>
             </TitleContainer>
         </DescriptionContainer>
 
