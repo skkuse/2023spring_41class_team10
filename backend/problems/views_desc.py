@@ -118,12 +118,12 @@ class ProblemExecView(APIView):
         execution_time = end_time-start_time
 
         # Remove Execution files
+        white_list = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
         file_list = os.listdir(self.dir_path)
         for file_name in file_list:
-            if file_name == ".keep":
-                continue
-            file_path = os.path.join(self.dir_path, file_name)
-            os.remove(file_path)
+            if file_name not in white_list:
+                file_path = os.path.join(self.dir_path, file_name)
+                os.remove(file_path)
 
         # When execution fail due to timeout, return Error Response
         if result.returncode < 0:
