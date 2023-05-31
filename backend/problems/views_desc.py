@@ -54,22 +54,33 @@ class ProblemDescView(APIView):
 
 
 class ProblemExecView(APIView):
-    
+    """코드 실행
+
+    url        : problems/v1/<id>/exec/
+    Returns :
+        POST   : status, message, id
+    """
+
     def post(self, request, id):
-        
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
         body = json.loads(request.body.decode('utf-8'))
-        
         code = body.get("code", "")
         language = body.get("lang", "python")
         language = language.lower()
         tc_user = body.get("tc_user", "")
-        
+
+        # 코드 공백 검사
+        if code.strip() == "":
+            return Response(get_fail_res("코드를 입력하지 않았습니다."))
+
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
         except Problem.DoesNotExist:
             return Response(get_fail_res("Exececution Failed!: Don't Exist Problem!"))
-        
+
         if language == "python":
             # Create a new Python file
             self.create_new_file(code, ".py")
@@ -103,9 +114,9 @@ class ProblemExecView(APIView):
             result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
             end_time = time.time()
             output = result.stdout
-        
+
         execution_time = end_time-start_time
-        
+
         # Remove Execution files
         file_list = os.listdir(self.dir_path)
         for file_name in file_list:
@@ -113,52 +124,46 @@ class ProblemExecView(APIView):
                 continue
             file_path = os.path.join(self.dir_path, file_name)
             os.remove(file_path)
-        
+
         # When execution fail due to timeout, return Error Response
         if result.returncode < 0:
-            # Timeout Case, Create Table
-            Execution.objects.create(
+            execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Timeout",
                 exec_time = execution_time,
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 result = output
             )
-            return Response(get_fail_res("Execution Failed: Timeout!"))        
-        
+            msg=f"Execution Failed: Timeout!"
         # Error Case, Create Table
-        if result.returncode > 0:
-            Execution.objects.create(
+        elif result.returncode > 0:
+            execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Error",
                 exec_time = execution_time,
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 result = result.stderr
             )
-            return Response(get_fail_res("Execution Failed: Error!      " + result.stderr))
-        
-        # Success Case, Create Table
-        Execution.objects.create(
-            problem = target_problem,
-            lang = language,
-            status = "Success",
-            exec_time = execution_time,
-            user = 1,
-            # user = request.user.id,
-            result = output
-        )
-        
-        # Execution Success
-        response_data = {
-            "id" : id,
-            "result" : output,
-            "exec_time" : execution_time
-        }
-        
+            msg=f"Execution Failed: Error! {result.stderr}"
+        else:
+            # Success Case, Create Table
+            execution = Execution.objects.create(
+                problem = target_problem,
+                lang = language,
+                status = "Success",
+                exec_time = execution_time,
+                user = user_id,
+                result = output
+            )
+            msg="Execution Success!"
+
+        data = {"id":target_problem.id, "result":execution.result, "exec_time": execution.exec_time, "status": execution.status}
+        response_data = {"status": "success", 
+                        "message": msg, 
+                        "data":data}
+
         return Response(response_data)
 
     def create_new_file(self, code, extension):
@@ -170,8 +175,8 @@ class ProblemExecView(APIView):
         self.file_path = os.path.join(self.dir_path, "temp"+extension)
         with open(self.file_path, "w") as file:
             file.write(code)
-            
-            
+
+
 class ProblemCodeSaveView(APIView):
     """ 유저가 문제 풀이코드를 임시저장
 
