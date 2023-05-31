@@ -3,6 +3,7 @@ venv
 .venv
 env
 .env
+myenv/
 media/
 secret.json
 *.log

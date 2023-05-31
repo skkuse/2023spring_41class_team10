@@ -4,12 +4,19 @@ import FooterB from '../components/FooterB';
 import NavBarBeforeLogin from '../components/NavBarBeforeLogin';
 
 function MainPageBeforeLogin(props) {
+
+  /*페이지 이동 추가 부분*/
+  const navigate = useNavigate();
+  const goUrl = () => {
+      navigate('/login');
+  };
+
     return (
         <div className={styles.mainpage}>
         <div className={styles.div}>
           <div className={styles.overlap}>
             <div className={styles.herocenter}>
-              <button className={styles.centerBtn}>지금 가입하기</button>
+              <button className={styles.centerBtn} onClick={goUrl}>지금 가입하기</button>
               <div className={styles.subtitle}>Be Pro 설명</div>
               <h1 className={styles.title}>미래형 AI 코딩 교육 플랫폼</h1>
             </div>

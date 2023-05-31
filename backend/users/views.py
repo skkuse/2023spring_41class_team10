@@ -1,9 +1,9 @@
-from django.contrib.auth import views as auth_views
+from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.models import User
+from rest_framework import status
 from rest_framework.views import APIView
-
 from rest_framework.response import Response
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from backend.settings import CLIENT_ID, CLIENT_SECRET
 from users.models import User
 
@@ -53,15 +53,25 @@ class GitHubLoginView(APIView):
             try:
                 # 유저가 존재하면 데이터 조회하여 반환
                 user_account = users.first()
+                # 접속일 업데이트
                 user_account.login()
-                print("user_account", user_account)
-                res_user = user_account.to_json()
-                print("res_user", res_user)
+                # 로그인
+                login(request, user_account, backend="django.contrib.auth.backends.ModelBackend", )
 
-                return Response(res_user)
+                token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
+                print("token", token)
+                print("access_token", token.access_token)
+                
+                data = {
+                    'user': user_account.to_json(),
+                    'access_token': str(token.access_token),
+                    'refresh_token': str(token),
+                }
+                return Response({"message": "로그인 성공", "data":data}, status=status.HTTP_200_OK)
+
             except Exception as e:
                 logging.exception("[github_login_callback] user_account", e)
-                return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."))
+                return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
         else:
             # 유저가 존재하지 않으면 유저를 생성하여 데이터 반환
             user = User.objects.create_user(

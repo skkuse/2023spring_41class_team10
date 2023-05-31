@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
 import ProblemInfo from '../components/ProblemInfo';
+// import { useQuestionQuery } from '../hooks';
+import axios from 'axios';
 
 const QuestionsContainer = styled.div`
   display: flex;
@@ -10,7 +12,7 @@ const QuestionsContainer = styled.div`
   align-items: center;
   padding: 2rem;
   background-color: #f2f2f2;
-  margin-bottom:100px;
+  margin-bottom: 100px;
 `;
 
 const TitleContainer = styled.div`
@@ -37,8 +39,8 @@ const StatusContainer = styled.div`
 `;
 
 const FilterButton = styled.button`
-  margin:20px;
-  margin-right:200px;
+  margin: 20px;
+  margin-right: 200px;
   background-color: #ccc;
   padding: 10px;
   border: none;
@@ -53,12 +55,11 @@ const FilterButton = styled.button`
   }
 `;
 
-
 const FirstDiv = styled.div`
   width: 80px;
   margin: 10px;
   padding: 10px;
-  background-color: #C6DBDA;
+  background-color: #c6dbda;
   border-radius: 8px;
   text-align: center;
   border: 1px solid #000000;
@@ -68,7 +69,7 @@ const SecondDiv = styled.div`
   width: 80px;
   margin: 10px;
   padding: 10px;
-  background-color: #FEF0D6;
+  background-color: #fef0d6;
   border-radius: 8px;
   text-align: center;
   border: 1px solid #000000;
@@ -78,7 +79,7 @@ const ThirdDiv = styled.div`
   width: 80px;
   margin: 10px;
   padding: 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 8px;
   text-align: center;
   border: 1px solid #000000;
@@ -88,7 +89,7 @@ const FourthDiv = styled.div`
   width: 80px;
   margin: 10px;
   padding: 10px;
-  background-color: #D9CFDE;
+  background-color: #d9cfde;
   text-align: center;
   border-radius: 8px;
   border: 1px solid #000000;
@@ -117,31 +118,24 @@ const SearchButton = styled.button`
 `;
 
 function QuestionsPage() {
-  const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString();
-
-  const questions = [
-    {
-      slug: '1',
-      title: 'Test Problem 1',
-      problemNumber: '1',
-      problemCategory: 'I/O',
-      problemLevel: '2',
-      problemStatus: 'complete',
-      createdAt: tempdate1,
-      updatedAt: tempdate1,
-    },
-    {
-      slug: '2',
-      title: 'Test Problem 2',
-      problemNumber: '2',
-      problemCategory: 'Looping',
-      problemLevel: '3',
-      problemStatus: 'processing',
-      createdAt: tempdate1,
-      updatedAt: tempdate1,
-    },
-    // Add more questions as needed
-  ];
+  const [questions, setQuestions] = useState([]);
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get('http://127.0.0.1:8000/problems/v1/list/', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log('response', response);
+        if (response.data.status !== 'fail') setQuestions(response.data['data']);
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
+      }
+    };
+    fetchQuestions();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -165,30 +159,30 @@ function QuestionsPage() {
       </TitleContainer>
       <HeadContainer>
         <StatusContainer>
-            <FirstDiv>완료</FirstDiv>
-            <SecondDiv>진행중</SecondDiv>
-            <ThirdDiv>미완료</ThirdDiv>
-            <FourthDiv>AI 추천</FourthDiv>
+          <FirstDiv>완료</FirstDiv>
+          <SecondDiv>진행중</SecondDiv>
+          <ThirdDiv>미완료</ThirdDiv>
+          <FourthDiv>AI 추천</FourthDiv>
         </StatusContainer>
         <FilterButton>필터</FilterButton>
         <SearchContainer>
-            <SearchInput
+          <SearchInput
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <SearchButton onClick={handleSearch}>Search</SearchButton>
+          />
+          <SearchButton onClick={handleSearch}>Search</SearchButton>
         </SearchContainer>
       </HeadContainer>
       {questions.map((question) => (
         <ProblemInfo
           key={question.slug}
-          problemNumber={question.problemNumber}
+          problemNumber={question.id}
           title={question.title}
-          problemCategory={question.problemCategory}
-          problemLevel={question.problemLevel}
-          problemStatus={question.problemStatus}
+          problemCategory={question.field}
+          problemLevel={question.level}
+          problemStatus={question.status}
         />
       ))}
     </QuestionsContainer>

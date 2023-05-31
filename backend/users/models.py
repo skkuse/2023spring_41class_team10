@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 class UserManager(BaseUserManager):
-    def create_user(self, github_username, email, profile_image_url, **extra_fields):
+    def create_user(self, github_username, password="", email="example@example.com", profile_image_url="", **extra_fields):
         if not github_username:
             raise ValueError('github_username must not be None')
         if not email:
@@ -13,12 +13,15 @@ class UserManager(BaseUserManager):
                         email=email,
                         profile_image_url = profile_image_url,
                         **extra_fields)
-        user.set_password(self.make_random_password())
+        if password == "":
+            user.set_password(self.make_random_password())
+        else:
+            user.set_password(password)
         user.save()
         return user
 
 
-    def create_superuser(self, github_username, email, profile_image_url, **extra_fields):
+    def create_superuser(self, github_username, password, **extra_fields):
 
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -28,11 +31,11 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        return self.create_user(github_username, email, profile_image_url **extra_fields)
+        return self.create_user(github_username, password=password, **extra_fields)
 
 
-class User(AbstractBaseUser):
-    name = models.CharField(max_length=50, default="")
+class User(AbstractUser):
+    username = models.CharField(max_length=50, default="")
     github_username = models.CharField(max_length=50, unique=True, db_index=True)
     email = models.CharField(max_length=200, default="")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,7 +52,7 @@ class User(AbstractBaseUser):
     def to_json(self):
         return {
             "id" : self.id,
-            "name" : self.name,
+            "username" : self.username,
             "github_username": self.github_username,
             "email" : self.email,
             "created_at" : self.created_at,

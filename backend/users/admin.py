@@ -3,8 +3,8 @@ from .models import User
 
 
 class UserAdmin(admin.ModelAdmin):
-  search_fields = ["id", "name", "github_username", "email"]
-  list_display = ("id", "name", "github_username", "email", "created_at", "last_login", "profile_image_url")
+  search_fields = ["id", "username", "github_username", "email"]
+  list_display = ("id", "username", "github_username", "email", "created_at", "last_login", "profile_image_url")
 
   @admin.display(description='lecture', ordering='lecture__title')
   def get_lecture(self, obj):

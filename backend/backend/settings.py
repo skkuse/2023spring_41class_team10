@@ -70,8 +70,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'rest_framework',
-    # 'rest_framework_simplejwt.token_blacklist',
-    # 'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
+    'rest_framework.authtoken',
     # 'dj_rest_auth',
     # 'dj_rest_auth.registration',
     # 'allauth',
@@ -88,7 +88,7 @@ INSTALLED_APPS = [
     'boards'
 ]
 
-# AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'users.User'
 SITE_ID = 1
 
 REST_FRAMEWORK = {
@@ -98,6 +98,7 @@ REST_FRAMEWORK = {
     # ),
     # 세션 인증과 JWT 쿠키 인증을 사용하여 API에 접근 가능하도록 인증 설정
     'DEFAULT_AUTHENTICATION_CLASSES': (  
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
@@ -143,6 +144,8 @@ SIMPLE_JWT = {
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
 

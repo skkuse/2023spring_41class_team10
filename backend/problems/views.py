@@ -30,37 +30,52 @@ class ProblemListView(APIView):
         GET     : id, problem_title, algorithm_field, level
     """
     def get(self, request):
-        
-        problems = Problem.objects.all()
-        
+        page = request.GET.get('page', 1)
+        PAGE_SIZE = 5
+
+        # Problem 모델에서 모든 객체를 가져온다.
+        problems = Problem.objects.all().order_by('id')
+
         if not problems.exists():
             return Response(get_fail_res("ProblemListView Failed!: Any problems in Problem Table"))
-        
+        problems = list(problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+
         problem_list = []
+
         for prob in problems:
             prob_obj = {}
             prob_obj["id"] = prob.id
             prob_obj["title"] = prob.title
             prob_obj["level"] = prob.level
-            
+            if request.user.is_authenticated:
+                user_submissions = Submission.objects.filter(user=request.user.id, problem_id=prob.id)
+                if len(user_submissions) == 0:
+                    prob_obj['status'] = "uncomplete"
+                else:
+                    pass_submissions = user_submissions.filter(status="PASS")
+                    if len(pass_submissions) == 0:
+                        prob_obj['status'] = "processing"
+                    else:
+                        prob_obj['status'] = "complete"
+                print(user_submissions)
+            else:
+                prob_obj['status'] = "uncomplete"
+
             relations = ProblemFieldRelation.objects.filter(problem = prob)
-            
-            if not relations.exists():
-                return Response(get_fail_res("ProblemListView Failed!: No Relation with problem"))
-            
             field_list = []
-            for relation in relations:
-                field_list.append(relation.field.field)
-            
+            if relations.exists():
+                for relation in relations:
+                    field_list.append(relation.field.field)
+
             prob_obj["field"] = field_list
             problem_list.append(prob_obj)
-        
+
         response_data = {
-            "status": "Success",
+            "status": "success",
             "message": "Problem List Info",
             "data": problem_list
         }
-        
+
         return Response(response_data)
 
 

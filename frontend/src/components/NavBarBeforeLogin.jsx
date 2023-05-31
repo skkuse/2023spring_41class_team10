@@ -54,7 +54,7 @@ const Links2 = styled.div`
     width: 165px;
 `;
 
-const NavFont = styled.a`
+const NavFont = styled(Link)`
     font-family: "Roboto", Helvetica; font-size: 18px; font-weight: 400; color: rgb(0, 0, 0); line-height: normal;
     height: 22px;
     left: 0;
@@ -79,8 +79,8 @@ function NavBarBeforeLogin(props) {
             <SecondButton>Sign Up</SecondButton>
             <FirstButton>Login</FirstButton>
             <Links2>
-              <LinkDiv><NavFont href="#!">Home</NavFont></LinkDiv>
-              <LinkDiv><NavFont href="#!">Question</NavFont></LinkDiv>
+              <LinkDiv><NavFont href="/home">Home</NavFont></LinkDiv>
+              <LinkDiv><NavFont href="/questions">Question</NavFont></LinkDiv>
             </Links2>
             <LogoImage src="/imgs/nav_logo.png" />
         </NavigationLeft>

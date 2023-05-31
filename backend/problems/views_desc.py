@@ -23,33 +23,24 @@ def get_fail_res(msg):
 class ProblemDescView(APIView):
     
     def get(self, request, id):
-        
+
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
         except Problem.DoesNotExist:
             return Response(get_fail_res("Description Failed!: Don't Exist Problem!"))
         
-        # Check whether the relation exists
-        relations = ProblemFieldRelation.objects.filter(problem = target_problem)
-        target_field = []
-        
-        if relations.exists():
-            for i in range(relations.count()):
-                field_obj = relations[i].field
-                target_field.append(field_obj.field)
-        else:
-            return Response(get_fail_res("Description Failed!: Don't Exist ProblemFieldRelation!"))
+        # 알고리즘 분야 리스트 가져오기
+        fields = ProblemFieldRelation.objects.filter(problem=target_problem).values_list("field__field", flat=True)
+        target_field = list(fields)
+        print("target_field", target_field)
 
         # Check whether the Testcase exists
-        target_tc = Testcase.objects.filter(problem = target_problem, is_sample = True)
+        target_tc = Testcase.objects.filter(problem=target_problem, is_sample=True)
         sample_tc = []
-        
-        if target_tc.exists():
-            sample_tc = [tc.testcase for tc in target_tc]
-        else:
-            return Response(get_fail_res("Description Failed!: Don't Exist Testcase!"))
-        
+        for tc in target_tc:
+            sample_tc.append({"testcase" : tc.testcase, "result" : tc.result})
+
         response_data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
@@ -58,7 +49,7 @@ class ProblemDescView(APIView):
             "description" : target_problem.description,
             "tc_sample" : sample_tc
         }
-        
+        print("response_data", response_data)
         return Response(response_data)
 
 
