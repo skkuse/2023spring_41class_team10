@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styles from './NavBar.module.css'
 
 function NavBarBeforeLogin(props) {
@@ -7,8 +8,8 @@ function NavBarBeforeLogin(props) {
             <button className={styles.secondBtn}>Sign Up</button>
             <button className={styles.firstBtn}>Login</button>
             <div className={styles.links2}>
-              <div className={styles.link}><a href="#!" className={styles.nav_font}>Home</a></div>
-              <div className={styles.textwrapper}><a href="#!" className={styles.nav_font}>Question</a></div>
+              <div className={styles.link}><Link to="/home" className={styles.nav_font}>Home</Link></div>
+              <div className={styles.textwrapper}><Link to="/questions" className={styles.nav_font}>Question</Link></div>
             </div>
             <img className={styles.mainpagebeforeloginlogo} src="/imgs/nav_logo.png" />
         </div>
