@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './MainPage.module.css';
 import FooterB from '../components/FooterB';
 import NavBar from '../components/NavBar';
@@ -7,12 +8,19 @@ import NavBar from '../components/NavBar';
 // 사용법: <MainPage userName="교육생이름" /> 이런 식으로 사용하면 됩니다.
 
 function MainPage(props) {
+
+    /*페이지 이동 추가 부분*/
+    const navigate = useNavigate();
+    const goUrl = () => {
+        navigate('/');
+    };
+
     return (
         <div className={styles.mainpage}>
         <div className={styles.div}>
           <div className={styles.overlap}>
             <div className={styles.herocenter}>
-              <button className={styles.centerBtn}>개인 페이지로 이동</button>
+              <button className={styles.centerBtn} onClick={goUrl}>개인 페이지로 이동</button>
               <div className={styles.subtitle}>Be Pro 설명</div>
               <h1 className={styles.title}>어서오세요, {props.userName} 교육생님</h1>
             </div>
