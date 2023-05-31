@@ -21,38 +21,6 @@ const Titleh1 = styled.h1`
     padding: 10px 0;
 `;
 
-const MoreDescriptionContainer = styled.div`
-    display: flex;
-    justify-content: right;
-`;
-
-const ChooseLanguageContainer = styled.div`
-    display: flex;
-    background-color: #CCCCCC;
-    padding: 4px;
-    margin: 0 5px;
-    border-radius: 4px;
-    width: 180px;
-    height: 30px;
-    align-items: center;
-    justify-content: space-around;
-`;
-const LangDiv = styled.div`
-    font-size: 14px;
-    font-weight: bold;
-`
-
-const LanguageDiv = styled.div`
-    background-color: black;
-    color: white;
-    padding: 2px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: bold;
-    height: 16px;
-    width: 80px;
-`
-
 const ReviewContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -60,38 +28,19 @@ const ReviewContainer = styled.div`
   margin-bottom: 5vh;
 `;
 
-const TypingContainer = styled.textarea`
-    background-color: black;
-    color: white;
-    width: 100%;
-    margin-bottom: 1vh;
-`;
-
 const Titleh2 = styled.h2`
-    margin: 5px 0;
+    margin: 15px 3vw;
 `;
 
-const CodeCompareContainer = styled.div`
-    display: flex;
-    justify-content: space-around;
+
+const TypingContainer = styled.textarea`
     width: 100%;
+    height: 100%;
+    border-style: none;
+    border-color: Transparent;
+    overflow: auto;
+    outline: none;
 `;
-
-const OriginalCodeContainer = styled.div`
-    label {
-        display: block;
-    }
-    width: 100%;
-    margin-right: 4vw;
-`;
-
-const FeedbackContainer = styled.div`
-    label {
-        display: block;
-    }
-    width: 100%;
-`;
-
 const CodeReviewContainer = styled.div`
     label {
         display: block;
@@ -103,8 +52,8 @@ const CodeReviewDiv = styled.div`
     width: 100%;
     background-color: white;
     border-radius: 3vw;
-    padding: 15px;
-    min-height: 15vh;
+    padding: 10px 10px 0px 10px;
+    min-height: 5vh;
     margin-bottom: 1vh;
 `;
 
@@ -140,15 +89,44 @@ const data = {
 
 function Produce() {
     const [problemData, setProblemData] = useState({
-        slug : "",
         title : "",
-        problemNumber : "",
         problemCategory : "",
         problemLevel : "",
         description : "",
         programmingLanguage : "",
         testCase: "",
     });
+
+    const handleTitleChange=(e)=>{
+        let data = problemData;
+        data.title = e.target.value;
+        setProblemData(data);
+    }
+    const handleCategoryChange=(e)=>{
+        let data = problemData;
+        data.problemCategory = e.target.value;
+        setProblemData(data);
+    }
+    const handleLevelChange=(e)=>{
+        let data = problemData;
+        data.problemLevel = e.target.value;
+        setProblemData(data);
+    }
+    const handleDescriptionChange=(e)=>{
+        let data = problemData;
+        data.description = e.target.value;
+        setProblemData(data);
+    }
+    const handleLanguageChange=(e)=>{
+        let data = problemData;
+        data.programmingLanguage = e.target.value;
+        setProblemData(data);
+    }
+    const handleTestcaseChange=(e)=>{
+        let data = problemData;
+        data.testCase = e.target.value;
+        setProblemData(data);
+    }
 
     const handleButtonClick=(e)=>{
         console.log("button clicked ", e);
@@ -170,8 +148,33 @@ function Produce() {
 
         <ReviewContainer>
             <CodeReviewContainer>
-                <label>허용된 언어</label>
+                <Titleh2>허용된 언어</Titleh2>
                 <CodeReviewDiv>
+                <TypingContainer
+                    value={data.programmingLanguage}
+                    onChange={handleLanguageChange}
+                    rows={3}
+                />
+                </CodeReviewDiv>
+            </CodeReviewContainer>
+            <CodeReviewContainer>
+                <Titleh2>문제 설명</Titleh2>
+                <CodeReviewDiv>
+                <TypingContainer
+                    value={data.description}
+                    onChange={handleDescriptionChange}
+                    rows={10}
+                />
+                </CodeReviewDiv>
+            </CodeReviewContainer>
+            <CodeReviewContainer>
+                <Titleh2>테스트 케이스</Titleh2>
+                <CodeReviewDiv>
+                <TypingContainer
+                    value={data.testCase}
+                    onChange={handleTestcaseChange}
+                    rows={8}
+                />
                 </CodeReviewDiv>
             </CodeReviewContainer>
             <Controllers>

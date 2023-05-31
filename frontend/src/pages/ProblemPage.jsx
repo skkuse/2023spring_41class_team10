@@ -115,7 +115,6 @@ const Button = styled.button`
 //백엔드 연결 전 테스트용 데이터
 const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString()
 const data = {
-    slug : '1',
     title : "Test Problem",
     problemNumber : '1',
     problemCategory : 'I/O',

@@ -1,62 +1,33 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useAuth } from '../hooks'
+import React from 'react';
+import { useState } from 'react';
+import styles from './NavBar.module.css'
 
-function Navbar() {
-  const { isAuth, authUser } = useAuth()
+function NavBar(props) {
+    const [isDetailClicked, setDetailClicked] = useState(false);
+    
+    function detailHandler() {
+        setDetailClicked(!isDetailClicked);
+    }
 
-  return (
-    <nav className="navbar navbar-light">
-      <div className="container">
-        <NavLink className="navbar-brand" to="/" end>
-          BePro
-        </NavLink>
-        <ul className="nav navbar-nav pull-xs-right">
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/" end>
-              Home
-            </NavLink>
-          </li>
-          {isAuth && (
+    return (
+        <div className={styles.navigationleft}>
+            {!isDetailClicked ? <>
+            <button className={styles.secondBtn} onClick={detailHandler}>{props.userName}님</button>
+            <button className={styles.firstBtn}>고객센터</button>
+            </> :
             <>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/">
-                  <i className="ion-compose" />
-                  &nbsp;New Post
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/">
-                  <i className="ion-gear-a" />
-                  &nbsp;Settings
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to={`/@${authUser?.username}`}>
-                  <img style={{ width: 24, height: 24, marginRight: 4, borderRadius: '50%' }} src={authUser?.image} />
-                  {authUser?.username}
-                </NavLink>
-              </li>
+            <button className={styles.secondBtn} onClick={detailHandler}>Back</button>
+            <button className={styles.thirdBtn}>Log Out</button>
+            <button className={styles.fourthBtn}>My Page</button>
             </>
-          )}
-          {!isAuth && (
-            <>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/login">
-                  Sign up
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/login">
-                  Sign in
-                </NavLink>
-              </li>
-            </>
-          )}
-        </ul>
-      </div>
-    </nav>
-  )
+            }
+            <div className={styles.links2}>
+              <div className={styles.link}><a href="#!" className={styles.nav_font}>Home</a></div>
+              <div className={styles.textwrapper}><a href="#!" className={styles.nav_font}>Question</a></div>
+            </div>
+            <img className={styles.mainpagebeforeloginlogo} src="/imgs/nav_logo.png" />
+        </div>
+    );
 }
 
-export default Navbar
+export default NavBar;
