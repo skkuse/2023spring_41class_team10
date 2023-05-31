@@ -27,7 +27,7 @@ const ProblemLink = styled(Link)`
   color: #000;
   width: 80%;
   height: 50px;
-  margin-bottom:20px;
+  margin-bottom: 20px;
 `;
 
 function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus }) {
@@ -42,13 +42,14 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
   } else if (problemStatus === 'ai') {
     backgroundColor = '#D9CFDE';
   }
+  let categories = problemCategory.join(', ');
 
   return (
     <ProblemLink to={`/problem/${problemNumber}`}>
       <SquareContainer style={{ backgroundColor }}>
         <SquareItem>{problemNumber}</SquareItem>
         <WideSquareItem>{title}</WideSquareItem>
-        <SquareItem>{problemCategory}</SquareItem>
+        <SquareItem>{categories}</SquareItem>
         <SquareItem>{problemLevel}</SquareItem>
       </SquareContainer>
     </ProblemLink>
