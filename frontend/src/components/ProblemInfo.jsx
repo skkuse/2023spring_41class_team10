@@ -5,21 +5,28 @@ import { Link } from 'react-router-dom';
 const SquareContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
-  border-radius: 4px;
-  border: 0.1px solid;
-  height: 50px;
+  border-radius: 10px;
+  border: 0.1px solid black;
+  height: 26px;
   margin: 1rem;
+  padding: 4px 0;
+  background-color: white;
+  box-shadow: 2px 4px 4px #cccccc;
 `;
 
 const SquareItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid;
+  border-right: 2px solid;
 `;
 
 const WideSquareItem = styled(SquareItem)`
   flex: 2;
+`;
+
+const RightSquareItem = styled(SquareItem)`
+  border-right: 0px;
 `;
 
 const ProblemLink = styled(Link)`
@@ -30,7 +37,7 @@ const ProblemLink = styled(Link)`
   margin-bottom: 20px;
 `;
 
-function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus }) {
+function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus, isActive=true }) {
   let backgroundColor;
 
   if (problemStatus === 'complete') {
@@ -45,12 +52,12 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
   let categories = problemCategory.join(', ');
 
   return (
-    <ProblemLink to={`/problem/${problemNumber}`}>
-      <SquareContainer style={{ backgroundColor }}>
-        <SquareItem>{problemNumber}</SquareItem>
+    <ProblemLink to={isActive ? `/problem/${problemNumber}` : '#'}>
+      <SquareContainer>
+        <SquareItem>{problemNumber} </SquareItem>
         <WideSquareItem>{title}</WideSquareItem>
         <SquareItem>{categories}</SquareItem>
-        <SquareItem>{problemLevel}</SquareItem>
+        <RightSquareItem>{problemLevel}</RightSquareItem>
       </SquareContainer>
     </ProblemLink>
   );

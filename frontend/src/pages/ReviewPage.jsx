@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components';
-import { } from '../components'
+import { ProblemInfo } from '../components'
 import { useProblemQuery } from '../hooks'
 
 const Container = styled.div`
@@ -130,7 +130,6 @@ const Button = styled.button`
 //백엔드 연결 전 테스트용 데이터
 const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString()
 const data = {
-    slug : '1',
     title : "Test Problem",
     problemNumber : '1',
     problemCategory : 'I/O',
@@ -169,7 +168,7 @@ function Review() {
                 <Titleh1>코드 리뷰</Titleh1>
                 <hr style={{ height: '3px' }} />
                 {/* problem metadata component */}
-                <p>| #{problemNumber} | {title} | {problemCategory} | {problemLevel} |</p>
+                <ProblemInfo problemNumber={problemNumber} title={title} problemCategory={problemCategory} problemLevel={problemLevel} isActive={false}/>
                 <MoreDescriptionContainer>
                     <ChooseLanguageContainer>
                         <LangDiv>선택한 언어</LangDiv>

@@ -147,6 +147,19 @@ const TestCase = styled.pre`
   width: 50%;
 `;
 
+//백엔드 없을 때 테스트용 데이터
+const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString()
+const data = {
+    title : "Test Problem",
+    problemNumber : '1',
+    problemCategory : 'I/O',
+    problemLevel : '2',
+    description : 'Description for Test Problem. You will see this description and learn about the problem.',
+    programmingLanguage : 'C',
+    createdAt : tempdate1,
+    updatedAt : tempdate1,
+}
+
 function Problem() {
   //const { data } = useProblemQuery() // 나중에 백엔드 연결하면 바꾸기
   const { slug } = useParams();

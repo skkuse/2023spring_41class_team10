@@ -1,62 +1,143 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useAuth } from '../hooks'
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
-function Navbar() {
-  const { isAuth, authUser } = useAuth()
+const NavigationLeft = styled.div`
+    background-color: #ffffff;
+    height: 64px;
+    left: 318px;
+    position: absolute;
+    top: 0;
+    width: 1440px;
+`;
 
-  return (
-    <nav className="navbar navbar-light">
-      <div className="container">
-        <NavLink className="navbar-brand" to="/" end>
-          BePro
-        </NavLink>
-        <ul className="nav navbar-nav pull-xs-right">
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/" end>
-              Home
-            </NavLink>
-          </li>
-          {isAuth && (
+const FirstButton = styled.button`
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 40px;
+    right: 11%;
+    position: absolute;
+    top: 12px;
+    width: 10%;
+    background-color: #ffffff;
+`;
+
+const SecondButton = styled.button`
+    height: 40px;
+    right: 0.7%;
+    position: absolute;
+    top: 12px;
+    width: 10%;
+    background-color: rgb(0,0,0);
+    color: rgb(255,255,255);
+`;
+
+const ThirdButton = styled.button`
+    color: #0044bb;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 40px;
+    right: 11%;
+    position: absolute;
+    top: 12px;
+    width: 10%;
+    background-color: #ffffff;
+`;
+
+const FourthButton = styled.button`
+    color: #0044bb;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 40px;
+    right: 21%;
+    position: absolute;
+    top: 12px;
+    width: 10%;
+    background-color: #ffffff;
+`;
+
+const LinkDiv = styled.div`
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 22px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+`;
+
+const Links2 = styled.div`
+    height: 22px;
+    left: 156px;
+    position: absolute;
+    top: 21px;
+    width: 165px;
+`;
+
+const NavFont = styled.a`
+    font-family: "Roboto", Helvetica; font-size: 18px; font-weight: 400; color: rgb(0, 0, 0); line-height: normal;
+    height: 22px;
+    left: 0;
+    letter-spacing: 0;
+    position: absolute;
+    top: 0;
+`;
+
+const TextWrapper = styled.div`
+    color: #000000;
+    font-family: "Roboto", Helvetica;
+    font-size: 18px;
+    font-weight: 400;
+    height: 22px;
+    left: 80px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+`;
+
+const LogoImage = styled.img`
+    height: 58px;
+    left: 20px;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 101px;
+    cursor: pointer;
+`;
+
+function NavBar(props) {
+    const [isDetailClicked, setDetailClicked] = useState(false);
+    
+    function detailHandler() {
+        setDetailClicked(!isDetailClicked);
+    }
+
+    return (
+        <NavigationLeft>
+            {!isDetailClicked ? <>
+            <SecondButton onClick={detailHandler}>{props.userName}님</SecondButton>
+            <FirstButton>고객센터</FirstButton>
+            </> :
             <>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/">
-                  <i className="ion-compose" />
-                  &nbsp;New Post
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/">
-                  <i className="ion-gear-a" />
-                  &nbsp;Settings
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to={`/@${authUser?.username}`}>
-                  <img style={{ width: 24, height: 24, marginRight: 4, borderRadius: '50%' }} src={authUser?.image} />
-                  {authUser?.username}
-                </NavLink>
-              </li>
+            <SecondButton onClick={detailHandler}>Back</SecondButton>
+            <ThirdButton>Log Out</ThirdButton>
+            <FourthButton>My Page</FourthButton>
             </>
-          )}
-          {!isAuth && (
-            <>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/login">
-                  Sign up
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/login">
-                  Sign in
-                </NavLink>
-              </li>
-            </>
-          )}
-        </ul>
-      </div>
-    </nav>
-  )
+            }
+            <Links2>
+              <LinkDiv><NavFont href="#!">Home</NavFont></LinkDiv>
+              <TextWrapper><NavFont href="#!">Question</NavFont></TextWrapper>
+            </Links2>
+            <LogoImage src="/imgs/nav_logo.png" />
+        </NavigationLeft>
+    );
 }
 
-export default Navbar
+export default NavBar;
