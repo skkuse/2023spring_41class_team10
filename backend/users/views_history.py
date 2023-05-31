@@ -87,26 +87,26 @@ class ProblemLoadView(APIView):
 class LectureHistoryView(APIView):
 
     def get(self, request):
-        # id: user id
         user_id = 1
-        # try:
-            # target_lectures = Lecture.objects.get(id=id)
-        # except Lecture.DoesNotExist:
-            # return Response(get_fail_res("Problem does not exists"))
+
         
         filtered_histories = LectureHistory.objects.filter(user_id=user_id)
         if not filtered_histories.exists():
             return Response(get_fail_res("History does not exists"))
 
-        target_lectures = []
+        lecture_list = []
 
         for history in filtered_histories:
-            target_lectures.append(history.lecture)
+            lecture_obj = {}
+            lecture_obj["user_id"] = user_id
+            lecture_obj["link"] = history.lecture.video_link
+            lecture_obj["title"] = history.lecture.title
+            lecture_list.append(lecture_obj)
 
         response_data = {
             "status": "200",
             "message": "Success",
-            "data" : target_lectures
+            "data" : lecture_list
         }
 
         return Response(response_data)
