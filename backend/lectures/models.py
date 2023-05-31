@@ -25,6 +25,7 @@ class LectureFieldRelation(models.Model):
   def __str__(self) -> str:
     return f"#{self.lecture.id} {self.lecture.title}_{self.field.field}"
 
+# 유저의 강의 시청기록
 class LectureHistory(models.Model):
   id = models.AutoField(primary_key=True)
   lecture = models.ForeignKey(Lecture, models.CASCADE)

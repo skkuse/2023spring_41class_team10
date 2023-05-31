@@ -55,6 +55,7 @@ class Submission(models.Model):
   user = models.BigIntegerField()
   num_pass = models.IntegerField()
 
+# 유저가 저장버튼을 눌러 저장한 코드
 class UserCodeHistory(models.Model):
   id = models.AutoField(primary_key=True)
   user = models.BigIntegerField()
