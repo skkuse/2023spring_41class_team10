@@ -9,7 +9,7 @@
   .div {
     background-color: #ffffff;
     border: 1px none;
-    height: 1825px;
+    height: 1520px;
     overflow: hidden;
     position: relative;
     width: 1440px;
@@ -19,7 +19,7 @@
     height: 762px;
     left: -318px;
     position: absolute;
-    top: 2px;
+    top: -60px;
     width: 1961px;
   }
   
@@ -280,7 +280,7 @@
     height: 1061px;
     left: 0;
     position: absolute;
-    top: 764px;
+    top: 702px;
     width: 1440px;
   }
 

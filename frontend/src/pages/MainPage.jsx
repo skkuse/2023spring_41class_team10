@@ -86,9 +86,7 @@ function MainPage(props) {
               <p className={styles.p}>미래형 AI 코딩 교육 플랫폼 서비스 모음</p>
               <p className={styles.title4}>BePro 의 주요 학습 서비스</p>
             </div>
-            
           </div>
-          
         </div>
       </div>
     );
