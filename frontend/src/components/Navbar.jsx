@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import AuthContext from './AuthContext';
 
@@ -17,9 +17,9 @@ const Logo = styled.div`
 `;
 
 const LogoImage = styled.img`
-    height: 100%;
-    max-height: 50px;
-    transform: translateY(3px);
+  height: 100%;
+  max-height: 50px;
+  transform: translateY(3px);
 `;
 
 const NavigationLinks = styled.div`
@@ -48,35 +48,33 @@ const StyledLinkBlack = styled(Link)`
   border-radius: 6px;
 `;
 
-
 function NavBar(props) {
-    const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn } = useContext(AuthContext);
 
-    return (
-        <StyledNavbar>
-          <NavigationLinks>
-            <Logo>
-              <StyledLink to="/">
-                <LogoImage src="/imgs/nav_logo.png" />
-              </StyledLink>
-            </Logo>
-            <StyledLink to="/home">Home</StyledLink>
-            <StyledLink to="/questions">Questions</StyledLink>
-          </NavigationLinks>
-          {isLoggedIn ? (
-            <AuthLinks>
-                <StyledLink to="/login">고객센터</StyledLink>
-                <StyledLinkBlack to="/login">{props.username} 님</StyledLinkBlack>
-            </AuthLinks>
-          ) : (
-            <AuthLinks>
-                <StyledLink to="/login">Login</StyledLink>
-                <StyledLinkBlack to="/login">Sign Up</StyledLinkBlack>
-            </AuthLinks>
-          )}
-          
-        </StyledNavbar>
-      );
+  return (
+    <StyledNavbar>
+      <NavigationLinks>
+        <Logo>
+          <StyledLink to="/">
+            <LogoImage src="/imgs/nav_logo.png" />
+          </StyledLink>
+        </Logo>
+        <StyledLink to="/home">Home</StyledLink>
+        <StyledLink to="/questions">Questions</StyledLink>
+      </NavigationLinks>
+      {isLoggedIn ? (
+        <AuthLinks>
+          <StyledLink to="/login">고객센터</StyledLink>
+          <StyledLinkBlack to="/login">{props.username} 님</StyledLinkBlack>
+        </AuthLinks>
+      ) : (
+        <AuthLinks>
+          <StyledLink to="/login">Login</StyledLink>
+          <StyledLinkBlack to="/login">Sign Up</StyledLinkBlack>
+        </AuthLinks>
+      )}
+    </StyledNavbar>
+  );
 }
 
 export default NavBar;

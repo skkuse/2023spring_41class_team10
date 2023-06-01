@@ -42,7 +42,7 @@ const ProblemLink = styled(Link)`
   width: 100%;
 `;
 
-function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus, isActive=true }) {
+function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus, isActive = true }) {
   let backgroundColor;
 
   if (problemStatus === 'complete') {
@@ -58,7 +58,7 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
 
   return (
     <ProblemLink to={isActive ? `/problem/${problemNumber}` : '#'}>
-      <SquareContainer>
+      <SquareContainer style={{ backgroundColor }}>
         <SquareItem># {problemNumber} </SquareItem>
         <WideSquareItem>{title}</WideSquareItem>
         <SquareItem>{categories}</SquareItem>

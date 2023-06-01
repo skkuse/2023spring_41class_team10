@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
+import { BsFilter, BsSearch } from 'react-icons/bs';
 import ProblemInfo from '../components/ProblemInfo';
 // import { useQuestionQuery } from '../hooks';
 import axios from 'axios';
@@ -26,27 +27,27 @@ const Titleh1 = styled.h1`
 `;
 
 const HeadContainer = styled.div`
-  margin: 50px;
+  margin: 50px 10px;
   display: flex;
   justify-content: space-between;
+  gap: 5rem;
 `;
 
 const StatusContainer = styled.div`
-  margin: 10px;
-  margin-right: 200px;
+  margin: 10px 0;
   display: flex;
   justify-content: space-between;
 `;
 
 const FilterButton = styled.button`
-  margin: 20px;
-  margin-right: 200px;
+  margin: 0 10px;
   background-color: #ccc;
-  padding: 10px;
+  padding: 4px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   color: #333;
+  font-size: 18px;
   font-weight: bold;
   transition: background-color 0.3s ease;
 
@@ -56,9 +57,9 @@ const FilterButton = styled.button`
 `;
 
 const FirstDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #c6dbda;
   border-radius: 8px;
   text-align: center;
@@ -66,9 +67,9 @@ const FirstDiv = styled.div`
 `;
 
 const SecondDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #fef0d6;
   border-radius: 8px;
   text-align: center;
@@ -76,9 +77,9 @@ const SecondDiv = styled.div`
 `;
 
 const ThirdDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #ffffff;
   border-radius: 8px;
   text-align: center;
@@ -86,9 +87,9 @@ const ThirdDiv = styled.div`
 `;
 
 const FourthDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #d9cfde;
   text-align: center;
   border-radius: 8px;
@@ -96,7 +97,7 @@ const FourthDiv = styled.div`
 `;
 
 const SearchContainer = styled.div`
-  margin: 1rem;
+  margin: 0.5rem 1rem;
   display: flex;
   align-items: center;
 `;
@@ -109,12 +110,13 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 8px 16px;
+  padding: 4px 8px;
   background-color: #333;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 18px;
 `;
 
 function QuestionsPage() {
@@ -164,15 +166,19 @@ function QuestionsPage() {
           <ThirdDiv>미완료</ThirdDiv>
           <FourthDiv>AI 추천</FourthDiv>
         </StatusContainer>
-        <FilterButton>필터</FilterButton>
         <SearchContainer>
+          <FilterButton>
+            <BsFilter />
+          </FilterButton>
           <SearchInput
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <SearchButton onClick={handleSearch}>Search</SearchButton>
+          <SearchButton onClick={handleSearch}>
+            <BsSearch />
+          </SearchButton>
         </SearchContainer>
       </HeadContainer>
       {questions.map((question) => (
