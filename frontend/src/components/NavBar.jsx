@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import styles from './NavBar.module.css'
+// import styles from './NavBar.module.css'
 
 function NavBar(props) {
     const [isDetailClicked, setDetailClicked] = useState(false);
