@@ -144,3 +144,12 @@ def get_user_primary_email(access_token):
         logging.error("[get_user_primary_email] status error", res.status_code)
 
     return primary_email
+
+
+class UserInfoView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+
+        return Response({"user":user.to_json()})

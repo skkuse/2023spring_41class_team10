@@ -6,6 +6,7 @@ import json
 import os
 
 from problems.models import *
+from users.models import User
 
 import subprocess   # For execution user's code
 import time         # For measure execution time
@@ -23,7 +24,9 @@ def get_fail_res(msg):
 class ProblemDescView(APIView):
     
     def get(self, request, id):
-
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
@@ -55,7 +58,7 @@ class ProblemDescView(APIView):
         else:
             status = "uncomplete"
                 
-        response_data = {
+        data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
             "field" : target_field,
@@ -64,6 +67,13 @@ class ProblemDescView(APIView):
             "tc_sample" : sample_tc,
             "status" : status
         }
+        response_data = {
+            "status" : "success",
+            "message" : f"문제 {target_problem.id}번 데이터입니다.",
+            "data" : data,
+            "user" : user
+        }
+        user
         print("response_data", response_data)
         return Response(response_data)
 
@@ -80,6 +90,7 @@ class ProblemExecView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
         language = body.get("lang", "python")
@@ -175,10 +186,18 @@ class ProblemExecView(APIView):
             )
             msg="Execution Success!"
 
-        data = {"id":target_problem.id, "result":execution.result, "exec_time": execution.exec_time, "status": execution.status}
-        response_data = {"status": "success", 
-                        "message": msg, 
-                        "data":data}
+        data = {
+            "id":target_problem.id, 
+            "result":execution.result, 
+            "exec_time": execution.exec_time, 
+            "status": execution.status
+        }
+        response_data = {
+            "status" : "success", 
+            "message" : msg, 
+            "data" : data,
+            "user" : user
+        }
 
         return Response(response_data)
 
@@ -205,6 +224,7 @@ class ProblemCodeSaveView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
         body = json.loads(request.body.decode('utf-8'))
         user_code = body.get("code", "")
         language = body.get("lang", "python")
@@ -240,8 +260,9 @@ class ProblemCodeSaveView(APIView):
 
         response_data = {
             "id" : id,
+            "status" : "success",
             "message" : message,
-            "status" : "success"
+            "user": user
         }
         
         return Response(response_data)
@@ -257,6 +278,7 @@ class ProblemCodeLoadView(APIView) :
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
 
         # Check whether the problem exists
         try:
@@ -286,7 +308,8 @@ class ProblemCodeLoadView(APIView) :
             "id" : id,
             "message" : message,
             "status" : "success",
-            "data": data
+            "data" : data,
+            "user" : user
         }
 
         return Response(response_data)

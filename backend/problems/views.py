@@ -9,6 +9,7 @@ import subprocess
 import logging
 
 from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation
+from users.models import User
 from backend.settings import EXECUTE_DIR
 
 def get_fail_res(msg):
@@ -28,7 +29,11 @@ class ProblemListView(APIView):
         GET     : id, problem_title, algorithm_field, level
     """
     def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         page = request.GET.get('page', 1)
+        page = int(page)
         PAGE_SIZE = 5
 
         # Problem 모델에서 모든 객체를 가져온다.
@@ -71,7 +76,8 @@ class ProblemListView(APIView):
         response_data = {
             "status": "success",
             "message": "Problem List Info",
-            "data": problem_list
+            "data": problem_list,
+            "user": user
         }
 
         return Response(response_data)
@@ -87,6 +93,8 @@ class ProblemSubmitView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        
+        user = User.objects.get(id=user_id)
         print("ProblemSubmitView")
         # url 파라미터 problem_id 저장
         problem_id = kwargs.get('problem_id')
@@ -152,9 +160,13 @@ class ProblemSubmitView(APIView):
             num_pass = res["num_pass"],
             code = code
         )
-        response = {"status": "success", 
-                    "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
-                    "data":res}
+        response = {
+            "status": "success", 
+            "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
+            "data":res, 
+            "user":user
+        }
+
         return Response(response)
 
 

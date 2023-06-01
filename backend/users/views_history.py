@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 
 from lectures.models import Lecture, LectureHistory
 from problems.models import Submission, ProblemFieldRelation
+from users.models import User
 
 import logging
 import json
@@ -27,6 +28,7 @@ class SubmissionHistoryView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         
         N = request.GET.get('n', 5)
         # user의 제출 history 조회, 제출을 내림차순으로 정렬
@@ -47,7 +49,8 @@ class SubmissionHistoryView(APIView):
         response_data = {
             "status": "success",
             "message": f"recent {len(data)} submissions",
-            "data": data
+            "data": data,
+            "user": user
         }
 
         return Response(response_data)
@@ -62,6 +65,7 @@ class SubmissionCodeView(APIView):
     def get(self, request, id):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
 
         # user의 특정문제 제출 history 조회
         user_id = request.user.id
@@ -92,7 +96,8 @@ class SubmissionCodeView(APIView):
         response_data = {
             "status": "success",
             "message": f"problem {id} submissions",
-            "data": data
+            "data": data,
+            "user": user
         }
 
         return Response(response_data)
@@ -107,6 +112,7 @@ class LectureHistoryView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         N = request.GET.get('n', 5)
         # user의 강의 기록을 조회
         user_id = request.user.id
@@ -123,7 +129,8 @@ class LectureHistoryView(APIView):
         response_data = {
             "status": "success",
             "message": f"recent {len(data)} views",
-            "data" : data
+            "data" : data,
+            "user" : user
         }
 
         return Response(response_data)
@@ -139,6 +146,8 @@ class LectureHistorySaveView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
+        
         try:
             body = json.loads(request.body.decode('utf-8'))
             lecture_id = body.get("lecture_id")
@@ -148,5 +157,10 @@ class LectureHistorySaveView(APIView):
         except Exception as e:
             logging.exception(f"[LectureHistoryCreateView] {e}")
             return Response(get_fail_res("lecture error"))
+        response_data = {
+            "status": "success", 
+            "message": f"{user_id}, {lecture.title}", 
+            "user": user
+        }
 
-        return Response({"status": "success", "message": f"{user_id}, {lecture.title}"})
+        return Response(response_data)
