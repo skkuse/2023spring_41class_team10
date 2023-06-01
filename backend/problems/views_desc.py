@@ -113,47 +113,8 @@ class ProblemExecView(APIView):
         exec_res = dict()
         if tc_user == "":
             msg=f"Execution Nothing: User's testcase does not exist!"
-        
         else:
             exec_res = execution_code(code, language, tc_user)
-            
-        """ 
-        if language == "python":
-            # Create a new Python file
-            self.create_new_file(code, ".py")
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['python3', self.file_path, tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-        elif language == "c":
-            # Create a new C file
-            self.create_new_file(code, ".c")
-            
-            # Compile first before Execution
-            subprocess.run(['gcc', self.file_path, '-o', 'out'])
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-        elif language == "cpp":
-            # Create a new C++ file
-            self.create_new_file(code, ".cc")
-            
-            # Compile first before Execution
-            subprocess.run(['g++', self.file_path, '-o', 'out'])
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-
-        execution_time = end_time-start_time
-        """
 
         # Remove Execution files
         need_file = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
