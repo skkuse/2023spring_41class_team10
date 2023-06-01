@@ -284,7 +284,7 @@ function Review() {
           <hr style={{ height: '3px' }} />
           {/* problem metadata component */}
           <ProblemInfo
-            problemNumber={submissionData.problem_id}
+            problemNumber={slug}
             title={submissionData.title}
             problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
             problemLevel={submissionData.level}
