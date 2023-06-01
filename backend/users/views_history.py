@@ -84,7 +84,8 @@ class SubmissionCodeView(APIView):
             "field": target_fields,
             "submit_at" : target.create_at,
             "result" : target.status,
-            "code" : target.code
+            "code" : target.code,
+            "description": target.problem.description,
         }
 
         response_data = {

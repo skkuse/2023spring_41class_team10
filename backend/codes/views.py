@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 import os
 import json
 import openai
+import re
 
 from backend.settings import OPENAI_API_KEY, DATA_DIR
 
@@ -23,8 +24,12 @@ class ChatRefactorAPIView(APIView):
         body = json.loads(request.body.decode('utf-8'))
         
         role = body.get("role", "user")
-        content = body.get("content", "")
-        
+        problem = body.get("problem", "")
+        code = body.get("code", "")
+        lang = body.get("lang", "")
+        # 사용언어와, 문제설명, 코드를 모두 GPT에게 질의
+        content = f"""사용자가 문제를 보고 {lang} 코드를 작성했습니다.\n주어진 문제\n{problem}\n코드\n{code}\n"""
+
         chat_messages.append({"role": role, "content": content+self.suffix})
         print("before message", chat_messages)
         print("before api call", role, content)
@@ -71,5 +76,8 @@ def parse_code(text):
             parsed_text["language"] = lang.strip()
     else:
         parsed_text["text"] = text
+    
+    # 공백이 너무 긴 경우 방지
+    parsed_text["text"] = re.sub(r'\n\s*\n+', '\n\n', parsed_text["text"])
     
     return parsed_text
