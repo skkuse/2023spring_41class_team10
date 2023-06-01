@@ -117,15 +117,15 @@ class ChatReviewAPIView(APIView):
         
         answer = completion.choices[0].message['content']
         chat_messages.append({"role": chat_role, "content": answer})
-
+        # 코드 제안없이 리뷰 메시지만 전송
         Review.objects.create(code="", message=answer, target_id=submission_id)
         return JsonResponse({"status": "success", "message": answer, "code": "", 'raw': answer})
 
-        def init_chat(self):
-            print("init")
-            template_name = "review.json"
-            with open(os.path.join(DATA_DIR, template_name), "r") as f:
-                self.meta_messages=json.load(f)
+    def init_chat(self):
+        print("init")
+        template_name = "review.json"
+        with open(os.path.join(DATA_DIR, template_name), "r") as f:
+            self.meta_messages=json.load(f)
 
 #Comment
 class ChatAddCommentAPIView(APIView):
@@ -138,7 +138,7 @@ class ChatAddCommentAPIView(APIView):
         openai.api_key = OPENAI_API_KEY
         openai.Model.list()
         body = json.loads(request.body.decode('utf-8'))
-        
+
         role = body.get("role", "user")
         problem = body.get("problem", "")
         code = body.get("code", "")
@@ -163,7 +163,7 @@ class ChatAddCommentAPIView(APIView):
 
     def init_chat(self):
         template_name = "comment.json"
-        with open(os, path.join(DATA_DIR, template_name), "r") as f:
+        with open(os.path.join(DATA_DIR, template_name), "r") as f:
             self.meta_messages=json.load(f)
 
 #Deadcode
