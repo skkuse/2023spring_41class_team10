@@ -320,22 +320,22 @@ def execution_code(code, lang, testcase, answer):
     return result
 
 def create_new_file(code, extension, testcase):        
-        if not os.path.exists(EXECUTE_DIR):
-            os.makedirs(EXECUTE_DIR, exist_ok=True)
-        
-        # Case Java, file name is Main
-        if extension == ".java":
-            file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
-            with open(file_path, "w") as file:
-                file.write(code)
-                
-        # Other Case, file name is temp
-        else:
-            file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
-            with open(file_path, "w") as file:
-                file.write(code)
-        
+    if not os.path.exists(EXECUTE_DIR):
+        os.makedirs(EXECUTE_DIR, exist_ok=True)
+    
+    # Case Java, file name is Main
+    if extension == ".java":
+        file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
             
-        test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
-        with open(test_file_path, "w") as file:
-            file.write(testcase)
+    # Other Case, file name is temp
+    else:
+        file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
+    
+        
+    test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
+    with open(test_file_path, "w") as file:
+        file.write(testcase)
