@@ -96,6 +96,7 @@ class ProblemExecView(APIView):
         code = body.get("code", "")
         language = body.get("lang", "python")
         language = language.lower()
+        language = "cpp" if language == "c++" else language
         tc_user = body.get("tc_user", "")
         print("tc_user", tc_user)
 
@@ -266,7 +267,7 @@ def execution_code(code, lang, testcase):
         # Measure Execution start time and Execute .c
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    print("re", re)
+
     # Measure Execution end time
     end_time = time.time()
     result["exec_time"] = end_time - start_time
@@ -341,7 +342,7 @@ class ProblemCodeLoadView(APIView) :
 
     url        : problems/v1/<id>/load/
     Returns :
-        POST   : status, message, id
+        GET   : status, message, id
     """
     def get(self, request, id):
         if not request.user.is_authenticated:

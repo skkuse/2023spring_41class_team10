@@ -103,7 +103,7 @@ class ProblemSubmitView(APIView):
         # json data 파싱하여 code와 language 저장
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
-        lang = body.get("language", "python")
+        lang = body.get("lang", "python")
         lang = lang.lower()
         lang = "cpp" if lang == "c++" else lang
 
@@ -162,7 +162,7 @@ class ProblemSubmitView(APIView):
         )
         response = {
             "status": "success", 
-            "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
+            "message": f"{res['num_pass']}/{num_testcase}개의 테스트케이스를 통과했습니다.", 
             "data":res, 
             "user":user.to_json()
         }
@@ -302,7 +302,7 @@ def execution_code(code, lang, testcase, answer):
         # Measure Execution start time and Execute .c
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    print("re", re)
+
     # Measure Execution end time
     end_time = time.time()
     result["exec_time"] = end_time - start_time
