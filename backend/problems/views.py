@@ -60,7 +60,7 @@ class ProblemListView(APIView):
                         prob_obj['status'] = "processing"
                     else:
                         prob_obj['status'] = "complete"
-                print(user_submissions)
+
             else:
                 prob_obj['status'] = "uncomplete"
 

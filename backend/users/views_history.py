@@ -70,7 +70,7 @@ class SubmissionCodeView(APIView):
         # user의 특정문제 제출 history 조회
         user_id = request.user.id
         user_submissions = Submission.objects.filter(user=user_id, problem__id=id, status="PASS").order_by("-create_at")
-        print("user_submissions", user_submissions)
+
         if len(user_submissions) == 0:
             return Response(get_fail_res("유저가 통과하지 못한 문제입니다."))
         target = user_submissions.first()
