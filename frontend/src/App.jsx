@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Main, Home, Profile, Auth, Problem, Review, Produce, Notice, Questions, OAuth } from './pages';
 import { LoginView, NoticeView } from './routes/';
 
-import { GuestRoute, Navbar, AuthContext } from './components';
+import { GuestRoute, Navbar, Footer, AuthContext } from './components';
 import './App.css';
 
 
@@ -23,7 +23,8 @@ function App() {
   return (
     <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
       <Router>
-        <Navbar />
+        <Navbar /> 
+        {/* Navbar에 props로 username 넘겨주기 */}
         <MainBack>
           <Routes>
             <Route path="/" element={<Main />} />
@@ -40,17 +41,7 @@ function App() {
             {/* produce page(문제 추가 페이지): 허가된 관리자만 입장할 수 있도록 설정해야함*/}
           </Routes>
         </MainBack>
-        <footer>
-          <div className="container">
-            <Link to="/" className="logo-font">
-              BePro
-            </Link>
-            <span className="attribution">
-              AI based programming education platform, BePro, from Software Engineering class SWE3002_41 of{' '}
-              <a href="https://skku.edu">Thinkster</a>. Code &amp; design licensed under MIT.
-            </span>
-          </div>
-        </footer>
+        <Footer />
       </Router>
     </AuthContext.Provider>
   );
