@@ -71,7 +71,7 @@ class ProblemDescView(APIView):
             "status" : "success",
             "message" : f"문제 {target_problem.id}번 데이터입니다.",
             "data" : data,
-            "user" : user
+            "user" : user.to_json()
         }
         user
         print("response_data", response_data)
@@ -196,7 +196,7 @@ class ProblemExecView(APIView):
             "status" : "success", 
             "message" : msg, 
             "data" : data,
-            "user" : user
+            "user" : user.to_json()
         }
 
         return Response(response_data)
@@ -262,7 +262,7 @@ class ProblemCodeSaveView(APIView):
             "id" : id,
             "status" : "success",
             "message" : message,
-            "user": user
+            "user": user.to_json()
         }
         
         return Response(response_data)
@@ -309,7 +309,7 @@ class ProblemCodeLoadView(APIView) :
             "message" : message,
             "status" : "success",
             "data" : data,
-            "user" : user
+            "user" : user.to_json()
         }
 
         return Response(response_data)

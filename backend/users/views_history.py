@@ -50,7 +50,7 @@ class SubmissionHistoryView(APIView):
             "status": "success",
             "message": f"recent {len(data)} submissions",
             "data": data,
-            "user": user
+            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -97,7 +97,7 @@ class SubmissionCodeView(APIView):
             "status": "success",
             "message": f"problem {id} submissions",
             "data": data,
-            "user": user
+            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -130,7 +130,7 @@ class LectureHistoryView(APIView):
             "status": "success",
             "message": f"recent {len(data)} views",
             "data" : data,
-            "user" : user
+            "user" : user.to_json()
         }
 
         return Response(response_data)
@@ -160,7 +160,7 @@ class LectureHistorySaveView(APIView):
         response_data = {
             "status": "success", 
             "message": f"{user_id}, {lecture.title}", 
-            "user": user
+            "user": user.to_json()
         }
 
         return Response(response_data)

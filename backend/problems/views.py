@@ -77,7 +77,7 @@ class ProblemListView(APIView):
             "status": "success",
             "message": "Problem List Info",
             "data": problem_list,
-            "user": user
+            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -164,7 +164,7 @@ class ProblemSubmitView(APIView):
             "status": "success", 
             "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
             "data":res, 
-            "user":user
+            "user":user.to_json()
         }
 
         return Response(response)

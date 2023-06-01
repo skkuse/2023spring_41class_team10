@@ -74,7 +74,7 @@ class GitHubLoginView(APIView):
                 return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
         else:
             # 유저가 존재하지 않으면 유저를 생성하여 데이터 반환
-            user = User.objects.create_user(
+            user_account = User.objects.create_user(
                 github_username=user_info['username'],
                 email=primary_email,
                 profile_image_url=user_info['profile_image']

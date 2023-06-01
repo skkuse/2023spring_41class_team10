@@ -178,7 +178,7 @@ function Problem() {
         const config = getHeader();
         const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/`, config);
         console.log('response', response);
-        if (response.data.status !== 'fail') setProblemInfo(response.data);
+        if (response.data.status !== 'fail') setProblemInfo(response.data.data);
       } catch (error) {
         console.error('Failed to fetch questions:', error);
       }
