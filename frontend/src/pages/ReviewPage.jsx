@@ -246,10 +246,10 @@ function Review() {
         };
         const response = await axios.post(`http://127.0.0.1:8000/codes/v1/review/`, data, config);
         console.log('response', response);
-        setGPTReview(response.data.data);
+        setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        console.error('Failed to fetch review:', error);
         setLoading(0);
       }
     }
@@ -270,7 +270,49 @@ function Review() {
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        console.error('Failed to fetch refactoring:', error);
+        setLoading(0);
+      }
+    }
+  };
+  const handleDeadCode = async () => {
+    if (loading == 0) {
+      try {
+        setLoading(3);
+        const config = getHeader();
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
+        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/deadcode/`, data, config);
+        console.log('response', response);
+        setGPTReview(response.data);
+        setLoading(0);
+      } catch (error) {
+        console.error('Failed to fetch deadcode:', error);
+        setLoading(0);
+      }
+    }
+  };
+  const handleCodeComment = async () => {
+    if (loading == 0) {
+      try {
+        setLoading(4);
+        const config = getHeader();
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
+        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/comment/`, data, config);
+        console.log('response', response);
+        setGPTReview(response.data);
+        setLoading(0);
+      } catch (error) {
+        console.error('Failed to fetch comment:', error);
         setLoading(0);
       }
     }
@@ -343,7 +385,7 @@ function Review() {
             )}
             &nbsp; Refactoring{' '}
           </LongButton>
-          <LongButton onClick={handleButtonClick} color={'#FEF0D6'}>
+          <LongButton onClick={handleDeadCode} color={'#FEF0D6'}>
             {' '}
             {loading == 3 ? (
               <FaSpinnerBlock>
@@ -354,7 +396,7 @@ function Review() {
             )}
             &nbsp; Dead Code{' '}
           </LongButton>
-          <LongButton onClick={handleButtonClick} color={'#AED5F8'}>
+          <LongButton onClick={handleCodeComment} color={'#AED5F8'}>
             {' '}
             {loading == 4 ? (
               <FaSpinnerBlock>
