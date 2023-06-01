@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const LoginContainer = styled.div`
@@ -46,7 +47,7 @@ const LoginTitle = styled.h1`
 
 const LoginButton = styled.button`
   margin-top: 20px;
-  width: 20%;
+  width: 20vw;
   aspect-ratio: 4/1;
   font-family: Roboto;
   color: #ffffff;
@@ -86,7 +87,9 @@ const Login = () => {
       <ContentContainer>
         <LoginTitle>로그인</LoginTitle>
         <GithubLoginButton onClick={handleGithubLogin}>Github로 로그인</GithubLoginButton>
-        <CustomerSupportButton>고객 센터</CustomerSupportButton>
+        <Link to="/notice">
+          <CustomerSupportButton>고객 센터</CustomerSupportButton>
+        </Link>
         <FooterText>© 2023 - Privacy — Terms</FooterText>
       </ContentContainer>
     </LoginContainer>

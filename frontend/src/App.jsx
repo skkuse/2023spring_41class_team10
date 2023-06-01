@@ -33,7 +33,7 @@ function App() {
             <Route path="/login/github/callback/" element={<OAuth />} />{' '}
             <Route path="/problem/:slug" element={<Problem />} /> 
             <Route path="/problem/:slug/review" element={<Review />} /> 
-            <Route path="/@:username" element={<Profile />} />{' '}
+            <Route path="/profile/:slugUsername" element={<Profile />} />{' '}
             {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
             <Route path="/notice" element={<Notice />} />
             <Route path="/questions" element={<Questions />} />
