@@ -149,7 +149,8 @@ class ProblemSubmitView(APIView):
             status = res["result"],
             exec_time = res["exec_time"],
             user = user_id,
-            num_pass = res["num_pass"]
+            num_pass = res["num_pass"],
+            code = code
         )
         response = {"status": "success", 
                     "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
@@ -277,7 +278,7 @@ def execution_code(code, lang, testcase, answer):
         # Measure Execution start time and Execute .cc
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    
+
     # TODO: Incomplete Case 4. JAVA
     elif lang == "java":
         # Make Code File & Connect Execution File

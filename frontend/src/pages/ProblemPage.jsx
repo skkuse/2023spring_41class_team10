@@ -267,7 +267,7 @@ function Problem() {
   const handleRunCode = async () => {
     try {
       const config = getHeader();
-      let data = { lang: language, code: codeTyped, user_tc: inputTyped };
+      let data = { lang: language, code: codeTyped, tc_user: inputTyped };
       console.log('data', data);
       const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/exec/`, data, config);
       console.log('response', response);

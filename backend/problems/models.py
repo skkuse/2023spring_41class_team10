@@ -54,6 +54,7 @@ class Submission(models.Model):
   exec_time = models.FloatField()
   user = models.BigIntegerField()
   num_pass = models.IntegerField()
+  code = models.TextField(default="")
 
 # 유저가 저장버튼을 눌러 저장한 코드
 class UserCodeHistory(models.Model):

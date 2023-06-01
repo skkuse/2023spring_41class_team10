@@ -41,13 +41,28 @@ class ProblemDescView(APIView):
         for tc in target_tc:
             sample_tc.append({"testcase" : tc.testcase, "result" : tc.result})
 
+        if request.user.is_authenticated:
+            user_submissions = Submission.objects.filter(user=request.user.id, problem_id=id)
+            if len(user_submissions) == 0:
+                status = "uncomplete"
+            else:
+                pass_submissions = user_submissions.filter(status="PASS")
+                if len(pass_submissions) == 0:
+                    status = "processing"
+                else:
+                    status = "complete"
+            print(user_submissions)
+        else:
+            status = "uncomplete"
+                
         response_data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
             "field" : target_field,
             "level" : target_problem.level,
             "description" : target_problem.description,
-            "tc_sample" : sample_tc
+            "tc_sample" : sample_tc,
+            "status" : status
         }
         print("response_data", response_data)
         return Response(response_data)
@@ -70,6 +85,7 @@ class ProblemExecView(APIView):
         language = body.get("lang", "python")
         language = language.lower()
         tc_user = body.get("tc_user", "")
+        print("tc_user", tc_user)
 
         # 코드 공백 검사
         if code.strip() == "":
@@ -118,10 +134,10 @@ class ProblemExecView(APIView):
         execution_time = end_time-start_time
 
         # Remove Execution files
-        white_list = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
+        need_file = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
         file_list = os.listdir(self.dir_path)
         for file_name in file_list:
-            if file_name not in white_list:
+            if file_name not in need_file:
                 file_path = os.path.join(self.dir_path, file_name)
                 os.remove(file_path)
 
