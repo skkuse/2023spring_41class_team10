@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import axios from 'axios';
 import { useAuth } from '../hooks';
+import { AuthContext}  from '../components';
 
 const OAuthPage = () => {
+  const { setLoggedIn } = useContext(AuthContext);
+
   console.log('OAuthPage');
 
   const navigate = useNavigate();
@@ -27,6 +30,7 @@ const OAuthPage = () => {
           // 처리 완료 후 리다이렉트 등 필요한 동작 수행
           console.log('Successful callback:', response);
           console.log(response.data.message);
+          setLoggedIn(true);
           localStorage.setItem('access_token', response.data.data.access_token);
           localStorage.setItem('refresh_token', response.data.data.refresh_token);
           navigate('/');
