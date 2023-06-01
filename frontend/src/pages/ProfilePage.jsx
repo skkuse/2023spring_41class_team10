@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth, useProfileQuery } from '../hooks';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ProblemInfo from '../components/ProblemInfo';
 import Lectures from '../components/Lectures';
@@ -123,8 +124,7 @@ function ProfilePage() {
   const { authUser, logout } = useAuth();
   const { username, github } = data.profile;
   const canUpdateProfile = authUser?.username === username;*/
-
-
+  const { slugUsername } = useParams();
   
   const data = [
     {
@@ -185,7 +185,7 @@ function ProfilePage() {
           src="https://img.youtube.com/vi/k75oGRMiENk/0.jpg"
           alt="Profile Image"
         />
-        <ProfileUsername>{data[0].username}</ProfileUsername>
+        <ProfileUsername>{slugUsername}</ProfileUsername>
         <ButtonContainer>
         <ProfileGithub onClick={handleClick}>Visit GitHub Profile</ProfileGithub>
       <LogoutButton onClick={handleLogout}>GitHub 계정 로그아웃</LogoutButton>

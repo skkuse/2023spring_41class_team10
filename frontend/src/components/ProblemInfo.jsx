@@ -59,7 +59,7 @@ function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, prob
   return (
     <ProblemLink to={isActive ? `/problem/${problemNumber}` : '#'}>
       <SquareContainer>
-        <SquareItem>{problemNumber} </SquareItem>
+        <SquareItem># {problemNumber} </SquareItem>
         <WideSquareItem>{title}</WideSquareItem>
         <SquareItem>{categories}</SquareItem>
         <RightSquareItem>{problemLevel}</RightSquareItem>
