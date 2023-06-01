@@ -1,5 +1,5 @@
 from django.urls import path
-from problems import views, views_sample, views_desc, views_history
+from problems import views, views_sample, views_desc
 
 app_name = 'problems'
 urlpatterns = [
@@ -9,6 +9,6 @@ urlpatterns = [
     path('v1/<id>/', views_desc.ProblemDescView.as_view(), name='problem_desc'),
     path('v1/<id>/exec/', views_desc.ProblemExecView.as_view(), name='problem_exec'),
     path('v1/<id>/save/', views_desc.ProblemCodeSaveView.as_view(), name='problem_code_save'),
+    path('v1/<id>/load/', views_desc.ProblemCodeLoadView.as_view(), name='problem_code_load'),
     path('v1/<problem_id>/submit/', views.ProblemSubmitView.as_view(), name='problem_submit'),
-    path('v1/<id>/load/', views_history.ProblemLoadView.as_view(), name='problem_code_load'),
 ]

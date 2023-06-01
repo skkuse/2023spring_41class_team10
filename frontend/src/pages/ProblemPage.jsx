@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {} from '../components';
 import { useProblemQuery } from '../hooks';
 import ProblemInfo from '../components/ProblemInfo';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Container = styled.div`
@@ -50,6 +50,7 @@ const ActualDescriptionContainer = styled.pre`
 const LeftAlign = styled.div`
   display: flex;
   justify-content: end;
+  margin-bottom: 8px;
 `;
 const ChooseLanguageContainer = styled.div`
   display: flex;
@@ -67,14 +68,14 @@ const LangDiv = styled.div`
   font-weight: bold;
 `;
 
-const LanguageDiv = styled.div`
+const LanguageDiv = styled.select`
   background-color: black;
   color: white;
   padding: 2px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: bold;
-  height: 16px;
+  height: 24px;
   width: 80px;
 `;
 
@@ -148,22 +149,24 @@ const TestCase = styled.pre`
 `;
 
 //백엔드 없을 때 테스트용 데이터
-const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString()
+const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString();
 const data = {
-    title : "Test Problem",
-    problemNumber : '1',
-    problemCategory : 'I/O',
-    problemLevel : '2',
-    description : 'Description for Test Problem. You will see this description and learn about the problem.',
-    programmingLanguage : 'C',
-    createdAt : tempdate1,
-    updatedAt : tempdate1,
-}
+  title: 'Test Problem',
+  problemNumber: '1',
+  problemCategory: 'I/O',
+  problemLevel: '2',
+  description: 'Description for Test Problem. You will see this description and learn about the problem.',
+  programmingLanguage: 'C',
+  createdAt: tempdate1,
+  updatedAt: tempdate1
+};
 
 function Problem() {
   //const { data } = useProblemQuery() // 나중에 백엔드 연결하면 바꾸기
   const { slug } = useParams();
+  const navigate = useNavigate();
 
+  const [language, setLanguage] = useState('Python');
   const [codeTyped, setCodeTyped] = useState('Type your code here.');
   const [inputTyped, setInputTyped] = useState('Type your input here.');
   const [outputValue, setOutputValue] = useState('Default Output');
@@ -172,12 +175,8 @@ function Problem() {
   useEffect(() => {
     const fetchProblemInfo = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const config = getHeader();
+        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') setProblemInfo(response.data);
       } catch (error) {
@@ -187,26 +186,117 @@ function Problem() {
     fetchProblemInfo();
   }, []);
 
+  const getHeader = () => {
+    const token = localStorage.getItem('access_token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
+    return config;
+  };
+
   const handleCodeChange = (e) => {
     setCodeTyped(e.target.value);
   };
   const handleInputChange = (e) => {
     setInputTyped(e.target.value);
   };
+  const handleLanguageSelect = (e) => {
+    // 선택한 언어에 대한 동작 수행
+    setLanguage(e.target.value);
+    console.log(`Selected language: ${e.target.value}`);
+  };
   const handleButtonClick = (e) => {
     console.log('button clicked ', e);
     if (e.target.innerText == 'Back') {
       // Go back page
       console.log('back clicked');
+      navigate('/questions');
+    } else if (e.target.innerText == 'Load') {
+      // Load Code
+      console.log('load clicked');
+      handleLoadCode();
     } else if (e.target.innerText == 'Run') {
       // Run Code
       console.log('run clicked');
-    } else if (e.target.innerText == 'Stop') {
-      // Stop running code
+      handleRunCode();
+    } else if (e.target.innerText == 'Save') {
+      // Save running code
       console.log('stop clicked');
+      handleSaveCode();
     } else if (e.target.innerText == 'Submit') {
       // Submit code
       console.log('submit clicked');
+      handleSubmitCode();
+    }
+  };
+  const handleLoadCode = async () => {
+    if (confirm('코드를 불러오면 현재 작성된 코드가 덮어씌워집니다. 불러오시겠습니까?')) {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/load/`, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') {
+          alert(response.data.message);
+          setCodeTyped(response.data.data.code);
+        } else alert(response.data.message);
+      } catch (error) {
+        console.error('Failed to Load Code:', error);
+        alert('Fail to Load Code');
+      }
+    }
+  };
+  const handleSaveCode = async () => {
+    if (confirm('코드를 저장하시겠습니까?')) {
+      try {
+        const config = getHeader();
+        let data = { lang: language, code: codeTyped };
+        console.log('data', data);
+        const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/save/`, data, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') {
+          alert(response.data.message);
+        } else alert(response.data.message);
+      } catch (error) {
+        console.error('Failed to Run Code:', error);
+        alert('Fail to Run Code');
+      }
+    }
+  };
+  const handleRunCode = async () => {
+    try {
+      const config = getHeader();
+      let data = { lang: language, code: codeTyped, tc_user: inputTyped };
+      console.log('data', data);
+      const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/exec/`, data, config);
+      console.log('response', response);
+      if (response.data.status !== 'fail') {
+        alert(response.data.message);
+        setOutputValue(response.data.data.result);
+      } else alert(response.data.message);
+    } catch (error) {
+      console.error('Failed to Run Code:', error);
+      alert('Fail to Run Code');
+    }
+  };
+  const handleSubmitCode = async () => {
+    if (confirm('코드를 제출하시겠습니까?')) {
+      try {
+        const config = getHeader();
+        let data = { lang: language, code: codeTyped };
+        console.log('data', data);
+
+        const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/submit/`, data, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') {
+          alert(response.data.message);
+          setOutputValue(response.data.data.result);
+        } else alert(response.data.message);
+      } catch (error) {
+        console.error('Failed to Run Code:', error);
+        alert('Fail to Run Code');
+      }
     }
   };
 
@@ -220,12 +310,7 @@ function Problem() {
           <p>
             | #{slug} | {problemInfo.title} | {problemInfo.field} | {problemInfo.level} |
           </p>
-          <LeftAlign>
-            <ChooseLanguageContainer>
-              <LangDiv>언어 선택</LangDiv>
-              <LanguageDiv> C </LanguageDiv>
-            </ChooseLanguageContainer>
-          </LeftAlign>
+
           <MoreDescriptionContainer>
             <ActualDescriptionContainer>
               &lt;문제설명&gt;<br></br>
@@ -247,7 +332,17 @@ function Problem() {
             </TestCaseArea>
           ))}
       </DescriptionContainer>
-
+      <LeftAlign>
+        <ChooseLanguageContainer>
+          <LangDiv>언어 선택</LangDiv>
+          <LanguageDiv onChange={(val) => handleLanguageSelect(val)}>
+            <option>Python</option>
+            <option>C</option>
+            <option>C++</option>
+            <option>JAVA</option>
+          </LanguageDiv>
+        </ChooseLanguageContainer>
+      </LeftAlign>
       <SolvingContainer>
         <TypingContainer value={codeTyped} onChange={handleCodeChange} rows={20} />
         <InputOutputContainer>
@@ -265,13 +360,17 @@ function Problem() {
             {' '}
             Back{' '}
           </Button>
+          <Button onClick={handleButtonClick} color={'#FACFCF'}>
+            {' '}
+            Load{' '}
+          </Button>
           <Button onClick={handleButtonClick} color={'#FEF0D6'}>
             {' '}
             Run{' '}
           </Button>
-          <Button onClick={handleButtonClick} color={'#FACFCF'}>
+          <Button onClick={handleButtonClick} color={'#AED5F8 '}>
             {' '}
-            Stop{' '}
+            Save{' '}
           </Button>
           <Button onClick={handleButtonClick} color={'#D9CFDE'}>
             {' '}

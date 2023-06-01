@@ -41,35 +41,62 @@ class ProblemDescView(APIView):
         for tc in target_tc:
             sample_tc.append({"testcase" : tc.testcase, "result" : tc.result})
 
+        if request.user.is_authenticated:
+            user_submissions = Submission.objects.filter(user=request.user.id, problem_id=id)
+            if len(user_submissions) == 0:
+                status = "uncomplete"
+            else:
+                pass_submissions = user_submissions.filter(status="PASS")
+                if len(pass_submissions) == 0:
+                    status = "processing"
+                else:
+                    status = "complete"
+            print(user_submissions)
+        else:
+            status = "uncomplete"
+                
         response_data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
             "field" : target_field,
             "level" : target_problem.level,
             "description" : target_problem.description,
-            "tc_sample" : sample_tc
+            "tc_sample" : sample_tc,
+            "status" : status
         }
         print("response_data", response_data)
         return Response(response_data)
 
 
 class ProblemExecView(APIView):
-    
+    """코드 실행
+
+    url        : problems/v1/<id>/exec/
+    Returns :
+        POST   : status, message, id
+    """
+
     def post(self, request, id):
-        
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
         body = json.loads(request.body.decode('utf-8'))
-        
         code = body.get("code", "")
         language = body.get("lang", "python")
         language = language.lower()
         tc_user = body.get("tc_user", "")
-        
+        print("tc_user", tc_user)
+
+        # 코드 공백 검사
+        if code.strip() == "":
+            return Response(get_fail_res("코드를 입력하지 않았습니다."))
+
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
         except Problem.DoesNotExist:
             return Response(get_fail_res("Exececution Failed!: Don't Exist Problem!"))
-        
+
         if language == "python":
             # Create a new Python file
             self.create_new_file(code, ".py")
@@ -103,62 +130,56 @@ class ProblemExecView(APIView):
             result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
             end_time = time.time()
             output = result.stdout
-        
+
         execution_time = end_time-start_time
-        
+
         # Remove Execution files
+        need_file = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
         file_list = os.listdir(self.dir_path)
         for file_name in file_list:
-            if file_name == ".keep":
-                continue
-            file_path = os.path.join(self.dir_path, file_name)
-            os.remove(file_path)
-        
+            if file_name not in need_file:
+                file_path = os.path.join(self.dir_path, file_name)
+                os.remove(file_path)
+
         # When execution fail due to timeout, return Error Response
         if result.returncode < 0:
-            # Timeout Case, Create Table
-            Execution.objects.create(
+            execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Timeout",
                 exec_time = execution_time,
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 result = output
             )
-            return Response(get_fail_res("Execution Failed: Timeout!"))        
-        
+            msg=f"Execution Failed: Timeout!"
         # Error Case, Create Table
-        if result.returncode > 0:
-            Execution.objects.create(
+        elif result.returncode > 0:
+            execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Error",
                 exec_time = execution_time,
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 result = result.stderr
             )
-            return Response(get_fail_res("Execution Failed: Error!      " + result.stderr))
-        
-        # Success Case, Create Table
-        Execution.objects.create(
-            problem = target_problem,
-            lang = language,
-            status = "Success",
-            exec_time = execution_time,
-            user = 1,
-            # user = request.user.id,
-            result = output
-        )
-        
-        # Execution Success
-        response_data = {
-            "id" : id,
-            "result" : output,
-            "exec_time" : execution_time
-        }
-        
+            msg=f"Execution Failed: Error! {result.stderr}"
+        else:
+            # Success Case, Create Table
+            execution = Execution.objects.create(
+                problem = target_problem,
+                lang = language,
+                status = "Success",
+                exec_time = execution_time,
+                user = user_id,
+                result = output
+            )
+            msg="Execution Success!"
+
+        data = {"id":target_problem.id, "result":execution.result, "exec_time": execution.exec_time, "status": execution.status}
+        response_data = {"status": "success", 
+                        "message": msg, 
+                        "data":data}
+
         return Response(response_data)
 
     def create_new_file(self, code, extension):
@@ -170,51 +191,102 @@ class ProblemExecView(APIView):
         self.file_path = os.path.join(self.dir_path, "temp"+extension)
         with open(self.file_path, "w") as file:
             file.write(code)
-            
-            
+
+
 class ProblemCodeSaveView(APIView):
-    
+    """ 유저가 문제 풀이코드를 임시저장
+
+    url        : problems/v1/<id>/save/
+    Returns :
+        POST   : status, message, id
+    """
+
     def post(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
         body = json.loads(request.body.decode('utf-8'))
-        
-        
         user_code = body.get("code", "")
         language = body.get("lang", "python")
-        tc_user = body.get("tc_user", "")
-        
+
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
         except Problem.DoesNotExist:
             return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
-        
-        # "user = 1" is just for test
-        history = UserCodeHistory.objects.filter(user = 1, problem = target_problem)
+
+        history = UserCodeHistory.objects.filter(user=user_id, problem=target_problem).order_by("-id")
         if history.exists():
-            user_history = history.last()
+            user_history = history.first()
             UserCodeHistory.objects.create(
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 problem = target_problem,
                 version = user_history.version + 1,
                 code = user_code,
-                memo = ""
+                memo = "",
+                lang = language
             )
-            message = "Save time: " + str(user_history.version+1)
+            message = f"버전 {str(user_history.version+1)}가 저장되었습니다."
         else:
             UserCodeHistory.objects.create(
-                user = 1,
-                # user = request.user.id,
+                user = user_id,
                 problem = target_problem,
                 version = 1,
                 code = user_code,
-                memo = ""
+                memo = "",
+                lang = language
             )
-            message = "First Save"
-                
+            message = "저장되었습니다."
+
         response_data = {
             "id" : id,
-            "message" : message
+            "message" : message,
+            "status" : "success"
         }
         
+        return Response(response_data)
+
+class ProblemCodeLoadView(APIView) :
+    """저장 코드 불러오기
+
+    url        : problems/v1/<id>/load/
+    Returns :
+        POST   : status, message, id
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+
+        # Check whether the problem exists
+        try:
+            target_problem = Problem.objects.get(id=id)
+        except Problem.DoesNotExist:
+            return Response(get_fail_res("Save Failed!: Don't Exist Problem!"))
+
+        try:
+            history = UserCodeHistory.objects.filter(user=user_id, problem=target_problem).order_by("-id").first()
+            data = {
+                "id": history.problem.id,
+                "code": history.code,
+                "lang": history.lang
+            }
+            create_date = str(history.create_at)[:19]
+            message = f"{create_date}에 저장된 코드를 불러왔습니다.(버전 {history.version})"
+        except Exception as e:
+            message = "저장된 코드가 없습니다."
+            print(message, e)
+            data = {
+                "id": id,
+                "code": "",
+                "lang": ""
+            }
+
+        response_data = {
+            "id" : id,
+            "message" : message,
+            "status" : "success",
+            "data": data
+        }
+
         return Response(response_data)

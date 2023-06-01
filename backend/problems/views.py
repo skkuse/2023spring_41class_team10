@@ -20,8 +20,6 @@ def get_fail_res(msg):
         'message': msg
     }
 
-# def index(request):
-#     return HttpResponse("Hello, world. You're at the problems index.")
 
 class ProblemListView(APIView):
     """ Problem List View
@@ -86,20 +84,29 @@ class ProblemSubmitView(APIView):
         POST     : id, num_tc, num_pass, exec_time, result
     """
     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
         print("ProblemSubmitView")
         # url 파라미터 problem_id 저장
         problem_id = kwargs.get('problem_id')
         res = {"id":problem_id, "num_tc": 0, "num_pass":0, "exec_time":-1, "result":""}
-        
+
         # json data 파싱하여 code와 language 저장
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
         lang = body.get("language", "python")
-        
+        lang = lang.lower()
+        lang = "cpp" if lang == "c++" else lang
+
+        response = {"status": "success"}
+
         # 코드 안전성 체크
         is_safe = check_safe_code(code, lang)
         if not is_safe:
             res["result"] = "Violation"
+            response["message"] = "위협 코드가 포함되어있습니다. 실행 거부되었습니다."
+            response["data"] = res
             return Response(res)
 
         # 문제와 테스트케이스 조회
@@ -109,23 +116,23 @@ class ProblemSubmitView(APIView):
         except Exception as e:
             logging.exception(f"[ProblemSubmitView] {e}")
             res["result"] = "Not Found"
-            return Response(res)
-            
+            return Response(get_fail_res("문제 정보를 찾을 수 없습니다."))
+
         num_testcase = len(testcases)
         res["num_tc"] = num_testcase
-        
+
         # Execute Code
         for tc in testcases:
             exec_res = execution_code(code, lang, tc.testcase, tc.result)
             res["exec_time"] = exec_res["exec_time"]
             if exec_res["result"] == "PASS":
                 res["num_pass"] += 1
-                
+
         if res["num_pass"] == res["num_tc"]:
             res["result"] = "PASS"
         else:
             res["result"] = "FAIL"
-            
+
         # Remove Unnecessary Files
         need_file = [".keep", "c.sh", "cpp.sh", "python.sh", "java.sh"]
         file_list = os.listdir(EXECUTE_DIR)
@@ -134,20 +141,21 @@ class ProblemSubmitView(APIView):
                 continue
             file_path = os.path.join(EXECUTE_DIR, file_name)
             os.remove(file_path)
-        
-        
+
         # Create Submit History
         Submission.objects.create(
             problem = problem,
             lang = lang,
             status = res["result"],
             exec_time = res["exec_time"],
-            user = 1,
-            # user = request.user.id,
-            num_pass = res["num_pass"]
+            user = user_id,
+            num_pass = res["num_pass"],
+            code = code
         )
-        
-        return Response(res)
+        response = {"status": "success", 
+                    "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
+                    "data":res}
+        return Response(response)
 
 
 def check_safe_code(code, lang):
@@ -270,7 +278,7 @@ def execution_code(code, lang, testcase, answer):
         # Measure Execution start time and Execute .cc
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    
+
     # TODO: Incomplete Case 4. JAVA
     elif lang == "java":
         # Make Code File & Connect Execution File
@@ -282,7 +290,7 @@ def execution_code(code, lang, testcase, answer):
         # Measure Execution start time and Execute .c
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    
+    print("re", re)
     # Measure Execution end time
     end_time = time.time()
     result["exec_time"] = end_time - start_time

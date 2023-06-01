@@ -54,7 +54,9 @@ class Submission(models.Model):
   exec_time = models.FloatField()
   user = models.BigIntegerField()
   num_pass = models.IntegerField()
+  code = models.TextField(default="")
 
+# 유저가 저장버튼을 눌러 저장한 코드
 class UserCodeHistory(models.Model):
   id = models.AutoField(primary_key=True)
   user = models.BigIntegerField()
@@ -63,3 +65,4 @@ class UserCodeHistory(models.Model):
   code = models.TextField()
   memo = models.TextField()
   create_at = models.DateTimeField(auto_now_add=True)
+  lang = models.CharField(max_length=50, default="python")

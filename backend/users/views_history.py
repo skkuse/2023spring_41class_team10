@@ -1,112 +1,152 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from backend.settings import BASE_DIR
 
+from lectures.models import Lecture, LectureHistory
+from problems.models import Submission, ProblemFieldRelation
+
+import logging
 import json
-import os
-
-from lectures.models import *
-from problems.models import *
-from django.db.models import Max
 
 def get_fail_res(msg):
     """ 
     Create fail Response
     """
     return {
-        'status': "400",
+        'status': "fail",
         'message': msg
     }
 
 
-class ProblemLoadView(APIView):
+class SubmissionHistoryView(APIView):
+    """유저의 제출내역 조회
 
+    url        : users/v1/problems/
+    Returns :
+        GET   : list({user_id, title, problem_id, submit_at, result}]
+    """
     def get(self, request):
-        # id: problem id
-        user_id = 1
-    
-        filtered_histories = UserCodeHistory.objects.filter(user=user_id)
-        if not filtered_histories.exists():
-            return Response(get_fail_res("History does not exists"))
-
-
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
         
+        N = request.GET.get('n', 5)
+        # user의 제출 history 조회, 제출을 내림차순으로 정렬
+        user_id = request.user.id
+        user_submissions = Submission.objects.filter(user=user_id).order_by("-create_at")
 
-        code_histories = []
-        titles = []
-        for history in filtered_histories:
-            if history.problem.title not in titles:
-                # code_histories.append({
-                #     "user_id" : user_id,
-                #     "title" : history.problem.title,
-                #     "problem_id" : history.problem.id,
-                #     "submit_at" : history.create_at,
-                #     "result" : "test"
-                # })
-                data = {
-                    "user_id" : user_id,
-                    "title" : history.problem.title,
-                    "problem_id" : history.problem.id,
-                    "submit_at" : history.create_at,
-                    "result" : "temp"
-                }
-                # submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=history.create_at)
-                latest_submit = Submission.objects.filter(user=user_id, problem=history.problem).aggregate(max_create_at=Max('create_at'))
-                latest_create_at = latest_submit['max_create_at']
-                submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=latest_create_at).first()
-
-                # if not submit.exists():
-                    # return Response(get_fail_res("Submission history does not exists"))
-                    
-                # for sub in submit:
-                    # data["result"] = sub.status
-                data["result"] = submit.status
-                code_histories.append(data)
-            else:
-                for hist in code_histories:
-                    if hist["title"] == history.problem.title:
-                        hist["submit_at"] = history.create_at
-                        # submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=history.create_at)
-                        latest_submit = Submission.objects.filter(user=user_id, problem=history.problem).aggregate(max_create_at=Max('create_at'))
-                        latest_create_at = latest_submit['max_create_at']
-                        submit = Submission.objects.filter(user=user_id, problem=history.problem, create_at=latest_create_at).first()
-                        hist["result"] = submit.status
-                        # if not submit.exists():
-                        #     return Response(get_fail_res("Submission history does not exists"))
-                        # for sub in submit:
-                        #     hist["result"] = sub.status
-            titles.append(history.problem.title)
-
-        response_data = {
-                "status": "200",
-                "message": "Success",
-                "data": code_histories
+        data = []
+        for submission in user_submissions[:N]:
+            obj = {
+                "user_id" : user_id,
+                "title" : submission.problem.title,
+                "problem_id" : submission.problem.id,
+                "submit_at" : submission.create_at,
+                "result" : submission.status
             }
-        return Response(response_data)
-    
-class LectureHistoryView(APIView):
-
-    def get(self, request):
-        user_id = 1
-
-        
-        filtered_histories = LectureHistory.objects.filter(user_id=user_id)
-        if not filtered_histories.exists():
-            return Response(get_fail_res("History does not exists"))
-
-        lecture_list = []
-
-        for history in filtered_histories:
-            lecture_obj = {}
-            lecture_obj["user_id"] = user_id
-            lecture_obj["link"] = history.lecture.video_link
-            lecture_obj["title"] = history.lecture.title
-            lecture_list.append(lecture_obj)
+            data.append(obj)
 
         response_data = {
-            "status": "200",
-            "message": "Success",
-            "data" : lecture_list
+            "status": "success",
+            "message": f"recent {len(data)} submissions",
+            "data": data
         }
 
         return Response(response_data)
+
+class SubmissionCodeView(APIView):
+    """유저의 제출내역 조회
+
+    url        : users/v1/problems/<id>/
+    Returns :
+        GET   : list({user_id, title, problem_id, submit_at, result}]
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+
+        # user의 특정문제 제출 history 조회
+        user_id = request.user.id
+        user_submissions = Submission.objects.filter(user=user_id, problem__id=id, status="PASS").order_by("-create_at")
+        print("user_submissions", user_submissions)
+        if len(user_submissions) == 0:
+            return Response(get_fail_res("유저가 통과하지 못한 문제입니다."))
+        target = user_submissions.first()
+
+        # 알고리즘 분류 조회
+        fields = ProblemFieldRelation.objects.filter(problem=target.problem).values_list("field__field", flat=True)
+        target_fields = list(fields)
+
+        data = {
+            "user_id" : user_id,
+            "title" : target.problem.title,
+            "problem_id" : target.problem.id,
+            "level": target.problem.level,
+            "lang" : target.lang,
+            "field": target_fields,
+            "submit_at" : target.create_at,
+            "result" : target.status,
+            "code" : target.code,
+            "description": target.problem.description,
+            "submission_id": target.id
+        }
+
+        response_data = {
+            "status": "success",
+            "message": f"problem {id} submissions",
+            "data": data
+        }
+
+        return Response(response_data)
+
+class LectureHistoryView(APIView):
+    """유저의 강의 시청내역 조회
+
+    url        : users/v1/lectures/history/
+    Returns :
+        GET   : list({user_id, title, link}]
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        N = request.GET.get('n', 5)
+        # user의 강의 기록을 조회
+        user_id = request.user.id
+        user_lecture_histories = LectureHistory.objects.filter(user_id=user_id).order_by("-create_at")
+
+        data = []
+        for history in user_lecture_histories[:N]:
+            lecture_obj = {}
+            lecture_obj["user_id"] = user_id
+            lecture_obj["title"] = history.lecture.title
+            lecture_obj["link"] = history.lecture.video_link
+            data.append(lecture_obj)
+
+        response_data = {
+            "status": "success",
+            "message": f"recent {len(data)} views",
+            "data" : data
+        }
+
+        return Response(response_data)
+
+class LectureHistorySaveView(APIView):
+    """유저의 강의 시청내역 저장
+
+    url        : users/v1/lectures/history/save/
+    Returns :
+        POST   : status, message
+    """
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            lecture_id = body.get("lecture_id")
+            print("lecture_id", lecture_id)
+            lecture = Lecture.objects.get(id=lecture_id)
+            LectureHistory.objects.create(lecture=lecture, user_id=user_id)
+        except Exception as e:
+            logging.exception(f"[LectureHistoryCreateView] {e}")
+            return Response(get_fail_res("lecture error"))
+
+        return Response({"status": "success", "message": f"{user_id}, {lecture.title}"})
