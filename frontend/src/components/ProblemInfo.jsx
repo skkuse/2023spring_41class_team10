@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 const SquareContainer = styled.div`
+  max-width: 800px;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
   border-radius: 10px;
@@ -30,11 +32,14 @@ const RightSquareItem = styled(SquareItem)`
 `;
 
 const ProblemLink = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-decoration: none;
   color: #000;
-  width: 80%;
   height: 50px;
   margin-bottom: 20px;
+  width: 100%;
 `;
 
 function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus, isActive=true }) {
