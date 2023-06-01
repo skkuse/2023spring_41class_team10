@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from lectures.models import Lecture, LectureHistory
-from problems.models import Submission
+from problems.models import Submission, ProblemFieldRelation
 
 import logging
 import json
@@ -29,7 +29,7 @@ class SubmissionHistoryView(APIView):
             return Response(get_fail_res("user is not authenticated"))
         
         N = request.GET.get('n', 5)
-        # user의 제출 history 조회, 제출을을 내림차순으로 정렬
+        # user의 제출 history 조회, 제출을 내림차순으로 정렬
         user_id = request.user.id
         user_submissions = Submission.objects.filter(user=user_id).order_by("-create_at")
 
@@ -52,6 +52,48 @@ class SubmissionHistoryView(APIView):
 
         return Response(response_data)
 
+class SubmissionCodeView(APIView):
+    """유저의 제출내역 조회
+
+    url        : users/v1/problems/<id>/
+    Returns :
+        GET   : list({user_id, title, problem_id, submit_at, result}]
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+
+        # user의 특정문제 제출 history 조회
+        user_id = request.user.id
+        user_submissions = Submission.objects.filter(user=user_id, problem__id=id, status="PASS").order_by("-create_at")
+        print("user_submissions", user_submissions)
+        if len(user_submissions) == 0:
+            return Response(get_fail_res("유저가 통과하지 못한 문제입니다."))
+        target = user_submissions.first()
+
+        # 알고리즘 분류 조회
+        fields = ProblemFieldRelation.objects.filter(problem=target.problem).values_list("field__field", flat=True)
+        target_fields = list(fields)
+
+        data = {
+            "user_id" : user_id,
+            "title" : target.problem.title,
+            "problem_id" : target.problem.id,
+            "level": target.problem.level,
+            "lang" : target.lang,
+            "field": target_fields,
+            "submit_at" : target.create_at,
+            "result" : target.status,
+            "code" : target.code
+        }
+
+        response_data = {
+            "status": "success",
+            "message": f"problem {id} submissions",
+            "data": data
+        }
+
+        return Response(response_data)
 
 class LectureHistoryView(APIView):
     """유저의 강의 시청내역 조회
