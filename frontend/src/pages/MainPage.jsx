@@ -1,28 +1,44 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../components';
 import styles from './MainPage.module.css';
-import FooterB from '../components/FooterB';
-import NavBar from '../components/NavBar';
+
 
 // 사용법: <MainPage userName="교육생이름" /> 이런 식으로 사용하면 됩니다.
 
 function MainPage(props) {
+    const { isLoggedIn } = useContext(AuthContext);
 
     /*페이지 이동 추가 부분*/
     const navigate = useNavigate();
-    const goUrl = () => {
-        navigate('/');
+    const goUrl1 = () => {
+        navigate('/login');
     };
+    const goUrl2 = () => {
+      navigate('/home');
+  };
 
     return (
         <div className={styles.mainpage}>
         <div className={styles.div}>
           <div className={styles.overlap}>
             <div className={styles.herocenter}>
-              <button className={styles.centerBtn} onClick={goUrl}>개인 페이지로 이동</button>
-              <div className={styles.subtitle}>Be Pro 설명</div>
-              <h1 className={styles.title}>어서오세요, {props.userName} 교육생님</h1>
+
+              {isLoggedIn?(
+                <>
+                  <button className={styles.centerBtn} onClick={goUrl2}>개인 페이지로 이동</button>
+                  <div className={styles.subtitle}>Be Pro 설명</div>
+                  <h1 className={styles.title}>어서오세요, {props.userName} 교육생님</h1>
+                </>
+              ) : (
+                <>
+                  <button className={styles.centerBtn} onClick={goUrl1}>지금 가입하기</button>
+                  <div className={styles.subtitle}>Be Pro 설명</div>
+                  <h1 className={styles.title}>미래형 AI 코딩 교육 플랫폼</h1>
+                </>
+              )}
+              
+
             </div>
             <div className={styles.group}>
               <img className={styles.vector} src="/imgs/vector.svg" />
@@ -43,38 +59,34 @@ function MainPage(props) {
               <div className={styles.ellipse4} />
               <div className={styles.rectangle} />
             </div>
-            <NavBar userName={props.userName} />
           </div>
           <div className={styles.rectangle2} />
           <div className={styles.overlapgroup4}>
             <div className={styles.postssquare}>
               <div className={styles.cardsqare}>
-                <div className={styles.subtitle2}>Learn More</div>
-                <div className={styles.title2}>나에게 맞는 강의 추천</div>
-                <img className={styles.mainpagebeforeloginelement} src="/imgs/service.png" />
+                {/* <div className={styles.subtitle2}>Learn More</div> */}
+                <div className={styles.title2}>ChatGPT를 이용한 코딩 교육</div>
+                <img className={styles.mainpagebeforeloginelement} src="/imgs/main_img1.png" />
               </div>
               <div className={styles.cardsquare}>
-                <p className={styles.title3}>자동 코드 분석 및 리팩토링</p>
-                <div className={styles.subtitle2}>Learn More</div>
+                <p className={styles.title3}>진도 저장 및 개인 맞춤 서비스</p>
+                {/* <div className={styles.subtitle2}>Learn More</div> */}
                 <div
                   className={styles.mainpagebeforeloginoverlapgroup}
                   
                 />
               </div>
               <div className={styles.cardsquare3}>
-                <div className={styles.title2}>ChatGPT를 이용한 코딩 교육</div>
-                <div className={styles.subtitle2}>Learn More</div>
+                <div className={styles.title2}>자동 코드 분석 및 리팩토링</div>
+                {/* <div className={styles.subtitle2}>Learn More</div> */}
                 <div className={styles.overlapgroup1}>
-                  <img className={styles.element001101} src="/imgs/service-2.png" />
+                  <img className={styles.element001101} src="/imgs/main_img3.png" />
                 </div>
               </div>
               <p className={styles.p}>미래형 AI 코딩 교육 플랫폼 서비스 모음</p>
               <p className={styles.title4}>BePro 의 주요 학습 서비스</p>
             </div>
-            
           </div>
-          <div className={styles.overlapgroup5}><FooterB /></div>
-          
         </div>
       </div>
     );

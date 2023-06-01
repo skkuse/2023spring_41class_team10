@@ -79,7 +79,21 @@ class GitHubLoginView(APIView):
                 email=primary_email,
                 profile_image_url=user_info['profile_image']
             )
-            return Response(user.to_json())
+            # 접속일 업데이트
+            user_account.login()
+            # 로그인
+            login(request, user_account, backend="django.contrib.auth.backends.ModelBackend", )
+
+            token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
+            print("token", token)
+            print("access_token", token.access_token)
+            
+            data = {
+                'user': user_account.to_json(),
+                'access_token': str(token.access_token),
+                'refresh_token': str(token),
+            }
+            return Response({"message": "로그인 성공", "data":data}, status=status.HTTP_200_OK)
 
 def get_access_token(code):
     try:
@@ -147,9 +161,36 @@ def get_user_primary_email(access_token):
 
 
 class UserInfoView(APIView):
+    """
+    users/v1/info/
+    """
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user = User.objects.get(id=request.user.id)
 
         return Response({"user":user.to_json()})
+
+class UserTargetInfoView(APIView):
+    """
+    users/v1/info/<id>
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        target = User.objects.get(id=id)
+
+        return Response({"data":target.to_json(), "user":user.to_json()})
+
+class UserGitHubUsernameView(APIView):
+    """
+    users/v1/usernames/<github_username>
+    """
+    def get(self, request, github_username):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        target = User.objects.get(github_username=github_username)
+
+        return Response({"data":target.to_json(), "user":user.to_json()})

@@ -307,9 +307,16 @@ function Problem() {
           <Titleh1>문제 풀이</Titleh1>
           <hr style={{ height: '3px' }} />
           {/* problem metadata component */}
-          <p>
+          {/* <p>
             | #{slug} | {problemInfo.title} | {problemInfo.field} | {problemInfo.level} |
-          </p>
+          </p> */}
+          <ProblemInfo
+            problemNumber={slug}
+            title={problemInfo.title}
+            problemCategory={problemInfo.field}
+            problemLevel={problemInfo.level}
+            isActive={false}
+          />
 
           <MoreDescriptionContainer>
             <ActualDescriptionContainer>

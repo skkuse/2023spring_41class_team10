@@ -135,7 +135,7 @@ REST_USE_JWT = True  # JWT 인증 사용
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  # Access Token의 유효 시간을 2시간으로 설정
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),  # Access Token의 유효 시간을 4시간으로 설정
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh Token의 유효 시간을 7일로 설정
     'ROTATE_REFRESH_TOKENS': False,  # Refresh Token 갱신 하지 않음
     'BLACKLIST_AFTER_ROTATION': True,  # Refresh Token 갱신 후 이전 토큰을 블랙리스트에 추가
