@@ -238,7 +238,12 @@ function Review() {
       try {
         setLoading(1);
         const config = getHeader();
-        const data = { lang: submissionData.lang, code: submissionData.code, problem: submissionData.description };
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
         const response = await axios.post(`http://127.0.0.1:8000/codes/v1/review/`, data, config);
         console.log('response', response);
         setGPTReview(response.data.data);
@@ -254,7 +259,12 @@ function Review() {
       try {
         setLoading(2);
         const config = getHeader();
-        const data = { lang: submissionData.lang, code: submissionData.code, problem: submissionData.description };
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
         const response = await axios.post(`http://127.0.0.1:8000/codes/v1/refactoring/`, data, config);
         console.log('response', response.data);
         setGPTReview(response.data);

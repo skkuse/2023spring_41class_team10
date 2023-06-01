@@ -86,6 +86,7 @@ class SubmissionCodeView(APIView):
             "result" : target.status,
             "code" : target.code,
             "description": target.problem.description,
+            "submission_id": target.id
         }
 
         response_data = {

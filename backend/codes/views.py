@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
+from codes.models import Review, Comment, Deadcode, Refactor
 
 import os
 import json
@@ -27,6 +28,7 @@ class ChatRefactorAPIView(APIView):
         problem = body.get("problem", "")
         code = body.get("code", "")
         lang = body.get("lang", "")
+        submission_id = body.get("submission_id", 0)
         # 사용언어와, 문제설명, 코드를 모두 GPT에게 질의
         content = f"""사용자가 문제를 보고 {lang} 코드를 작성했습니다.\n주어진 문제\n{problem}\n코드\n{code}\n"""
 
@@ -46,6 +48,9 @@ class ChatRefactorAPIView(APIView):
 
         parsed_text = parse_code(answer)
         print("parsed_text", parsed_text)
+
+        # 요청 기록 DB 저장
+        Refactor.objects.create(code=parsed_text["code"], message=parsed_text["text"], target_id=submission_id)
 
         return JsonResponse({"status": "success", "message": parsed_text["text"], "code": parsed_text["code"], 'raw': answer})
     def init_chat(self):
