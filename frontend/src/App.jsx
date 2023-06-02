@@ -44,11 +44,11 @@ function App() {
   return (
     <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
       <Router>
-        <Navbar username={userInfo.github_username} />
+        <Navbar username={userInfo ? userInfo.github_username : ''} />
         {/* Navbar에 props로 username 넘겨주기 */}
         <MainBack>
           <Routes>
-            <Route path="/" element={<Main username={userInfo.github_username} />} />
+            <Route path="/" element={<Main username={userInfo ? userInfo.github_username : ''} />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<LoginView />} />
             <Route path="/login/github/callback/" element={<OAuth />} />{' '}

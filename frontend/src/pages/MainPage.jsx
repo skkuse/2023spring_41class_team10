@@ -28,7 +28,7 @@ function MainPage(props) {
                   개인 페이지로 이동
                 </button>
                 <div className={styles.subtitle}>AI 학습 도구와 함께하는 프로그래밍 학습</div>
-                <h1 className={styles.title}>어서오세요, {props.username} 님</h1>
+                {props.username && <h1 className={styles.title}>어서오세요, {props.username + ' 님'}</h1>}
               </>
             ) : (
               <>
