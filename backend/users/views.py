@@ -55,8 +55,6 @@ class GitHubLoginView(APIView):
                 user_account = users.first()
                 # 접속일 업데이트
                 user_account.login()
-                # 로그인
-                login(request, user_account, backend="django.contrib.auth.backends.ModelBackend", )
 
                 token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
                 print("token", token)
@@ -70,19 +68,18 @@ class GitHubLoginView(APIView):
                 return Response({"message": "로그인 성공", "data":data}, status=status.HTTP_200_OK)
 
             except Exception as e:
-                logging.exception("[github_login_callback] user_account", e)
+                logging.exception(f"[github_login_callback] user_account {e}")
                 return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
         else:
             # 유저가 존재하지 않으면 유저를 생성하여 데이터 반환
             user_account = User.objects.create_user(
                 github_username=user_info['username'],
+                username=user_info['username'],
                 email=primary_email,
                 profile_image_url=user_info['profile_image']
             )
             # 접속일 업데이트
             user_account.login()
-            # 로그인
-            login(request, user_account, backend="django.contrib.auth.backends.ModelBackend", )
 
             token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
             print("token", token)
@@ -115,10 +112,10 @@ def get_access_token(code):
             print('refresh_token', refresh_token)
             return access_token
         else:
-            logging.error("[get_access_token] status error", res.status_code)
+            logging.error(f"[get_access_token] status error {res.status_code}")
             return None
     except Exception as e:
-        logging.exception("[get_access_token] get_access_token error", e)
+        logging.exception(f"[get_access_token] get_access_token error {e}")
         return None
 
 
@@ -136,10 +133,10 @@ def get_user_info(access_token):
 
             return user_info
         else:
-            logging.error("[get_user_info] status error", res.status_code)
+            logging.error(f"[get_user_info] status error {res.status_code}")
             return None
     except Exception as e:
-        logging.exception("[get_user_info] get_user_info error", e)
+        logging.exception(f"[get_user_info] get_user_info error {e}")
         return None
 
 def get_user_primary_email(access_token):
@@ -155,7 +152,7 @@ def get_user_primary_email(access_token):
                 primary_email = email['email']
                 break
     else:
-        logging.error("[get_user_primary_email] status error", res.status_code)
+        logging.error(f"[get_user_primary_email] status error {res.status_code}")
 
     return primary_email
 

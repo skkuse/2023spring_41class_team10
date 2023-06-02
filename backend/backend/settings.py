@@ -61,7 +61,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'HomePage.apps.HomepageConfig',
+    # 'HomePage.apps.HomepageConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,18 +69,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'import_export',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework.authtoken',
-    # 'dj_rest_auth',
-    # 'dj_rest_auth.registration',
-    # 'allauth',
-    # 'allauth.account',
-    # 'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.github',
     'corsheaders',
-    # 'login',
-    # 'accounts',
     "users",
     'problems',
     'codes',
@@ -99,8 +92,7 @@ REST_FRAMEWORK = {
     # 세션 인증과 JWT 쿠키 인증을 사용하여 API에 접근 가능하도록 인증 설정
     'DEFAULT_AUTHENTICATION_CLASSES': (  
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
 }
 
@@ -117,7 +109,7 @@ MIDDLEWARE = [
 
 
 # 유저 모델의 username 필드를 사용하지 않음
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # 이메일 필수 입력
 ACCOUNT_EMAIL_REQUIRED = True
 # 이메일 고유값으로 사용
