@@ -64,13 +64,13 @@ function NavBar(props) {
       </NavigationLinks>
       {isLoggedIn ? (
         <AuthLinks>
-          <StyledLink to="/login">고객센터</StyledLink>
+          <StyledLink to="/notice">고객센터</StyledLink>
           <StyledLinkBlack to="/login">{props.username !== '' ? props.username : '로그인'}</StyledLinkBlack>
         </AuthLinks>
       ) : (
         <AuthLinks>
-          <StyledLink to="/login">Login</StyledLink>
-          <StyledLinkBlack to="/login">Sign Up</StyledLinkBlack>
+          <StyledLink to="/notice">고객센터</StyledLink>
+          <StyledLinkBlack to="/login">Login</StyledLinkBlack>
         </AuthLinks>
       )}
     </StyledNavbar>
