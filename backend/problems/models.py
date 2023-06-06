@@ -8,7 +8,15 @@ class Problem(models.Model):
   create_at = models.DateTimeField(auto_now_add=True)
   
   def __str__(self) -> str:
-    return f"#{self.id} {self.title}" 
+    return f"#{self.id} {self.title}"
+  
+  def to_json(self):
+    return {
+      "id":self.id,
+      "title":self.title,
+      "level":self.level,
+      "description":self.description,
+    }
 
 class AlgorithmField(models.Model):
   id = models.AutoField(primary_key=True)

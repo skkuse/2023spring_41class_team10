@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import DatabaseError, transaction
 
 import json
 import re
@@ -82,6 +83,84 @@ class ProblemListView(APIView):
 
         return Response(response_data)
 
+
+class ProblemFieldListView(APIView):
+    """ Problem List View
+    url        : problems/v1/fields/list/
+    Returns :
+        GET     : algorithm_field
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+
+        fields = AlgorithmField.objects.order_by('id')
+        
+        fields_list = []
+        for field in fields:
+            fields_list.append({"id":field.id, "field":field.field})
+
+        response_data = {
+            "status": "success",
+            "message": "Problem Fields List Info",
+            "data": fields_list,
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+
+
+class ProblemSaveView(APIView):
+    """ Problem Save View
+    url        : problems/v1/create/
+    Returns :
+        POST     : id
+    """
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        # POST 데이터 가져오기
+        body = json.loads(request.body.decode('utf-8'))
+        title = body.get("title", "")
+        level = body.get("level", 0)
+        fields = body.get("field", [])
+        description = body.get("description", "")
+        testcases = body.get("tc", [{"testcase":"", "result":"", "is_sample":True}])
+
+        try:
+            with transaction.atomic():
+                # 문제 생성
+                problem = Problem.objects.create(title=title, level=level, description=description)
+
+                # 문제 분야 연결 생성
+                for field_id in fields:
+                    ProblemFieldRelation.objects.create(field_id=field_id, problem_id=problem.id)
+
+                # 문제 테스트케이스 생성
+                for tc in testcases:
+                    Testcase.objects.create(
+                        problem_id=problem.id,  
+                        testcase=tc["testcase"],
+                        result=tc["result"],
+                        is_sample=tc["is_sample"]
+                    )
+
+        except DatabaseError as error:
+            logging.error(f'[ProblemSaveView] DatabaseError {error}')
+            return Response(get_fail_res("문제 저장 중 DB에 오류가 발생했습니다."))
+        except Exception as exception:
+            logging.exception(f'[ProblemSaveView] Exception {exception}')
+            return Response(get_fail_res("문제 저장 중 문제가 발생했습니다."))
+        response_data = {
+            "status": "success",
+            "message": "Save Problem",
+            "data": problem.to_json(),
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
 
 class ProblemSubmitView(APIView):
     """ 유저 코드 제출

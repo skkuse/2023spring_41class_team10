@@ -6,6 +6,8 @@ urlpatterns = [
     # 문제 리스트 API
     path('v0/list/', views_sample.ProblemListView.as_view(), name='ProblemListSample'),
     path('v1/list/', views.ProblemListView.as_view(), name='ProblemList'),
+    path('v1/create/', views.ProblemSaveView.as_view(), name='problem_create'),
+    path('v1/fields/list/', views.ProblemFieldListView.as_view(), name='problem_field_list'),
     path('v1/<id>/', views_desc.ProblemDescView.as_view(), name='problem_desc'),
     path('v1/<id>/exec/', views_desc.ProblemExecView.as_view(), name='problem_exec'),
     path('v1/<id>/save/', views_desc.ProblemCodeSaveView.as_view(), name='problem_code_save'),
