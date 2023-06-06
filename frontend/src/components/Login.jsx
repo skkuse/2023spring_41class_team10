@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { BsGithub } from 'react-icons/bs';
 
 const LoginContainer = styled.div`
   width: 100vw;
@@ -21,7 +22,7 @@ const LogoContainer = styled.div`
 `;
 
 const LogoImg = styled.img`
-  width: 5%;
+  width: 150px;
   aspect-ratio: 9/5;
   margin-top: 10px;
 `;
@@ -46,18 +47,30 @@ const LoginTitle = styled.h1`
 `;
 
 const LoginButton = styled.button`
-  margin-top: 20px;
-  width: 20vw;
-  aspect-ratio: 4/1;
+  margin-top: 16px;
+  width: 280px;
+  aspect-ratio: 9/2;
   font-family: Roboto;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+`;
+
+const ButtonIcon = styled.span`
+  margin: auto;
+  line-height: 1.25rem !important;
+`;
+
+const ButtonText = styled.span`
+  margin: auto;
 `;
 
 const GithubLoginButton = styled(LoginButton)`
-  background-color: #555555;
+  background-color: #212529;
 `;
 
 const CustomerSupportButton = styled(LoginButton)`
@@ -79,16 +92,33 @@ const Login = () => {
     window.location.href = 'https://github.com/login/oauth/authorize?client_id=Iv1.f8333c935b2b0479';
   };
 
+  const handleLogout = () => {
+    localStorage.setItem('isLoggedIn', false);
+    localStorage.setItem('refresh_token', false);
+    localStorage.setItem('access_token', false);
+    window.location.reload();
+  };
+
   return (
     <LoginContainer>
       <LogoContainer>
         <LogoImg src="/imgs/nav_logo.png" alt="Logo" />
       </LogoContainer>
       <ContentContainer>
-        <LoginTitle>로그인</LoginTitle>
-        <GithubLoginButton onClick={handleGithubLogin}>Github로 로그인</GithubLoginButton>
+        <GithubLoginButton onClick={handleGithubLogin}>
+          {' '}
+          <ButtonIcon>
+            <BsGithub size="32" />
+          </ButtonIcon>
+          <ButtonText>GitHub로 시작하기</ButtonText>
+        </GithubLoginButton>
+        <CustomerSupportButton onClick={handleLogout}>
+          <ButtonText>로그아웃</ButtonText>
+        </CustomerSupportButton>
         <Link to="/notice">
-          <CustomerSupportButton>고객 센터</CustomerSupportButton>
+          <CustomerSupportButton>
+            <ButtonText>고객센터</ButtonText>
+          </CustomerSupportButton>
         </Link>
         <FooterText>© 2023 - Privacy — Terms</FooterText>
       </ContentContainer>

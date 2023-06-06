@@ -31,4 +31,5 @@ urlpatterns = [
     # path('HomePage/', include('HomePage.urls')),
     path('users/', include('users.urls')),
     path('codes/', include('codes.urls')),
+    path('boards/', include('boards.urls')),
 ]

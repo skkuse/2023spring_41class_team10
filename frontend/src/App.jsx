@@ -27,6 +27,8 @@ function App() {
         setUserInfo(response.data.user);
       } catch (error) {
         console.error('Failed to fetch questions:', error);
+        setUserInfo({ github_username: '' });
+        localStorage.setItem('isLoggedIn', false);
       }
     };
     if (isLoggedIn) fetchUserInfo();
