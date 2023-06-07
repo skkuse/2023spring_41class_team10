@@ -157,7 +157,7 @@ function QuestionsPage() {
     <QuestionsContainer>
       <TitleContainer>
         <Titleh1>문제 목록</Titleh1>
-        <hr style={{ height: '3px' }} />
+        <hr />
       </TitleContainer>
       <HeadContainer>
         <StatusContainer>
@@ -183,7 +183,7 @@ function QuestionsPage() {
       </HeadContainer>
       {questions.map((question) => (
         <ProblemInfo
-          key={question.slug}
+          key={question.id}
           problemNumber={question.id}
           title={question.title}
           problemCategory={question.field}

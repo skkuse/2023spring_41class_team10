@@ -147,30 +147,26 @@ function NoticePage() {
         <FAQButton onClick={handleFAQClick}>FAQ</FAQButton>
       </ButtonContainer>
       {showNoticeContent && (
-        <ContentContainer>
+        <ContentContainer key="notice">
           <h2>Notice</h2>
           {noticeDescriptions &&
             noticeDescriptions.map((notice) => (
-              <>
-                <DropBoxContainer key={notice.id} onClick={() => handleNoticeItemClick(notice.id)}>
-                  {notice.title}
-                </DropBoxContainer>
+              <div key={`notice-${notice.id}`}>
+                <DropBoxContainer onClick={() => handleNoticeItemClick(notice.id)}>{notice.title}</DropBoxContainer>
                 <QuestionContainer>{curNotice === notice.id && <DropBox>{notice.body}</DropBox>}</QuestionContainer>
-              </>
+              </div>
             ))}
         </ContentContainer>
       )}
       {showFAQContent && (
-        <ContentContainer>
+        <ContentContainer key="faq">
           <h2>FAQ</h2>
           {FAQDescriptions &&
             FAQDescriptions.map((faq) => (
-              <>
-                <DropBoxContainer key={faq.id} onClick={() => handleFAQItemClick(faq.id)}>
-                  {faq.title}
-                </DropBoxContainer>
+              <div key={`faq-${faq.id}`}>
+                <DropBoxContainer onClick={() => handleFAQItemClick(faq.id)}>{faq.title}</DropBoxContainer>
                 <QuestionContainer>{curFAQ === faq.id && <DropBox>{faq.body}</DropBox>}</QuestionContainer>
-              </>
+              </div>
             ))}
         </ContentContainer>
       )}

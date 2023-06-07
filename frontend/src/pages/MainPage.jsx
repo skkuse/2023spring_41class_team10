@@ -35,7 +35,7 @@ function MainPage(props) {
                 <button className={styles.centerBtn} onClick={goUrl1}>
                   지금 가입하기
                 </button>
-                <div className={styles.subtitle}>Be Pro 설명</div>
+                <div className={styles.subtitle}>AI 학습 도구와 함께하는 프로그래밍 학습</div>
                 <h1 className={styles.title}>미래형 AI 코딩 교육 플랫폼</h1>
               </>
             )}
