@@ -106,10 +106,14 @@ def get_access_token(code):
                     'https://github.com/login/oauth/access_token', 
                     data=github_data, headers=HEADERS)
         if res.status_code == 200:
-            access_token = res.json()['access_token']
-            refresh_token = res.json()['refresh_token']
-            print('access_token', access_token)
-            print('refresh_token', refresh_token)
+            access_token = None
+            try:
+                access_token = res.json()['access_token']
+                refresh_token = res.json()['refresh_token']
+                print('GitHub access_token', access_token)
+                print('GitHub refresh_token', refresh_token)
+            except Exception as e:
+                print("token exception: res", res.json())
             return access_token
         else:
             logging.error(f"[get_access_token] status error {res.status_code}")
