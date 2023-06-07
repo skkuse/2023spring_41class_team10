@@ -7,14 +7,15 @@ import Lectures from '../components/Lectures';
 import RecomLectures from '../components/RecomLecture';
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const BodyContainer = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  padding: 1rem 2rem;
 `;
 
 const LecturesContainer = styled.div`
-  margin: 2rem;
   flex-direction: column;
   margin-bottom: 100px;
 `;
@@ -96,6 +97,43 @@ function HomePage() {
     }
   ];
 
+  const [problemData, setProblemData] = useState([]);
+  const [recentLecture, setRecentLecture] = useState([]);
+  const [recommendLecture, setRecommendLecture] = useState([]);
+  useEffect(() => {
+    const fetchRecentLecture = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/users/v1/lectures/history/`, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') setRecentLecture(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch RecentLecture:', error);
+      }
+    };
+    const fetchRecommendLecture = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/users/v1/lectures/guideline/`, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') setRecommendLecture(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch RecentLecture:', error);
+      }
+    };
+    fetchRecentLecture();
+    fetchRecommendLecture();
+  }, []);
+  const getHeader = () => {
+    const token = localStorage.getItem('access_token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
+    return config;
+  };
+
   const processingProblems = problems.filter((problem) => problem.problemStatus === 'processing');
 
   return (
@@ -106,14 +144,15 @@ function HomePage() {
       </div>
       <BodyContainer>
         <LecturesContainer>
-          <ProcessingLectDiv>진행 중인 강의</ProcessingLectDiv>
+          <ProcessingLectDiv>최근 수강 강의</ProcessingLectDiv>
           <LectureList>
-            {lectures.map((lecture, index) => (
+            {recentLecture.map((lecture, index) => (
               <Lectures
                 key={index}
-                youtubeLink={lecture.youtubeLink}
-                title={lecture.title}
-                progress={lecture.progress}
+                id={lecture.id}
+                youtubeLink={lecture.lecture_link}
+                title={lecture.lecture_title}
+                datetime={lecture.create_at}
               />
             ))}
           </LectureList>
@@ -136,8 +175,14 @@ function HomePage() {
         <RecommendContainer>
           <RecommendDiv>추천 강의</RecommendDiv>
           <RecomList>
-            {lectures.map((lecture, index) => (
-              <Lectures key={index} youtubeLink={lecture.youtubeLink} title={lecture.title} />
+            {recommendLecture.map((lecture, index) => (
+              <Lectures
+                key={index}
+                id={lecture.lecture_id}
+                youtubeLink={lecture.lecture_link}
+                title={lecture.lecture_title}
+                memo={lecture.memo}
+              />
             ))}
           </RecomList>
         </RecommendContainer>
