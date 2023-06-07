@@ -66,7 +66,8 @@ class User(AbstractBaseUser):
             "email" : self.email,
             "created_at" : self.created_at,
             "last_login" : self.last_login,
-            "profile_image_url" : self.profile_image_url
+            "profile_image_url" : self.profile_image_url,
+            "is_staff" : self.is_staff
         }
 
     def login(self):

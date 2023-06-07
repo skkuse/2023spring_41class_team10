@@ -323,7 +323,7 @@ function Review() {
       <DescriptionContainer>
         <TitleContainer>
           <Titleh1>코드 리뷰</Titleh1>
-          <hr style={{ height: '3px' }} />
+          <hr />
           {/* problem metadata component */}
           <ProblemInfo
             problemNumber={slug}

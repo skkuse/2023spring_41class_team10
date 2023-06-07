@@ -305,7 +305,7 @@ function Problem() {
       <DescriptionContainer>
         <TitleContainer>
           <Titleh1>문제 풀이</Titleh1>
-          <hr style={{ height: '3px' }} />
+          <hr />
           {/* problem metadata component */}
           {/* <p>
             | #{slug} | {problemInfo.title} | {problemInfo.field} | {problemInfo.level} |

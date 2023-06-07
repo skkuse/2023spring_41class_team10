@@ -42,10 +42,13 @@ const StyledLink = styled(Link)`
 
 const StyledLinkBlack = styled(Link)`
   color: white;
-  background-color: black;
+  background-color: #23272b;
   text-decoration: none;
   padding: 4px 24px;
   border-radius: 6px;
+  &:hover {
+    background-color: black;
+  }
 `;
 
 function NavBar(props) {
@@ -65,7 +68,7 @@ function NavBar(props) {
       {isLoggedIn ? (
         <AuthLinks>
           <StyledLink to="/notice">고객센터</StyledLink>
-          <StyledLinkBlack to="/login">{props.username !== '' ? props.username : '로그인'}</StyledLinkBlack>
+          <StyledLinkBlack to="/login">{props.username !== '' ? props.username : 'Login'}</StyledLinkBlack>
         </AuthLinks>
       ) : (
         <AuthLinks>

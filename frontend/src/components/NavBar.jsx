@@ -14,7 +14,7 @@ function NavBar(props) {
       {!isDetailClicked ? (
         <>
           <button className={styles.secondBtn} onClick={detailHandler}>
-            {props.username !== '' ? props.username : '로그인'}
+            {props.username !== '' ? props.username : 'Login'}
           </button>
           <button className={styles.firstBtn}>고객센터</button>
         </>
