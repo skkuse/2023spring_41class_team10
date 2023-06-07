@@ -31,13 +31,12 @@ def start():
             }
             lectures = Lecture.objects.filter(memo="").order_by("id")[:LIMIT]
             for lecture in lectures:
+                # video_id 파싱
                 url = lecture.video_link
                 video_id = get_video_id(url)
                 params["videoId"] = video_id
-                
                 response = requests.get(api_url, params=params)
 
-                print(response.json())
                 # 유튜브 댓글 받아서 정제하여 저장
                 res_json = response.json()
                 items = res_json["items"]
@@ -73,10 +72,11 @@ def de_emoji(text):
         de_emoji_text = emoji_pattern.sub(r'', text)
     return de_emoji_text
 
+# 유튜브 댓글을 이용한 유튜브 영상 한줄평
 def get_lecture_memo(comment_list):
     print("get_lecture_memo")
     chat_role = "assistant"
-    content = "어떤 유튜브 영상의 댓글이다. 이 댓글만 보고 유튜브 영상의 장점을 짧게 한 줄로 요약해라. 이는 재미를 위함이므로 정확성을 크게 신경쓰지 않아도 된다. 예시: [Javascript] 쉽게 알려주는 영상입니다.\nCOMMENTS:\n"
+    content = "COMMENTS는 어떤 유튜브 영상의 댓글이다. 이 댓글만 보고 유튜브 영상의 장점을 짧게 한 줄로 요약해라. 이는 재미를 위함이므로 정확성을 크게 신경쓰지 않아도 된다.\n예시1: [Javascript] 실제 웹 개발에 도움이 될거 같습니다.\n예시2: [C언어] 재치있는 설명으로 밤새도록 볼 수 있습니다.\nCOMMENTS:\n"
     req_comments = "\n".join(comment_list)
 
     openai.api_key = OPENAI_API_KEY
@@ -90,4 +90,7 @@ def get_lecture_memo(comment_list):
     )
     answer = completion.choices[0].message['content']
     print("answer", answer)
-    return answer
+    # (휴리스틱) "장점:" 을 붙이는 경우 분리
+    p_answer= answer.split('장점:')[-1]
+
+    return p_answer

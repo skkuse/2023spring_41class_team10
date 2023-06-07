@@ -7,8 +7,18 @@ class Lecture(models.Model):
   author_id = models.BigIntegerField()
   create_at = models.DateTimeField(auto_now_add=True)
   memo = models.TextField(default="")
+
   def __str__(self) -> str:
-    return f"#{self.id} {self.title}" 
+    return f"#{self.id} {self.title}"
+
+  def to_json(self):
+    return {
+      "id":self.id,
+      "lecture_title":self.title,
+      "lecture_link":self.video_link,
+      "author_id":self.author_id,
+      "memo":self.memo
+    }
 
 class SoftwareField(models.Model):
   id = models.AutoField(primary_key=True)

@@ -20,36 +20,41 @@ def get_fail_res(msg):
     
 class LectureGuideRecommendView(APIView):
     
-    def post(self, request):
+    def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
-        user_id = body.get("user_id", "")
+        user_id = request.user.id
         user = User.objects.get(id=user_id)
 
         N=5
-
-        body = json.loads(request.body.decode('utf-8'))
-        
-        
-        
-        # 임시로 랜덤함수 이용해 선택
-        lectures = Lecture.objects.all()
-        rids = random.sample(range(1, len(lectures)), 5)
-        targets = lectures.filter(id__in=rids)
+        message = ""
         lecture_list = []
-        for lecture in targets:
-            data = {
-                "user_id" : lecture.author_id,
-                "lecture_link" : lecture.video_link,
-                "lecture_title":lecture.title 
-            }
-            lecture_list.append(data)
+
+        recommends = LectureRecommend.objects.filter(user_id=user_id).order_by("-create_at")
+        if len(recommends) > 0:
+            for lecture in recommends:
+                data = lecture.to_json()
+                data["user_id"] = user_id
+                lecture_list.append(data)
+            message = "유저에 맞게 추천되었습니다."
+        else:
+            # 임시로 랜덤함수 이용해 선택
+            lecture_ids = Lecture.objects.exclude(memo="").values_list("id", flat=True)
+            if len(lecture_ids) < 5:
+                lecture_ids = Lecture.objects.all().values_list("id", flat=True)
+            rids = random.sample(list(lecture_ids), N)
+            targets = Lecture.objects.filter(id__in=rids)
+            for lecture in targets:
+                data = lecture.to_json()
+                data["user_id"] = user_id
+                lecture_list.append(data)
+            message = "랜덤하게 추천되었습니다."
 
         response_data = {
             "status" : "success",
-            "message" : "랜덤하게 추천되었습니다.",
+            "message" : message,
             "data" : lecture_list,
-            "user" : user
+            "user" : user.to_json()
         }
 
         return Response(response_data)
