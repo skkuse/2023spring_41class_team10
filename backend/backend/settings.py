@@ -54,6 +54,10 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # GitHub OAuth Setting
 CLIENT_ID = get_secret('CLIENT_ID')
 CLIENT_SECRET = get_secret('CLIENT_SECRET')
+GITHUB_TOKEN = get_secret('GITHUB_TOKEN')
+
+# YouTube API KEY
+YOUTUBE_API_KEY = get_secret('YOUTUBE_API_KEY')
 
 ALLOWED_HOSTS = ["*"]
 
@@ -232,3 +236,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 # ex) ~/media/img.jpg
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SCHEDULER_DEFAULT = True

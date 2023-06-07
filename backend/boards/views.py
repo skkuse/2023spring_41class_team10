@@ -35,9 +35,7 @@ class NoticeListView(APIView):
         if not articles.exists():
             return Response(get_fail_res("NoticeListView Failed!: Any notice in Article Table"))
         articles = list(articles[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-
         article_list = [ article.to_json() for article in articles]
-        print("article_list", article_list)
 
         response_data = {
             "status": "success",
@@ -68,9 +66,7 @@ class FAQListView(APIView):
         if not articles.exists():
             return Response(get_fail_res("FAQListView Failed!: Any FAQ in article Table"))
         articles = list(articles[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-
         article_list = [ article.to_json() for article in articles]
-        print("article_list", article_list)
 
         response_data = {
             "status": "success",
