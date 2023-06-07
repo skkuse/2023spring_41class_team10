@@ -1,33 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
-import { BsFilter, BsSearch } from 'react-icons/bs';
-import ProblemInfo from '../components/ProblemInfo';
-// import { useQuestionQuery } from '../hooks';
 import axios from 'axios';
+import { BsFilter, BsSearch } from 'react-icons/bs';
+
+import ProblemInfo from '../components/ProblemInfo';
+import common from '../components/Common.module.css';
 
 const QuestionsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  background-color: #f2f2f2;
   margin-bottom: 100px;
 `;
 
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Titleh1 = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-`;
-
 const HeadContainer = styled.div`
-  margin: 50px 10px;
+  margin: 1rem;
   display: flex;
   justify-content: space-between;
   gap: 5rem;
@@ -154,44 +141,46 @@ function QuestionsPage() {
   };
 
   return (
-    <QuestionsContainer>
-      <TitleContainer>
-        <Titleh1>문제 목록</Titleh1>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>문제 목록</h1>
         <hr />
-      </TitleContainer>
-      <HeadContainer>
-        <StatusContainer>
-          <FirstDiv>완료</FirstDiv>
-          <SecondDiv>진행중</SecondDiv>
-          <ThirdDiv>미완료</ThirdDiv>
-          <FourthDiv>AI 추천</FourthDiv>
-        </StatusContainer>
-        <SearchContainer>
-          <FilterButton>
-            <BsFilter />
-          </FilterButton>
-          <SearchInput
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+      </div>
+      <QuestionsContainer>
+        <HeadContainer>
+          <StatusContainer>
+            <FirstDiv>완료</FirstDiv>
+            <SecondDiv>진행중</SecondDiv>
+            <ThirdDiv>미완료</ThirdDiv>
+            <FourthDiv>AI 추천</FourthDiv>
+          </StatusContainer>
+          <SearchContainer>
+            <FilterButton>
+              <BsFilter />
+            </FilterButton>
+            <SearchInput
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <SearchButton onClick={handleSearch}>
+              <BsSearch />
+            </SearchButton>
+          </SearchContainer>
+        </HeadContainer>
+        {questions.map((question) => (
+          <ProblemInfo
+            key={question.id}
+            problemNumber={question.id}
+            title={question.title}
+            problemCategory={question.field}
+            problemLevel={question.level}
+            problemStatus={question.status}
           />
-          <SearchButton onClick={handleSearch}>
-            <BsSearch />
-          </SearchButton>
-        </SearchContainer>
-      </HeadContainer>
-      {questions.map((question) => (
-        <ProblemInfo
-          key={question.id}
-          problemNumber={question.id}
-          title={question.title}
-          problemCategory={question.field}
-          problemLevel={question.level}
-          problemStatus={question.status}
-        />
-      ))}
-    </QuestionsContainer>
+        ))}
+      </QuestionsContainer>
+    </div>
   );
 }
 

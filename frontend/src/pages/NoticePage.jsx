@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
 import axios from 'axios';
+
+import common from '../components/Common.module.css';
 
 const NoticeContainer = styled.div`
   display: flex;
@@ -9,16 +10,6 @@ const NoticeContainer = styled.div`
   align-items: center;
   padding: 2rem;
   background-color: #f2f2f2;
-`;
-
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Titleh1 = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
 `;
 
 const ButtonContainer = styled.div`
@@ -137,40 +128,42 @@ function NoticePage() {
   };
 
   return (
-    <NoticeContainer>
-      <TitleContainer>
-        <Titleh1>고객센터</Titleh1>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>고객센터</h1>
         <hr />
-      </TitleContainer>
-      <ButtonContainer>
-        <NoticeButton onClick={handleNoticeClick}>공지사항</NoticeButton>
-        <FAQButton onClick={handleFAQClick}>FAQ</FAQButton>
-      </ButtonContainer>
-      {showNoticeContent && (
-        <ContentContainer key="notice">
-          <h2>Notice</h2>
-          {noticeDescriptions &&
-            noticeDescriptions.map((notice) => (
-              <div key={`notice-${notice.id}`}>
-                <DropBoxContainer onClick={() => handleNoticeItemClick(notice.id)}>{notice.title}</DropBoxContainer>
-                <QuestionContainer>{curNotice === notice.id && <DropBox>{notice.body}</DropBox>}</QuestionContainer>
-              </div>
-            ))}
-        </ContentContainer>
-      )}
-      {showFAQContent && (
-        <ContentContainer key="faq">
-          <h2>FAQ</h2>
-          {FAQDescriptions &&
-            FAQDescriptions.map((faq) => (
-              <div key={`faq-${faq.id}`}>
-                <DropBoxContainer onClick={() => handleFAQItemClick(faq.id)}>{faq.title}</DropBoxContainer>
-                <QuestionContainer>{curFAQ === faq.id && <DropBox>{faq.body}</DropBox>}</QuestionContainer>
-              </div>
-            ))}
-        </ContentContainer>
-      )}
-    </NoticeContainer>
+      </div>
+      <NoticeContainer>
+        <ButtonContainer>
+          <NoticeButton onClick={handleNoticeClick}>공지사항</NoticeButton>
+          <FAQButton onClick={handleFAQClick}>FAQ</FAQButton>
+        </ButtonContainer>
+        {showNoticeContent && (
+          <ContentContainer key="notice">
+            <h2>Notice</h2>
+            {noticeDescriptions &&
+              noticeDescriptions.map((notice) => (
+                <div key={`notice-${notice.id}`}>
+                  <DropBoxContainer onClick={() => handleNoticeItemClick(notice.id)}>{notice.title}</DropBoxContainer>
+                  <QuestionContainer>{curNotice === notice.id && <DropBox>{notice.body}</DropBox>}</QuestionContainer>
+                </div>
+              ))}
+          </ContentContainer>
+        )}
+        {showFAQContent && (
+          <ContentContainer key="faq">
+            <h2>FAQ</h2>
+            {FAQDescriptions &&
+              FAQDescriptions.map((faq) => (
+                <div key={`faq-${faq.id}`}>
+                  <DropBoxContainer onClick={() => handleFAQItemClick(faq.id)}>{faq.title}</DropBoxContainer>
+                  <QuestionContainer>{curFAQ === faq.id && <DropBox>{faq.body}</DropBox>}</QuestionContainer>
+                </div>
+              ))}
+          </ContentContainer>
+        )}
+      </NoticeContainer>
+    </div>
   );
 }
 

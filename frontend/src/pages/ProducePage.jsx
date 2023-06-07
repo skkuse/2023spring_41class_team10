@@ -6,35 +6,18 @@ import Select from 'react-select';
 
 import styled from 'styled-components';
 import {} from '../components';
-
-const Container = styled.div`
-  width: 90%;
-  max-width: 1400px;
-  margin: auto;
-`;
+import common from '../components/Common.module.css';
 
 const DescriptionContainer = styled.div`
+  padding: 2rem;
   text-align: center;
   margin-bottom: 2vh;
-`;
-
-const TitleContainer = styled.div``;
-
-const Titleh1 = styled.h1`
-  margin: 0 auto;
-  padding: 10px 0;
-`;
-
-const ReviewContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 5vh;
 `;
 
 const Titleh2 = styled.h2`
   margin: 12px 0 0 0;
   padding: 0 10px;
+  text-align: start;
 `;
 
 const TypingContainer = styled.textarea`
@@ -68,7 +51,6 @@ const TextareaDiv = styled.div`
   margin-bottom: 1rem;
   text-align: start;
   width: 100%;
-  background-color: white;
   border-radius: 3vw;
   padding: 10px 10px 0px 10px;
   min-height: 5vh;
@@ -95,6 +77,7 @@ const ProblemInfoContainer = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
+  padding: 2rem;
 `;
 
 const SquareContainer = styled.div`
@@ -269,27 +252,25 @@ function Produce() {
   };
 
   return (
-    <Container>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>문제 추가 (관리자)</h1>
+        <hr />
+      </div>
+      <ProblemInfoContainer>
+        <SquareContainer>
+          <WideSquareItem type="text" placeholder="문제 제목" onChange={handleTitleChange} />
+          <RightSquareItem type="number" placeholder="난이도" onChange={handleLevelChange} min={1} max={10} />
+        </SquareContainer>
+        <SelectItem
+          placeholder={'분야'}
+          options={fieldData}
+          // value={selectedFieldData}
+          onChange={(e) => handleSelectFeild(e)}
+          isMulti
+        />
+      </ProblemInfoContainer>
       <DescriptionContainer>
-        <TitleContainer>
-          <Titleh1>문제 추가 (관리자)</Titleh1>
-          <hr />
-          <ProblemInfoContainer>
-            <SquareContainer>
-              <WideSquareItem type="text" placeholder="문제 제목" onChange={handleTitleChange} />
-              <RightSquareItem type="number" placeholder="난이도" onChange={handleLevelChange} min={1} max={10} />
-            </SquareContainer>
-            <SelectItem
-              placeholder={'분야'}
-              options={fieldData}
-              // value={selectedFieldData}
-              onChange={(e) => handleSelectFeild(e)}
-              isMulti
-            />
-          </ProblemInfoContainer>
-        </TitleContainer>
-      </DescriptionContainer>
-      <ReviewContainer>
         <InputContainer>
           <Titleh2>문제 설명</Titleh2>
           <TextareaDiv>
@@ -337,9 +318,9 @@ function Produce() {
             Submit{' '}
           </Button>
         </Controllers>
-      </ReviewContainer>
+      </DescriptionContainer>
       <hr />
-    </Container>
+    </div>
   );
 }
 export default Produce;

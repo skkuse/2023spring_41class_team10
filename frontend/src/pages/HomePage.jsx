@@ -1,36 +1,16 @@
-import React from 'react';
-import { useAuth } from '../hooks';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import axios from 'axios';
+
 import ProblemInfo from '../components/ProblemInfo';
 import Lectures from '../components/Lectures';
-import styled from 'styled-components';
 import RecomLectures from '../components/RecomLecture';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: #f2f2f2;
-  padding: 2rem;
-`;
+import common from '../components/Common.module.css';
 
 const BodyContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-left: 200px;
   padding: 2rem;
-`;
-
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Titleh1 = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
 `;
 
 const LecturesContainer = styled.div`
@@ -66,15 +46,15 @@ const ProcessingQuesDiv = styled.div`
 const ProcessingList = styled.div`
   align-items: center;
   justify-content: center;
-`
+`;
 
 const RecommendContainer = styled.div`
   margin-top: 2rem;
 `;
 
 const RecomList = styled.div`
-  margin:20px;
-  display:flex
+  margin: 20px;
+  display: flex;
 `;
 
 const RecommendDiv = styled.div`
@@ -84,8 +64,6 @@ const RecommendDiv = styled.div`
 `;
 
 function HomePage() {
-  const { isAuth } = useAuth();
-
   const problems = [
     {
       slug: '1',
@@ -102,76 +80,69 @@ function HomePage() {
       problemCategory: 'Looping',
       problemLevel: '3',
       problemStatus: 'processing'
-    },
+    }
   ];
 
   const lectures = [
     {
       youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
       title: 'Lecture 1',
-      progress: 30,
+      progress: 30
     },
     {
       youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
       title: 'Lecture 2',
-      progress: 70,
-    },
+      progress: 70
+    }
   ];
 
-
-  const processingProblems = problems.filter(
-    (problem) => problem.problemStatus === 'processing'
-  );
+  const processingProblems = problems.filter((problem) => problem.problemStatus === 'processing');
 
   return (
-    <Container>
-    <TitleContainer>
-      <Titleh1>Home</Titleh1>
-      <hr style={{ height: '3px' }} />
-      </TitleContainer>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>Home</h1>
+        <hr />
+      </div>
       <BodyContainer>
-      <LecturesContainer>
-        <ProcessingLectDiv>진행 중인 강의</ProcessingLectDiv>
-        <LectureList>
-        {lectures.map((lecture, index) => (
-          <Lectures
-            key={index}
-            youtubeLink={lecture.youtubeLink}
-            title={lecture.title}
-            progress={lecture.progress}
-          />
-        ))}
-        </LectureList>
-      </LecturesContainer>
-      <QuestionsContainer>
-        <ProcessingQuesDiv>풀고 있는 문제</ProcessingQuesDiv>
-        <ProcessingList>
-        {processingProblems.map((problem) => (
-          <ProblemInfo
-            key={problem.slug}
-            problemNumber={problem.problemNumber}
-            title={problem.title}
-            problemCategory={problem.problemCategory}
-            problemLevel={problem.problemLevel}
-            problemStatus={problem.problemStatus}
-          />
-        ))}
-        </ProcessingList>
-      </QuestionsContainer>
-      <RecommendContainer>
-        <RecommendDiv>추천 강의</RecommendDiv>
-        <RecomList>
-        {lectures.map((lecture, index) => (
-          <Lectures
-            key={index}
-            youtubeLink={lecture.youtubeLink}
-            title={lecture.title}
-          />
-        ))}            
-        </RecomList>
-      </RecommendContainer>
+        <LecturesContainer>
+          <ProcessingLectDiv>진행 중인 강의</ProcessingLectDiv>
+          <LectureList>
+            {lectures.map((lecture, index) => (
+              <Lectures
+                key={index}
+                youtubeLink={lecture.youtubeLink}
+                title={lecture.title}
+                progress={lecture.progress}
+              />
+            ))}
+          </LectureList>
+        </LecturesContainer>
+        <QuestionsContainer>
+          <ProcessingQuesDiv>풀고 있는 문제</ProcessingQuesDiv>
+          <ProcessingList>
+            {processingProblems.map((problem) => (
+              <ProblemInfo
+                key={problem.slug}
+                problemNumber={problem.problemNumber}
+                title={problem.title}
+                problemCategory={problem.problemCategory}
+                problemLevel={problem.problemLevel}
+                problemStatus={problem.problemStatus}
+              />
+            ))}
+          </ProcessingList>
+        </QuestionsContainer>
+        <RecommendContainer>
+          <RecommendDiv>추천 강의</RecommendDiv>
+          <RecomList>
+            {lectures.map((lecture, index) => (
+              <Lectures key={index} youtubeLink={lecture.youtubeLink} title={lecture.title} />
+            ))}
+          </RecomList>
+        </RecommendContainer>
       </BodyContainer>
-    </Container>
+    </div>
   );
 }
 

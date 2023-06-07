@@ -6,7 +6,7 @@ const SquareContainer = styled.div`
   max-width: 800px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr;
+  grid-template-columns: 1fr 4fr 3fr 1fr;
   border-radius: 10px;
   border: 0.1px solid black;
   height: 26px;

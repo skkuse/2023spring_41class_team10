@@ -1,36 +1,16 @@
 import React from 'react';
-import { useAuth, useProfileQuery } from '../hooks';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+
 import ProblemInfo from '../components/ProblemInfo';
 import Lectures from '../components/Lectures';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: #f2f2f2;
-  padding: 2rem;
-`;
+import common from '../components/Common.module.css';
 
 const BodyContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 200px;
   padding: 2rem;
-`;
-
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Titleh1 = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
 `;
 
 const ProfileContainer = styled.div`
@@ -40,8 +20,8 @@ const ProfileContainer = styled.div`
 `;
 
 const ButtonContainer = styled.div`
-margin-top: 1rem;
-display: flex;
+  margin-top: 1rem;
+  display: flex;
 `;
 
 const ProfileImage = styled.img`
@@ -100,7 +80,7 @@ const RecentQuesDiv = styled.h3`
 `;
 
 const RecentQuesList = styled.div`
-margin-top: 2rem;
+  margin-top: 2rem;
 `;
 
 const RecentLecList = styled.div`
@@ -118,18 +98,17 @@ const RecentLecDiv = styled.h3`
   display: flex;
 `;
 
-
 function ProfilePage() {
-   /*const { data } = useProfileQuery();
+  /*const { data } = useProfileQuery();
   const { authUser, logout } = useAuth();
   const { username, github } = data.profile;
   const canUpdateProfile = authUser?.username === username;*/
   const { slugUsername } = useParams();
-  
+
   const data = [
     {
-        username: 'Jiyun',
-        github: 'https://github.com/mery0816'
+      username: 'Jiyun',
+      github: 'https://github.com/mery0816'
     }
   ];
 
@@ -149,22 +128,22 @@ function ProfilePage() {
       problemCategory: 'Looping',
       problemLevel: '3',
       problemStatus: 'processing'
-    },
+    }
   ];
 
   const lectures = [
     {
       youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
       title: 'Lecture 1',
-      progress: 30,
+      progress: 30
     },
     {
       youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
       title: 'Lecture 2',
-      progress: 70,
-    },
+      progress: 70
+    }
   ];
-  
+
   const handleLogout = () => {
     // Handle logout functionality here
     logout();
@@ -175,54 +154,50 @@ function ProfilePage() {
   };
 
   return (
-    <Container>
-    <TitleContainer>
-      <Titleh1>Profile</Titleh1>
-      <hr style={{ height: '3px' }} />
-      
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>프로필</h1>
+        <hr />
+      </div>
       <ProfileContainer>
-        <ProfileImage
-          src="https://img.youtube.com/vi/k75oGRMiENk/0.jpg"
-          alt="Profile Image"
-        />
+        <ProfileImage src="https://img.youtube.com/vi/k75oGRMiENk/0.jpg" alt="Profile Image" />
         <ProfileUsername>{slugUsername}</ProfileUsername>
         <ButtonContainer>
-        <ProfileGithub onClick={handleClick}>Visit GitHub Profile</ProfileGithub>
-      <LogoutButton onClick={handleLogout}>GitHub 계정 로그아웃</LogoutButton>
-      </ButtonContainer>
+          <ProfileGithub onClick={handleClick}>Visit GitHub Profile</ProfileGithub>
+          <LogoutButton onClick={handleLogout}>GitHub 계정 로그아웃</LogoutButton>
+        </ButtonContainer>
       </ProfileContainer>
-      </TitleContainer>
       <BodyContainer>
-      <RecentQuestions>
-        <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
-        <RecentQuesList>
-        {processingProblems.map((problem) => (
-          <ProblemInfo
-            key={problem.slug}
-            problemNumber={problem.problemNumber}
-            title={problem.title}
-            problemCategory={problem.problemCategory}
-            problemLevel={problem.problemLevel}
-            problemStatus={problem.problemStatus}
-          />
-        ))}
-        </RecentQuesList>
-      </RecentQuestions>
-      <RecentLectures>
-        <RecentLecDiv>최근 본 강의</RecentLecDiv>
-        <RecentLecList>
-        {lectures.map((lecture, index) => (
-          <Lectures
-            key={index}
-            youtubeLink={lecture.youtubeLink}
-            title={lecture.title}
-            progress={lecture.progress}
-          />
-        ))}
-        </RecentLecList>
-      </RecentLectures>
+        <RecentQuestions>
+          <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
+          <RecentQuesList>
+            {processingProblems.map((problem) => (
+              <ProblemInfo
+                key={problem.slug}
+                problemNumber={problem.problemNumber}
+                title={problem.title}
+                problemCategory={problem.problemCategory}
+                problemLevel={problem.problemLevel}
+                problemStatus={problem.problemStatus}
+              />
+            ))}
+          </RecentQuesList>
+        </RecentQuestions>
+        <RecentLectures>
+          <RecentLecDiv>최근 본 강의</RecentLecDiv>
+          <RecentLecList>
+            {lectures.map((lecture, index) => (
+              <Lectures
+                key={index}
+                youtubeLink={lecture.youtubeLink}
+                title={lecture.title}
+                progress={lecture.progress}
+              />
+            ))}
+          </RecentLecList>
+        </RecentLectures>
       </BodyContainer>
-    </Container>
+    </div>
   );
 }
 

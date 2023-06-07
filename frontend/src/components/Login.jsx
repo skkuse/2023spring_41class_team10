@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { BsGithub } from 'react-icons/bs';
 
+import common from '../components/Common.module.css';
+
 const LoginContainer = styled.div`
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,7 +16,7 @@ const LoginContainer = styled.div`
 const LogoContainer = styled.div`
   width: 100%;
   height: 60px;
-  padding: 0;
+  padding: 1rem 2rem;
   margin: 0;
   display: flex;
   align-items: center;
@@ -29,7 +31,7 @@ const LogoImg = styled.img`
 
 const ContentContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  padding: 1rem 2rem;
   background-color: #f2f2f2;
   display: flex;
   flex-direction: column;
@@ -100,29 +102,35 @@ const Login = () => {
   };
 
   return (
-    <LoginContainer>
-      <LogoContainer>
-        <LogoImg src="/imgs/nav_logo.png" alt="Logo" />
-      </LogoContainer>
-      <ContentContainer>
-        <GithubLoginButton onClick={handleGithubLogin}>
-          {' '}
-          <ButtonIcon>
-            <BsGithub size="32" />
-          </ButtonIcon>
-          <ButtonText>GitHub로 시작하기</ButtonText>
-        </GithubLoginButton>
-        <CustomerSupportButton onClick={handleLogout}>
-          <ButtonText>로그아웃</ButtonText>
-        </CustomerSupportButton>
-        <Link to="/notice">
-          <CustomerSupportButton>
-            <ButtonText>고객센터</ButtonText>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>로그인</h1>
+        <hr />
+      </div>
+      <LoginContainer>
+        <LogoContainer>
+          <LogoImg src="/imgs/nav_logo.png" alt="Logo" />
+        </LogoContainer>
+        <ContentContainer>
+          <GithubLoginButton onClick={handleGithubLogin}>
+            {' '}
+            <ButtonIcon>
+              <BsGithub size="32" />
+            </ButtonIcon>
+            <ButtonText>GitHub로 시작하기</ButtonText>
+          </GithubLoginButton>
+          <CustomerSupportButton onClick={handleLogout}>
+            <ButtonText>로그아웃</ButtonText>
           </CustomerSupportButton>
-        </Link>
-        <FooterText>© 2023 - Privacy — Terms</FooterText>
-      </ContentContainer>
-    </LoginContainer>
+          <Link to="/notice">
+            <CustomerSupportButton>
+              <ButtonText>고객센터</ButtonText>
+            </CustomerSupportButton>
+          </Link>
+          <FooterText>© 2023 - Privacy — Terms</FooterText>
+        </ContentContainer>
+      </LoginContainer>
+    </div>
   );
 };
 
