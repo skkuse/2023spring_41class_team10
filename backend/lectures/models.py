@@ -13,7 +13,7 @@ class Lecture(models.Model):
 
   def to_json(self):
     return {
-      "id":self.id,
+      "lecture_id":self.id,
       "lecture_title":self.title,
       "lecture_link":self.video_link,
       "author_id":self.author_id,

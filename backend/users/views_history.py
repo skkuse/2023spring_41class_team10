@@ -7,6 +7,7 @@ from users.models import User
 
 import logging
 import json
+import pytz
 
 def get_fail_res(msg):
     """ 
@@ -113,7 +114,7 @@ class LectureHistoryView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user = User.objects.get(id=request.user.id)
-        N = request.GET.get('n', 5)
+        N = request.GET.get('n', 3)
         # user의 강의 기록을 조회
         user_id = request.user.id
         user_lecture_histories = LectureHistory.objects.filter(user_id=user_id).order_by("-create_at")
@@ -121,9 +122,12 @@ class LectureHistoryView(APIView):
         data = []
         for history in user_lecture_histories[:N]:
             lecture_obj = {}
+            lecture_obj["lecture_id"] = history.lecture.id
             lecture_obj["user_id"] = user_id
-            lecture_obj["title"] = history.lecture.title
-            lecture_obj["link"] = history.lecture.video_link
+            lecture_obj["lecture_title"] = history.lecture.title
+            lecture_obj["lecture_link"] = history.lecture.video_link
+            # UTC => KST
+            lecture_obj["create_at"] = history.create_at.astimezone(pytz.timezone('Asia/Seoul'))
             data.append(lecture_obj)
 
         response_data = {

@@ -14,7 +14,6 @@ import openai
 import json
 
 def start():
-    print("start")
     scheduler=BackgroundScheduler(timezone='Asia/Seoul')
     @scheduler.scheduled_job('cron', minute="*/30", misfire_grace_time=60, id='yt_scheduler')
     def scheduler_job():
@@ -76,7 +75,7 @@ def de_emoji(text):
 def get_lecture_memo(comment_list):
     print("get_lecture_memo")
     chat_role = "assistant"
-    content = "COMMENTS는 어떤 유튜브 영상의 댓글이다. 이 댓글만 보고 유튜브 영상의 장점을 짧게 한 줄로 요약해라. 이는 재미를 위함이므로 정확성을 크게 신경쓰지 않아도 된다.\n예시1: [Javascript] 실제 웹 개발에 도움이 될거 같습니다.\n예시2: [C언어] 재치있는 설명으로 밤새도록 볼 수 있습니다.\nCOMMENTS:\n"
+    content = "COMMENTS는 어떤 유튜브 영상의 댓글이다. 이 댓글만 보고 유튜브 영상의 장점을 짧게 한 줄로 요약해라. 이는 흥미 요소이므로 정확성을 크게 신경쓰지 않아도 된다.\n예시1: [Javascript] 자세한 설명이 실력향상에 도움이 됩니다.\n예시2: [C언어] 재치있는 설명으로 밤새도록 볼 수 있습니다.\nCOMMENTS:\n"
     req_comments = "\n".join(comment_list)
 
     openai.api_key = OPENAI_API_KEY

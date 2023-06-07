@@ -129,7 +129,14 @@ class ProblemSaveView(APIView):
         fields = body.get("field", [])
         description = body.get("description", "")
         testcases = body.get("tc", [{"testcase":"", "result":"", "is_sample":True}])
-
+        if title == "" :
+            return Response(get_fail_res("제목을 입력하지 않았습니다."))
+        if description == "":
+            return Response(get_fail_res("문제 설명을 입력하지 않았습니다."))
+        if level <= 0:
+            return Response(get_fail_res("난이도 설정에 오류가 있습니다."))
+        if testcases[0]["result"] == "":
+            return Response(get_fail_res("테스트케이스 결과를 입력하지 않았습니다."))
         try:
             with transaction.atomic():
                 # 문제 생성
