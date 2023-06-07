@@ -15,7 +15,7 @@ function App() {
     try {
       let isLogin = localStorage.getItem('isLoggedIn');
       if (isLogin === 'true') setLoggedIn(isLogin);
-      else setLoggedIn(false);
+      else localStorage.setItem('isLoggedIn', false);
     } catch {
       localStorage.setItem('isLoggedIn', false);
     }
@@ -24,7 +24,7 @@ function App() {
         console.log('fetch');
         const config = getHeader();
         const response = await axios.get(`http://127.0.0.1:8000/users/v1/info/`, config);
-        console.log('response', response);
+        console.log('user info', response);
         setUserInfo(response.data.user);
       } catch (error) {
         console.error('Failed to fetch questions:', error);

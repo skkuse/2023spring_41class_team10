@@ -99,7 +99,7 @@ class ProblemFieldListView(APIView):
         
         fields_list = []
         for field in fields:
-            fields_list.append({"id":field.id, "field":field.field})
+            fields_list.append({"value":field.id, "label":field.field})
 
         response_data = {
             "status": "success",
