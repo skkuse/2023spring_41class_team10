@@ -125,6 +125,7 @@ class ProblemSaveView(APIView):
         body = json.loads(request.body.decode('utf-8'))
         title = body.get("title", "")
         level = body.get("level", 0)
+        level = int(level)
         fields = body.get("field", [])
         description = body.get("description", "")
         testcases = body.get("tc", [{"testcase":"", "result":"", "is_sample":True}])
@@ -155,7 +156,7 @@ class ProblemSaveView(APIView):
             return Response(get_fail_res("문제 저장 중 문제가 발생했습니다."))
         response_data = {
             "status": "success",
-            "message": "Save Problem",
+            "message": "문제를 저장했습니다. 홈으로 돌아갑니다.",
             "data": problem.to_json(),
             "user": user.to_json()
         }
