@@ -5,13 +5,31 @@ import axios from 'axios';
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 const CardContainer = styled.div`
-  width: 300px;
+  width: 100%;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 16px;
-  margin: 20px;
+  margin: 1rem;
   cursor: pointer;
+  @media (min-width: 576px) {
+    width: 35%;
+  }
+  @media (min-width: 768px) {
+    width: 38%;
+  }
+  @media (min-width: 992px) {
+    width: 218px;
+    &:nth-child(n + 4) {
+      display: none;
+    }
+  }
+  @media (min-width: 1200px) {
+    width: 288px;
+    &:nth-child(n + 4) {
+      display: none;
+    }
+  }
 `;
 
 const LectureTitle = styled.h2`

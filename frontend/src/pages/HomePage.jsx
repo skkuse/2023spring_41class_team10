@@ -15,54 +15,26 @@ const BodyContainer = styled.div`
   padding: 1rem 2rem;
 `;
 
-const LecturesContainer = styled.div`
-  flex-direction: column;
-  margin-bottom: 100px;
+const SectionContainer = styled.div`
+  margin: 0 0 2rem 0;
 `;
-
-const ProcessingLectDiv = styled.div`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+const LecturesContainer = styled(SectionContainer)`
+  flex-direction: column;
 `;
 
 const LectureList = styled.div`
   display: flex;
-`;
-
-const QuestionsContainer = styled.div`
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  width: 80%;
-  margin-bottom: 100px;
-`;
-
-const ProcessingQuesDiv = styled.div`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
 `;
 
 const ProcessingList = styled.div`
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
   justify-content: center;
 `;
 
-const RecommendContainer = styled.div`
-  margin-top: 2rem;
-`;
-
-const RecomList = styled.div`
-  margin: 20px;
-  display: flex;
-`;
-
-const RecommendDiv = styled.div`
-  margin-top: 2rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-`;
+const RecommendContainer = styled(SectionContainer)``;
 
 function HomePage() {
   const problems = [
@@ -105,8 +77,18 @@ function HomePage() {
       try {
         const config = getHeader();
         const response = await axios.get(`${server_url}/users/v1/lectures/history/`, config);
-        console.log('response', response);
+        console.log('fetchRecentLecture', response);
         if (response.data.status !== 'fail') setRecentLecture(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch RecentLecture:', error);
+      }
+    };
+    const fetchProblem = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/users/v1/problems/?status=fail`, config);
+        console.log('fetchProblem', response);
+        if (response.data.status !== 'fail') setProblemData(response.data.data);
       } catch (error) {
         console.error('Failed to fetch RecentLecture:', error);
       }
@@ -115,13 +97,14 @@ function HomePage() {
       try {
         const config = getHeader();
         const response = await axios.get(`${server_url}/users/v1/lectures/guideline/`, config);
-        console.log('response', response);
+        console.log('fetchRecommendLecture', response);
         if (response.data.status !== 'fail') setRecommendLecture(response.data.data);
       } catch (error) {
         console.error('Failed to fetch RecentLecture:', error);
       }
     };
     fetchRecentLecture();
+    fetchProblem();
     fetchRecommendLecture();
   }, []);
   const getHeader = () => {
@@ -144,7 +127,7 @@ function HomePage() {
       </div>
       <BodyContainer>
         <LecturesContainer>
-          <ProcessingLectDiv>최근 수강 강의</ProcessingLectDiv>
+          <h2>최근 수강 강의</h2>
           <LectureList>
             {recentLecture.map((lecture, index) => (
               <Lectures
@@ -157,24 +140,24 @@ function HomePage() {
             ))}
           </LectureList>
         </LecturesContainer>
-        <QuestionsContainer>
-          <ProcessingQuesDiv>풀고 있는 문제</ProcessingQuesDiv>
+        <SectionContainer>
+          <h2>풀고 있는 문제</h2>
           <ProcessingList>
-            {processingProblems.map((problem) => (
+            {problemData.map((problem, idx) => (
               <ProblemInfo
-                key={problem.slug}
-                problemNumber={problem.problemNumber}
+                key={idx}
+                problemNumber={problem.problem_id}
                 title={problem.title}
-                problemCategory={problem.problemCategory}
-                problemLevel={problem.problemLevel}
-                problemStatus={problem.problemStatus}
+                problemCategory={problem.field}
+                problemLevel={problem.level}
+                problemStatus={problem.result}
               />
             ))}
           </ProcessingList>
-        </QuestionsContainer>
+        </SectionContainer>
         <RecommendContainer>
-          <RecommendDiv>추천 강의</RecommendDiv>
-          <RecomList>
+          <h2>추천 강의</h2>
+          <LectureList>
             {recommendLecture.map((lecture, index) => (
               <Lectures
                 key={index}
@@ -184,7 +167,7 @@ function HomePage() {
                 memo={lecture.memo}
               />
             ))}
-          </RecomList>
+          </LectureList>
         </RecommendContainer>
       </BodyContainer>
     </div>
