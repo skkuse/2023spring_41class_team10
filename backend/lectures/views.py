@@ -26,7 +26,7 @@ class LectureGuideRecommendView(APIView):
         user_id = request.user.id
         user = User.objects.get(id=user_id)
 
-        N=3
+        N = request.GET.get('n', 4)
         message = ""
         lecture_list = []
 
