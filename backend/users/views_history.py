@@ -7,6 +7,7 @@ from users.models import User
 
 import logging
 import json
+import pytz
 
 def get_fail_res(msg):
     """ 
@@ -29,20 +30,34 @@ class SubmissionHistoryView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user = User.objects.get(id=request.user.id)
-        
+        status = request.GET.get('status', "all")
+        status = status.upper()
         N = request.GET.get('n', 5)
         # user의 제출 history 조회, 제출을 내림차순으로 정렬
         user_id = request.user.id
         user_submissions = Submission.objects.filter(user=user_id).order_by("-create_at")
+        if status == "PASS" or status == "FAIL":
+            user_submissions.filter(status=status)
+        print("1 user_submissions", len(user_submissions))
+
+        print("2 user_submissions", len(user_submissions))
 
         data = []
         for submission in user_submissions[:N]:
+            
+            fields = ProblemFieldRelation.objects.filter(problem=submission.problem).values_list("field__field", flat=True)
+
+            field_list = list(fields)
+            print("field_list", len(field_list))
+            
             obj = {
                 "user_id" : user_id,
                 "title" : submission.problem.title,
                 "problem_id" : submission.problem.id,
+                "level" : submission.problem.level,
                 "submit_at" : submission.create_at,
-                "result" : submission.status
+                "field" : field_list,
+                "result" : "complete" if submission.status == "PASS" else "processing"
             }
             data.append(obj)
 
@@ -113,7 +128,7 @@ class LectureHistoryView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user = User.objects.get(id=request.user.id)
-        N = request.GET.get('n', 5)
+        N = request.GET.get('n', 4)
         # user의 강의 기록을 조회
         user_id = request.user.id
         user_lecture_histories = LectureHistory.objects.filter(user_id=user_id).order_by("-create_at")
@@ -121,9 +136,12 @@ class LectureHistoryView(APIView):
         data = []
         for history in user_lecture_histories[:N]:
             lecture_obj = {}
+            lecture_obj["lecture_id"] = history.lecture.id
             lecture_obj["user_id"] = user_id
-            lecture_obj["title"] = history.lecture.title
-            lecture_obj["link"] = history.lecture.video_link
+            lecture_obj["lecture_title"] = history.lecture.title
+            lecture_obj["lecture_link"] = history.lecture.video_link
+            # UTC => KST
+            lecture_obj["create_at"] = history.create_at.astimezone(pytz.timezone('Asia/Seoul'))
             data.append(lecture_obj)
 
         response_data = {

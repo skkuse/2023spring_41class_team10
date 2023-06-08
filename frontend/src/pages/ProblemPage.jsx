@@ -1,35 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {} from '../components';
-import { useProblemQuery } from '../hooks';
-import ProblemInfo from '../components/ProblemInfo';
-import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Container = styled.div`
-  width: 90%;
-  max-width: 1400px;
-  margin: auto;
-`;
-
-const DescriptionContainer = styled.div`
-  text-align: center;
-  margin-bottom: 2vh;
-`;
-
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Titleh1 = styled.h1`
-  margin: 0 auto;
-  padding: 10px 0;
-`;
+import {} from '../components';
+import ProblemInfo from '../components/ProblemInfo';
+import { useParams, useNavigate } from 'react-router-dom';
+import common from '../components/Common.module.css';
 
 const Titleh3 = styled.h3`
+  text-align: start;
   flex: 50%;
   margin-bottom: 0;
   padding: 10px 0;
+`;
+
+const DescriptionContainer = styled.div`
+  padding: 1rem 2rem;
+  text-align: center;
+  margin-bottom: 2vh;
 `;
 
 const MoreDescriptionContainer = styled.div`
@@ -38,6 +26,10 @@ const MoreDescriptionContainer = styled.div`
 `;
 
 const ActualDescriptionContainer = styled.pre`
+  background-color: white;
+  border-radius: 1rem;
+  padding: 16px;
+
   margin: 0 5px;
   text-align: left;
   font-size: 18px;
@@ -80,6 +72,7 @@ const LanguageDiv = styled.select`
 `;
 
 const SolvingContainer = styled.div`
+  padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -301,30 +294,27 @@ function Problem() {
   };
 
   return (
-    <Container>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>문제 풀이</h1>
+        <hr />
+      </div>
       <DescriptionContainer>
-        <TitleContainer>
-          <Titleh1>문제 풀이</Titleh1>
-          <hr />
-          {/* problem metadata component */}
-          {/* <p>
-            | #{slug} | {problemInfo.title} | {problemInfo.field} | {problemInfo.level} |
-          </p> */}
-          <ProblemInfo
-            problemNumber={slug}
-            title={problemInfo.title}
-            problemCategory={problemInfo.field}
-            problemLevel={problemInfo.level}
-            isActive={false}
-          />
+        {/* problem metadata component */}
+        <ProblemInfo
+          problemNumber={slug}
+          title={problemInfo.title}
+          problemCategory={problemInfo.field}
+          problemLevel={problemInfo.level}
+          isActive={false}
+        />
+        <Titleh3>문제 설명</Titleh3>
+        <MoreDescriptionContainer>
+          <ActualDescriptionContainer>{problemInfo.description}</ActualDescriptionContainer>
+        </MoreDescriptionContainer>
+      </DescriptionContainer>
 
-          <MoreDescriptionContainer>
-            <ActualDescriptionContainer>
-              &lt;문제설명&gt;<br></br>
-              {problemInfo.description}
-            </ActualDescriptionContainer>
-          </MoreDescriptionContainer>
-        </TitleContainer>
+      <DescriptionContainer>
         {problemInfo.tc_sample && (
           <TestCaseArea>
             <Titleh3>예제</Titleh3>
@@ -339,17 +329,19 @@ function Problem() {
             </TestCaseArea>
           ))}
       </DescriptionContainer>
-      <LeftAlign>
-        <ChooseLanguageContainer>
-          <LangDiv>언어 선택</LangDiv>
-          <LanguageDiv onChange={(val) => handleLanguageSelect(val)}>
-            <option>Python</option>
-            <option>C</option>
-            <option>C++</option>
-            <option>JAVA</option>
-          </LanguageDiv>
-        </ChooseLanguageContainer>
-      </LeftAlign>
+      <div style={{ padding: '0 2rem' }}>
+        <LeftAlign>
+          <ChooseLanguageContainer>
+            <LangDiv>언어 선택</LangDiv>
+            <LanguageDiv onChange={(val) => handleLanguageSelect(val)}>
+              <option>Python</option>
+              <option>C</option>
+              <option>C++</option>
+              <option>JAVA</option>
+            </LanguageDiv>
+          </ChooseLanguageContainer>
+        </LeftAlign>
+      </div>
       <SolvingContainer>
         <TypingContainer value={codeTyped} onChange={handleCodeChange} rows={20} />
         <InputOutputContainer>
@@ -386,7 +378,7 @@ function Problem() {
         </Controllers>
       </SolvingContainer>
       <hr />
-    </Container>
+    </div>
   );
 }
 export default Problem;

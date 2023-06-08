@@ -22,7 +22,7 @@ function MainPage(props) {
       <div className={styles.div}>
         <div className={styles.overlap}>
           <div className={styles.herocenter}>
-            {isLoggedIn ? (
+            {props.username ? (
               <>
                 <button className={styles.centerBtn} onClick={goUrl2}>
                   개인 페이지로 이동
@@ -33,7 +33,7 @@ function MainPage(props) {
             ) : (
               <>
                 <button className={styles.centerBtn} onClick={goUrl1}>
-                  지금 가입하기
+                  지금 시작하기
                 </button>
                 <div className={styles.subtitle}>AI 학습 도구와 함께하는 프로그래밍 학습</div>
                 <h1 className={styles.title}>미래형 AI 코딩 교육 플랫폼</h1>

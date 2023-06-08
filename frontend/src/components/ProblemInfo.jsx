@@ -6,21 +6,41 @@ const SquareContainer = styled.div`
   max-width: 800px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr;
+  grid-template-columns: 1fr 4fr 3fr 1fr;
   border-radius: 10px;
   border: 0.1px solid black;
-  height: 26px;
   margin: 1rem;
   padding: 4px 0;
   background-color: white;
   box-shadow: 2px 4px 4px #cccccc;
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr 4fr;
+  }
 `;
 
 const SquareItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 2px solid;
+  border-right: 1px solid;
+  @media (max-width: 576px) {
+    border: 0;
+
+    &:nth-child(1) {
+      order: 1;
+      border-bottom: 1px solid;
+    }
+    &:nth-child(2) {
+      order: 2;
+      border-bottom: 1px solid;
+    }
+    &:nth-child(3) {
+      order: 4;
+    }
+    &:nth-child(4) {
+      order: 3;
+    }
+  }
 `;
 
 const WideSquareItem = styled(SquareItem)`
@@ -37,8 +57,6 @@ const ProblemLink = styled(Link)`
   align-items: center;
   text-decoration: none;
   color: #000;
-  height: 50px;
-  margin-bottom: 20px;
   width: 100%;
 `;
 

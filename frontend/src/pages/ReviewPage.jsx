@@ -1,28 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { ProblemInfo } from '../components';
-import { useProblemQuery } from '../hooks';
 import { useParams, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import axios from 'axios';
 import { BsRobot } from 'react-icons/bs';
 import { FaSpinner } from 'react-icons/fa';
 
-const Container = styled.div`
-  width: 90%;
-  max-width: 1400px;
-  margin: auto;
-`;
+import { ProblemInfo } from '../components';
+import common from '../components/Common.module.css';
 
 const DescriptionContainer = styled.div`
   text-align: center;
   margin-bottom: 2vh;
-`;
-
-const TitleContainer = styled.div``;
-
-const Titleh1 = styled.h1`
-  margin: 0 auto;
-  padding: 10px 0;
 `;
 
 const MoreDescriptionContainer = styled.div`
@@ -69,10 +57,12 @@ const TypingContainer = styled.textarea`
   color: white;
   width: 100%;
   margin-bottom: 1vh;
+  resize: none;
 `;
 
 const Titleh2 = styled.h2`
   margin: 5px 0;
+  text-align: start;
 `;
 
 const CodeCompareContainer = styled.div`
@@ -104,10 +94,9 @@ const CodeReviewContainer = styled.div`
 `;
 
 const CodeReviewDiv = styled.pre`
-  width: 100%;
   background-color: white;
-  border-radius: 3vw;
-  padding: 15px;
+  border-radius: 1rem;
+  padding: 16px;
   min-height: 15vh;
   margin-bottom: 1vh;
   font-family: Inter, system-ui, sans-serif;
@@ -319,33 +308,34 @@ function Review() {
   };
 
   return (
-    <Container>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>코드 리뷰</h1>
+        <hr />
+      </div>
+
       <DescriptionContainer>
-        <TitleContainer>
-          <Titleh1>코드 리뷰</Titleh1>
-          <hr />
-          {/* problem metadata component */}
-          <ProblemInfo
-            problemNumber={slug}
-            title={submissionData.title}
-            problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
-            problemLevel={submissionData.level}
-            isActive={false}
-          />
-          <MoreDescriptionContainer>
-            <ChooseLanguageContainer>
-              <LangDiv>선택한 언어</LangDiv>
-              <LanguageDiv> {submissionData.lang} </LanguageDiv>
-            </ChooseLanguageContainer>
-          </MoreDescriptionContainer>
-        </TitleContainer>
+        {/* problem metadata component */}
+        <ProblemInfo
+          problemNumber={slug}
+          title={submissionData.title}
+          problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
+          problemLevel={submissionData.level}
+          isActive={false}
+        />
+        <MoreDescriptionContainer>
+          <ChooseLanguageContainer>
+            <LangDiv>선택한 언어</LangDiv>
+            <LanguageDiv> {submissionData.lang} </LanguageDiv>
+          </ChooseLanguageContainer>
+        </MoreDescriptionContainer>
       </DescriptionContainer>
 
       <ReviewContainer>
         <Titleh2>Answer</Titleh2>
         <CodeCompareContainer>
           <OriginalCodeContainer>
-            <label>{username} 님</label>
+            <label>내가 쓴 코드</label>
             <TypingContainer value={submissionData.code} rows={15} readOnly={true} />
           </OriginalCodeContainer>
           <FeedbackContainer>
@@ -414,7 +404,7 @@ function Review() {
         </Controllers>
       </ReviewContainer>
       <hr />
-    </Container>
+    </div>
   );
 }
 export default Review;

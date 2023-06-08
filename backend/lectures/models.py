@@ -6,9 +6,19 @@ class Lecture(models.Model):
   video_link = models.CharField(max_length=2000)
   author_id = models.BigIntegerField()
   create_at = models.DateTimeField(auto_now_add=True)
-  
+  memo = models.TextField(default="")
+
   def __str__(self) -> str:
-    return f"#{self.id} {self.title}" 
+    return f"#{self.id} {self.title}"
+
+  def to_json(self):
+    return {
+      "lecture_id":self.id,
+      "lecture_title":self.title,
+      "lecture_link":self.video_link,
+      "author_id":self.author_id,
+      "memo":self.memo
+    }
 
 class SoftwareField(models.Model):
   id = models.AutoField(primary_key=True)
@@ -31,3 +41,19 @@ class LectureHistory(models.Model):
   lecture = models.ForeignKey(Lecture, models.CASCADE)
   user_id = models.BigIntegerField()
   create_at = models.DateTimeField(auto_now_add=True)
+
+# 유저의 강의 추천을 미리 저장
+class LectureRecommend(models.Model):
+  id = models.AutoField(primary_key=True)
+  user_id = models.BigIntegerField()
+  lecture = models.ForeignKey(Lecture, models.CASCADE)
+  create_at = models.DateTimeField(auto_now_add=True)
+
+class LectureComment(models.Model):
+  id = models.AutoField(primary_key=True)
+  lecture = models.ForeignKey(Lecture, models.CASCADE)
+  comment = models.TextField()
+  create_at = models.DateTimeField(auto_now_add=True)
+  
+  def __str__(self) -> str:
+    return self.comment 
