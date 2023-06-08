@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import DatabaseError, transaction
+from django.db.models import Prefetch
 
 import json
 import re
@@ -37,39 +38,43 @@ class ProblemListView(APIView):
         page = int(page)
         PAGE_SIZE = 5
 
-        # Problem 모델에서 모든 객체를 가져온다.
-        problems = Problem.objects.all().order_by('id')
+        # Problem 모델에서 페이지에 맞춰 가져온다.
+        problems = Problem.objects.all().order_by('id')[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
 
-        if not problems.exists():
-            return Response(get_fail_res("ProblemListView Failed!: Any problems in Problem Table"))
-        problems = list(problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+        # Prefetch를 사용하여 submission 쿼리 최적화
+        submissions_prefetch = Prefetch(
+            'submission_set',
+            queryset=Submission.objects.filter(user=request.user.id),
+            to_attr='submissions'
+        )
+        # Prefetch를 사용하여 ProblemFieldRelation 쿼리 최적화
+        field_relations_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemFieldRelation.objects.only('field__field'),
+            to_attr='field_relations'
+        )
+        # problems에 submissions, field_relations 객체 속성 추가
+        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
 
         problem_list = []
-
         for prob in problems:
             prob_obj = {}
             prob_obj["id"] = prob.id
             prob_obj["title"] = prob.title
             prob_obj["level"] = prob.level
-            if request.user.is_authenticated:
-                user_submissions = Submission.objects.filter(user=request.user.id, problem_id=prob.id)
-                if len(user_submissions) == 0:
-                    prob_obj['status'] = "uncomplete"
-                else:
-                    pass_submissions = user_submissions.filter(status="PASS")
-                    if len(pass_submissions) == 0:
-                        prob_obj['status'] = "processing"
-                    else:
-                        prob_obj['status'] = "complete"
 
-            else:
+            submissions = prob.submissions
+
+            if len(submissions) == 0:
                 prob_obj['status'] = "uncomplete"
+            else:
+                prob_obj['status'] = "processing"
+                for submission in submissions:
+                    if submission.status == "PASS":
+                        prob_obj['status'] = "complete"
+                        break
 
-            relations = ProblemFieldRelation.objects.filter(problem = prob)
-            field_list = []
-            if relations.exists():
-                for relation in relations:
-                    field_list.append(relation.field.field)
+            field_list = [field_relation.field.field for field_relation in prob.field_relations]
 
             prob_obj["field"] = field_list
             problem_list.append(prob_obj)
