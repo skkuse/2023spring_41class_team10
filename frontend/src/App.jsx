@@ -8,6 +8,8 @@ import { Navbar, Footer, AuthContext } from './components';
 import './App.css';
 import axios from 'axios';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 function App() {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState([]);
@@ -23,7 +25,7 @@ function App() {
       try {
         console.log('fetch');
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/users/v1/info/`, config);
+        const response = await axios.get(`${server_url}/users/v1/info/`, config);
         console.log('user info', response);
         setUserInfo(response.data.user);
       } catch (error) {
@@ -56,7 +58,7 @@ function App() {
           <Route path="/login/github/callback/" element={<OAuth />} />{' '}
           <Route path="/problem/:slug" element={<Problem />} />
           <Route path="/problem/:slug/review" element={<Review />} />
-          <Route path="/profile/:slugUsername" element={<Profile />} />{' '}
+          <Route path="/profile/:slugUsername" element={<Profile user={userInfo ? userInfo : {}} />} />{' '}
           {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
           <Route path="/notice" element={<Notice />} />
           <Route path="/questions" element={<Questions />} />

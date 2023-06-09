@@ -8,6 +8,8 @@ import styled from 'styled-components';
 import {} from '../components';
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const DescriptionContainer = styled.div`
   padding: 2rem;
   text-align: center;
@@ -148,7 +150,7 @@ function Produce() {
     const fetchFieldList = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/fields/list/`, config);
+        const response = await axios.get(`${server_url}/problems/v1/fields/list/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') setFieldData(response.data.data);
       } catch (error) {
@@ -240,7 +242,7 @@ function Produce() {
     try {
       console.log('problemData req', problemData);
       const config = getHeader();
-      const response = await axios.post('http://127.0.0.1:8000/problems/v1/create/', problemData, config);
+      const response = await axios.post(`${server_url}/problems/v1/create/`, problemData, config);
       console.log('postNewProblem res', response);
       if (response.status === 200) {
         alert(response.data.message);

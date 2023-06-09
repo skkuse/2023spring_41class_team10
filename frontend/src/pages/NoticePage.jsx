@@ -4,6 +4,8 @@ import axios from 'axios';
 
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const NoticeContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -72,7 +74,7 @@ function NoticePage() {
     const fetchNoticeInfo = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/boards/v1/notice/list/`, config);
+        const response = await axios.get(`${server_url}/boards/v1/notice/list/`, config);
         console.log('fetchNoticeInfo response', response);
         if (response.data.status !== 'fail') setNoticeDescriptions(response.data.data);
       } catch (error) {
@@ -82,7 +84,7 @@ function NoticePage() {
     const fetchFAQInfo = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/boards/v1/faq/list/`, config);
+        const response = await axios.get(`${server_url}/boards/v1/faq/list/`, config);
         console.log('fetchFAQInfo response', response);
         if (response.data.status !== 'fail') setFAQDescriptions(response.data.data);
       } catch (error) {

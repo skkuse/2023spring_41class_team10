@@ -6,6 +6,8 @@ import { BsFilter, BsSearch } from 'react-icons/bs';
 import ProblemInfo from '../components/ProblemInfo';
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const QuestionsContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -112,7 +114,7 @@ function QuestionsPage() {
     const fetchQuestions = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await axios.get('http://127.0.0.1:8000/problems/v1/list/', {
+        const response = await axios.get(`${server_url}/problems/v1/list/`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
