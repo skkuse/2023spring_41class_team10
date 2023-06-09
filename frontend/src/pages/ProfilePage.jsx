@@ -6,6 +6,8 @@ import ProblemInfo from '../components/ProblemInfo';
 import Lectures from '../components/Lectures';
 import common from '../components/Common.module.css';
 
+import { BsGithub } from 'react-icons/bs';
+
 const BodyContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -19,52 +21,63 @@ const ProfileContainer = styled.div`
   align-items: center;
 `;
 
-const ButtonContainer = styled.div`
-  margin-top: 1rem;
-  display: flex;
-`;
-
 const ProfileImage = styled.img`
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  margin-bottom: 1rem;
+  border: 1px solid #d0d7de;
+  object-fit: cover;
 `;
 
-const ProfileUsername = styled.h2`
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+const ProfileUsername = styled.h2``;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
 `;
 
 const ProfileGithub = styled.a`
-  font-size: 1rem;
-  background-color: #ccc;
-  padding: 10px;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: color 0.3s ease;
-  margin-right: 2rem;
-  color: #333;
-
+  transition: color 0.2s ease;
+  color: #ffffff;
+  background-color: #212529;
+  gap: 0.5rem;
   &:hover {
-    color: #0056b3;
+    text-decoration: underline;
+    color: #ffffff;
+    background-color: black;
   }
 `;
 
 const LogoutButton = styled.button`
   font-size: 1rem;
   background-color: #ccc;
-  padding: 10px;
+  padding: 0.5rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #0056b3;
+    background-color: #aaa;
   }
+`;
+
+const ButtonIcon = styled.span`
+  margin: auto;
+  line-height: 1.25rem !important;
+`;
+
+const ButtonText = styled.span`
+  margin: auto;
 `;
 
 const RecentQuestions = styled.div`
@@ -98,19 +111,8 @@ const RecentLecDiv = styled.h3`
   display: flex;
 `;
 
-function ProfilePage() {
-  /*const { data } = useProfileQuery();
-  const { authUser, logout } = useAuth();
-  const { username, github } = data.profile;
-  const canUpdateProfile = authUser?.username === username;*/
+function ProfilePage(props) {
   const { slugUsername } = useParams();
-
-  const data = [
-    {
-      username: 'Jiyun',
-      github: 'https://github.com/mery0816'
-    }
-  ];
 
   const processingProblems = [
     {
@@ -145,12 +147,14 @@ function ProfilePage() {
   ];
 
   const handleLogout = () => {
-    // Handle logout functionality here
-    logout();
+    localStorage.setItem('isLoggedIn', false);
+    localStorage.setItem('refresh_token', false);
+    localStorage.setItem('access_token', false);
+    window.location.reload();
   };
 
   const handleClick = () => {
-    window.open(data[0].github, '_blank');
+    window.open(`https://github.com/${slugUsername}`, '_blank');
   };
 
   return (
@@ -159,44 +163,64 @@ function ProfilePage() {
         <h1>프로필</h1>
         <hr />
       </div>
-      <ProfileContainer>
-        <ProfileImage src="https://img.youtube.com/vi/k75oGRMiENk/0.jpg" alt="Profile Image" />
-        <ProfileUsername>{slugUsername}</ProfileUsername>
-        <ButtonContainer>
-          <ProfileGithub onClick={handleClick}>Visit GitHub Profile</ProfileGithub>
-          <LogoutButton onClick={handleLogout}>GitHub 계정 로그아웃</LogoutButton>
-        </ButtonContainer>
-      </ProfileContainer>
-      <BodyContainer>
-        <RecentQuestions>
-          <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
-          <RecentQuesList>
-            {processingProblems.map((problem) => (
-              <ProblemInfo
-                key={problem.slug}
-                problemNumber={problem.problemNumber}
-                title={problem.title}
-                problemCategory={problem.problemCategory}
-                problemLevel={problem.problemLevel}
-                problemStatus={problem.problemStatus}
-              />
-            ))}
-          </RecentQuesList>
-        </RecentQuestions>
-        <RecentLectures>
-          <RecentLecDiv>최근 본 강의</RecentLecDiv>
-          <RecentLecList>
-            {lectures.map((lecture, index) => (
-              <Lectures
-                key={index}
-                youtubeLink={lecture.youtubeLink}
-                title={lecture.title}
-                progress={lecture.progress}
-              />
-            ))}
-          </RecentLecList>
-        </RecentLectures>
-      </BodyContainer>
+      {slugUsername === props.user.github_username ? (
+        <>
+          <ProfileContainer>
+            <ProfileImage src={props.user.profile_image_url} alt="Profile Image" />
+            <ProfileUsername>{slugUsername}</ProfileUsername>
+            <ButtonContainer>
+              <ProfileGithub onClick={handleClick}>
+                <ButtonIcon>
+                  <BsGithub size="32" />
+                </ButtonIcon>
+                <ButtonText>GitHub 페이지</ButtonText>
+              </ProfileGithub>
+              <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+            </ButtonContainer>
+          </ProfileContainer>
+          <BodyContainer>
+            <RecentQuestions>
+              <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
+              <RecentQuesList>
+                {processingProblems.map((problem) => (
+                  <ProblemInfo
+                    key={problem.slug}
+                    problemNumber={problem.problemNumber}
+                    title={problem.title}
+                    problemCategory={problem.problemCategory}
+                    problemLevel={problem.problemLevel}
+                    problemStatus={problem.problemStatus}
+                  />
+                ))}
+              </RecentQuesList>
+            </RecentQuestions>
+            <RecentLectures>
+              <RecentLecDiv>최근 본 강의</RecentLecDiv>
+              <RecentLecList>
+                {lectures.map((lecture, index) => (
+                  <Lectures
+                    key={index}
+                    youtubeLink={lecture.youtubeLink}
+                    title={lecture.title}
+                    progress={lecture.progress}
+                  />
+                ))}
+              </RecentLecList>
+            </RecentLectures>
+          </BodyContainer>
+        </>
+      ) : (
+        <>
+          <ProfileContainer>
+            {/* TODO 프로필 이미지를 유저 정보를 받아와서 처리하거나 디폴트 이미지 사용 */}
+            <ProfileImage src={`https://i.ytimg.com/vi/sXeYkw4VE24/mqdefault.jpg`} alt="Profile Image" />
+            <ProfileUsername>{slugUsername}</ProfileUsername>
+            <ButtonContainer>
+              <ProfileGithub onClick={handleClick}>GitHub 페이지</ProfileGithub>
+            </ButtonContainer>
+          </ProfileContainer>
+        </>
+      )}
     </div>
   );
 }

@@ -68,7 +68,11 @@ function NavBar(props) {
       {isLoggedIn ? (
         <AuthLinks>
           <StyledLink to="/notice">고객센터</StyledLink>
-          <StyledLinkBlack to="/login">{props.username !== '' ? props.username : 'Login'}</StyledLinkBlack>
+          {props.username ? (
+            <StyledLinkBlack to={`/profile/${props.username}`}>{props.username}</StyledLinkBlack>
+          ) : (
+            <StyledLinkBlack to="/login">Login</StyledLinkBlack>
+          )}
         </AuthLinks>
       ) : (
         <AuthLinks>

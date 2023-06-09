@@ -51,7 +51,6 @@ const LoginTitle = styled.h1`
 const LoginButton = styled.button`
   margin-top: 16px;
   width: 280px;
-  aspect-ratio: 9/2;
   font-family: Roboto;
   color: #ffffff;
   font-size: 20px;
@@ -60,6 +59,8 @@ const LoginButton = styled.button`
   display: flex;
   justify-content: center;
   padding: 0.5rem 1.5rem;
+  transition: background-color 0.1s ease;
+  border: none;
 `;
 
 const ButtonIcon = styled.span`
@@ -72,11 +73,20 @@ const ButtonText = styled.span`
 `;
 
 const GithubLoginButton = styled(LoginButton)`
+  aspect-ratio: 9/2;
   background-color: #212529;
+  &:hover {
+    background-color: black;
+  }
 `;
 
 const CustomerSupportButton = styled(LoginButton)`
-  background-color: #959595;
+  background-color: #ccc;
+  color: black;
+  font-size: 16px;
+  &:hover {
+    background-color: #aaa;
+  }
 `;
 
 const FooterText = styled.p`
