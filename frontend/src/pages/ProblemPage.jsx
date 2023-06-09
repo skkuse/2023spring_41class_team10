@@ -7,6 +7,8 @@ import ProblemInfo from '../components/ProblemInfo';
 import { useParams, useNavigate } from 'react-router-dom';
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const Titleh3 = styled.h3`
   text-align: start;
   flex: 50%;
@@ -169,7 +171,7 @@ function Problem() {
     const fetchProblemInfo = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/`, config);
+        const response = await axios.get(`${server_url}/problems/v1/${slug}/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') setProblemInfo(response.data.data);
       } catch (error) {
@@ -228,7 +230,7 @@ function Problem() {
     if (confirm('코드를 불러오면 현재 작성된 코드가 덮어씌워집니다. 불러오시겠습니까?')) {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/problems/v1/${slug}/load/`, config);
+        const response = await axios.get(`${server_url}/problems/v1/${slug}/load/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') {
           alert(response.data.message);
@@ -246,7 +248,7 @@ function Problem() {
         const config = getHeader();
         let data = { lang: language, code: codeTyped };
         console.log('data', data);
-        const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/save/`, data, config);
+        const response = await axios.post(`${server_url}/problems/v1/${slug}/save/`, data, config);
         console.log('response', response);
         if (response.data.status !== 'fail') {
           alert(response.data.message);
@@ -262,7 +264,7 @@ function Problem() {
       const config = getHeader();
       let data = { lang: language, code: codeTyped, tc_user: inputTyped };
       console.log('data', data);
-      const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/exec/`, data, config);
+      const response = await axios.post(`${server_url}/problems/v1/${slug}/exec/`, data, config);
       console.log('response', response);
       if (response.data.status !== 'fail') {
         alert(response.data.message);
@@ -280,7 +282,7 @@ function Problem() {
         let data = { lang: language, code: codeTyped };
         console.log('data', data);
 
-        const response = await axios.post(`http://127.0.0.1:8000/problems/v1/${slug}/submit/`, data, config);
+        const response = await axios.post(`${server_url}/problems/v1/${slug}/submit/`, data, config);
         console.log('response', response);
         if (response.data.status !== 'fail') {
           alert(response.data.message);

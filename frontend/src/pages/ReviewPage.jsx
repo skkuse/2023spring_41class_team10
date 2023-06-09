@@ -8,6 +8,8 @@ import { FaSpinner } from 'react-icons/fa';
 import { ProblemInfo } from '../components';
 import common from '../components/Common.module.css';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const DescriptionContainer = styled.div`
   text-align: center;
   margin-bottom: 2vh;
@@ -193,7 +195,7 @@ function Review() {
     const fetchProblemInfo = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/users/v1/problems/${slug}/`, config);
+        const response = await axios.get(`${server_url}/users/v1/problems/${slug}/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') {
           setSubmissionData(response.data.data);
@@ -233,7 +235,7 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/review/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/review/`, data, config);
         console.log('response', response);
         setGPTReview(response.data);
         setLoading(0);
@@ -254,7 +256,7 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/refactoring/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/refactoring/`, data, config);
         console.log('response', response.data);
         setGPTReview(response.data);
         setLoading(0);
@@ -275,7 +277,7 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/deadcode/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/deadcode/`, data, config);
         console.log('response', response);
         setGPTReview(response.data);
         setLoading(0);
@@ -296,7 +298,7 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/comment/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/comment/`, data, config);
         console.log('response', response);
         setGPTReview(response.data);
         setLoading(0);

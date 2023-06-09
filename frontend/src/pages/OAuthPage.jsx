@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../components';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 const OAuthPage = () => {
   const { setLoggedIn } = useContext(AuthContext);
 
@@ -20,7 +22,7 @@ const OAuthPage = () => {
     console.log('code', code);
 
     if (code) {
-      const url = `http://127.0.0.1:8000/login/github/callback/?code=${code}`;
+      const url = `${server_url}/login/github/callback/?code=${code}`;
 
       axios
         .get(url)
