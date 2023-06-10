@@ -3,6 +3,7 @@ import django.db
 
 from users.models import User, UserGitHubRepository
 from lectures.models import Lecture, LectureComment, LectureRecommend, LectureHistory, LectureFieldRelation
+from problems.models import ProblemRecommend, Submission, ProblemFieldRelation, Problem
 from backend.settings import YOUTUBE_API_KEY, GITHUB_TOKEN, OPENAI_API_KEY
 
 from urllib.parse import urlparse, parse_qs
@@ -38,7 +39,7 @@ def start():
             print("target", target.github_username)
             run_github_scheduler_job(target.github_username)
 
-    @scheduler.scheduled_job('cron', minute="0, 15, 30, 45", misfire_grace_time=60, id='recommend_scheduler')
+    @scheduler.scheduled_job('cron', minute="0, 15, 30, 45", misfire_grace_time=60, id='recommend_lecture_scheduler')
     def recommend_lecture_scheduler_job():
         user_ids = LectureRecommend.objects.values('user_id').distinct()
         users = User.objects.filter(is_superuser=False).exclude(id__in=user_ids).order_by("id")
@@ -55,6 +56,15 @@ def start():
             target = User.objects.get(id=user_obj["user_id"])
             print("target", target.github_username)
             run_recommend_lecture_scheduler_job(target.id)
+    @scheduler.scheduled_job('cron', minute="*/7", misfire_grace_time=60, id='recommend_problem_scheduler')
+    def recommend_problem_scheduler_job():
+        user_ids = ProblemRecommend.objects.values('user_id').distinct()
+        users = User.objects.filter(is_superuser=False).exclude(id__in=user_ids).order_by("id")
+        print("users", users)
+        if len(users) > 0:
+            target = users.first()
+            print("target", target.github_username)
+            run_recommend_problem_scheduler_job(target.id)
     scheduler.start()
 
 def run_yt_scheduler_job():
@@ -233,6 +243,67 @@ def run_recommend_lecture_scheduler_job(user_id):
 
     return answer
 
+def run_recommend_problem_scheduler_job(user_id):
+    N=5
+    submissions = Submission.objects.filter(user=user_id).order_by("-id")
+    print("len(submissions)", len(submissions))
+    if len(submissions) > 0:
+        submissions_history = "최근 제출내역:\n"
+        slice_N = N if len(submissions) > N else len(submissions)
+        submissions = submissions[:slice_N]
+        for idx, submission in enumerate(submissions):
+            print("submission for stat", idx)
+            status = submission.status
+            level = submission.problem.level
+            title = submission.problem.title
+            fields = ProblemFieldRelation.objects.filter(problem=submission.problem).values_list('field__field', flat=True)
+            field_stat = ", ".join(fields)
+            submissions_history += f"{idx}. 문제 제목:{title}, 문제 난이도: {level}, 알고리즘 분야: {field_stat}, 성공 여부: {status}\n"
+    else:
+        submissions_history = "최근 제출내역이 없습니다.\n"
+    print("submissions", len(submissions), type(submissions), submissions)
+    problem_ids = [ submission.problem.id for submission in submissions ]
+    print("problem_ids", problem_ids)
+    uncompletes = Problem.objects.exclude(id__in=problem_ids)
+    if len(uncompletes) > 0:
+        problems_pool = "\n문제 내역:\n"
+        slice_N = N*2 if len(uncompletes) > N*2 else len(uncompletes)
+        uncompletes = uncompletes[:slice_N]
+        for problem in uncompletes:
+            print("uncompletes for stat", problem)
+            fields = ProblemFieldRelation.objects.filter(problem=problem).values_list('field__field', flat=True)
+            field_stat = ", ".join(fields)
+            problems_pool += f"문제 제목: {problem.title}, 문제 난이도: {problem.level}, 알고리즘 분야: {field_stat}\n"
+    suffix= "\n당신은 최근 제출내역에서 주어진 알고리즘 문제내역 안에서 문제를 추천해주는 시스템이다. 최근 제출 내역의 문제 제목과 문제 난이도, 알고리즘 분야, 성공 여부를 관찰하고 주어진 알고리즘 문제 내역에서 다음에 풀 문제를 골라주어야한다. 난이도는 1부터 10까지의 자연수이다. 만약 제출 내역이 없다면 난이도가 제일 낮은 것에서 골라 추천해주면 된다."
+    content = submissions_history + problems_pool + suffix
+    print("content", content)
+    openai.api_key = OPENAI_API_KEY
+    openai.Model.list()
+
+    chat_messages = [{"role": "assistant", "content": content}]
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chat_messages,
+        max_tokens=800,
+    )
+    answer = completion.choices[0].message['content']
+    # answer 파싱해서 추천문제 저장
+    print("get_recommend_problem", answer)
+    # 문제 제목을 따옴표로 강조해주므로 따옴표안에 있는 단어를 매칭시킨다.
+    problem_titles = []
+    matches = re.findall(r'"(.*?)"|\'(.*?)\'', answer)
+    for match in matches:
+        problem_titles.append(match[0] if match[0] else match[1])
+    print(problem_titles)
+    print("problem_title", problem_titles)
+    targets = Problem.objects.exclude(id__in=problem_ids).filter(title__in=problem_titles)
+    print("targets", targets)
+    for target in targets:
+        ProblemRecommend.objects.create(
+            user_id=user_id,
+            problem=target
+        )
+        print("ProblemRecommend save")
 
 # 유튜브 링크에서 video id 파싱
 def get_video_id(url):
