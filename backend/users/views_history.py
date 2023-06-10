@@ -44,12 +44,8 @@ class SubmissionHistoryView(APIView):
 
         data = []
         for submission in user_submissions[:N]:
-            
             fields = ProblemFieldRelation.objects.filter(problem=submission.problem).values_list("field__field", flat=True)
-
             field_list = list(fields)
-            print("field_list", len(field_list))
-            
             obj = {
                 "user_id" : user_id,
                 "title" : submission.problem.title,
@@ -57,7 +53,7 @@ class SubmissionHistoryView(APIView):
                 "level" : submission.problem.level,
                 "submit_at" : submission.create_at,
                 "field" : field_list,
-                "result" : "complete" if submission.status == "PASS" else "processing"
+                "status" : "complete" if submission.status == "PASS" else "processing"
             }
             data.append(obj)
 
