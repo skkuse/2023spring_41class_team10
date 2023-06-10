@@ -10,7 +10,7 @@ import time
 import subprocess
 import logging
 
-from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation
+from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation, UserCodeHistory
 from users.models import User
 from backend.settings import EXECUTE_DIR
 
@@ -55,6 +55,108 @@ class ProblemListView(APIView):
         )
         # problems에 submissions, field_relations 객체 속성 추가
         problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
+
+        problem_list = []
+        for prob in problems:
+            prob_obj = {}
+            prob_obj["id"] = prob.id
+            prob_obj["title"] = prob.title
+            prob_obj["level"] = prob.level
+
+            submissions = prob.submissions
+
+            if len(submissions) == 0:
+                prob_obj['status'] = "uncomplete"
+            else:
+                prob_obj['status'] = "processing"
+                for submission in submissions:
+                    if submission.status == "PASS":
+                        prob_obj['status'] = "complete"
+                        break
+
+            field_list = [field_relation.field.field for field_relation in prob.field_relations]
+
+            prob_obj["field"] = field_list
+            problem_list.append(prob_obj)
+
+        response_data = {
+            "status": "success",
+            "message": "Problem List Info",
+            "data": problem_list,
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+    
+    
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        page = request.GET.get('page', 1)
+        page = int(page)
+        keyword = request.GET.get('q', "")
+        PAGE_SIZE=5
+        
+        # Load POST DATA
+        body = json.loads(request.body.decode('utf-8'))
+        filter_status = body.get("status", "all")
+        filter_status = filter_status.upper()
+        level = body.get("level", 0)
+        level = int(level)
+        field = body.get("field", [])
+        
+        # Filtering status
+        submissions = Submission.objects.filter(user=user.id)
+        if filter_status in ["PASS", "FAIL"]:
+            submissions = submissions.filter(status=filter_status)
+        
+        # Load problem_id within filtering status
+        problem_id_list = submissions.values_list("problem__id", flat=True)
+        
+        
+        problems = Problem.objects.filter(title__contains=keyword).order_by('id')
+        # problems = Problem.objects.all().order_by('id')
+        # Submission query optimize by using Prefetch
+        submissions_prefetch = Prefetch(
+            'submission_set',
+            queryset=Submission.objects.filter(user=request.user.id),
+            to_attr='submissions'
+        )
+        # ProblemFieldRelation query optimize by using Prefetch
+        field_relations_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemFieldRelation.objects.only('field__field'),
+            to_attr='field_relations'
+        )
+        # Add submissions, field_relations attributes to problems
+        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
+        if filter_status == "NONE": # Load not submit problems
+            problems = problems.exclude(id__in=problem_id_list)
+        else: # Load submit problems corresponding status
+            problems = problems.filter(id__in=problem_id_list)
+
+        # default response
+        response_data = {
+            "status": "success",
+            "message": "Problem Filter List",
+            "data": [],
+            "user": user.to_json()
+        }    
+        if len(problems) == 0:
+            return Response(response_data)
+
+        if level != 0: # filtering level
+            problems = problems.filter(level=level)
+        if len(field) != 0: # filtering field
+            filtered_field_problems = ProblemFieldRelation.objects.filter(field_id__in=field).values_list('problem__id', flat=True)
+            problems = problems.filter(id__in=filtered_field_problems)
+        if len(problems) < PAGE_SIZE:
+            problems = problems[:]
+        if len(problems) < PAGE_SIZE * page :
+            problems = problems[PAGE_SIZE * (page - 1):]
+        else:
+            problems = problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
 
         problem_list = []
         for prob in problems:
@@ -431,3 +533,4 @@ def create_new_file(code, extension, testcase):
     test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
     with open(test_file_path, "w") as file:
         file.write(testcase)
+
