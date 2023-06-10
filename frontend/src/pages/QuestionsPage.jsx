@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BsFilter, BsSearch } from 'react-icons/bs';
 
 import ProblemInfo from '../components/ProblemInfo';
+import Pagination from '../components/Pagination';
 import common from '../components/Common.module.css';
 import Select from 'react-select';
 
@@ -144,24 +145,26 @@ const SquareItem = styled.input`
   border: none;
   font-size: 16px;
   padding: 4px 8px;
+  width: 100%;
 `;
 
 const RightSquareItem = styled(SquareItem)`
   border-left: 1px solid #23272b;
 `;
 
-// 백엔드 데이터 들어오기 전 기본 데이터
-const fieldsOptions = [
-  { value: '입출력', label: '입출력' },
-  { value: '자료구조', label: '자료구조' },
-  { value: '알고리즘', label: '알고리즘' }
-]
-
 function QuestionsPage() {
   const [questions, setQuestions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // number of items per page
+
+  const [fieldList, setFieldList] = useState([
+    { value: '입출력', label: '입출력' },
+    { value: '자료구조', label: '자료구조' },
+    { value: '알고리즘', label: '알고리즘' }]); // 백엔드 데이터 들어오기 전 기본 데이터
   const [showFilters, setShowFilters] = useState(false);
   const [status, setStatus] = useState("all");
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(null);
   const [field, setField] = useState(null);
   const [allFilters, setAllFilters] = useState({ 
     status: "all", 
@@ -185,9 +188,29 @@ function QuestionsPage() {
       }
     };
     fetchQuestions();
+
+    const fetchFieldList = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/problems/v1/fields/list/`, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') setFieldList(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch FieldList:', error);
+      }
+    };
+    fetchFieldList();
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  const getPaginatedData = () => {
+    const startIndex = currentPage * itemsPerPage - itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return questions.slice(startIndex, endIndex);
+  };
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSearch = () => {
     // Perform search logic based on the searchTerm
@@ -280,7 +303,7 @@ function QuestionsPage() {
               </SquareContainer>
               <SelectItem
                 placeholder={'Field'}
-                options={fieldsOptions}
+                options={fieldList}
                 value={field}
                 onChange={handleFieldChange}
               />
@@ -299,6 +322,12 @@ function QuestionsPage() {
             problemStatus={question.status}
           />
         ))}
+        <Pagination
+          itemsPerPage={itemsPerPage}
+          totalItems={questions.length}
+          onPageChange={handlePageChange}
+          currentPage={currentPage}
+        />
       </QuestionsContainer>
     </div>
   );
