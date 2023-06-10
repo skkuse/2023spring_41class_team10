@@ -32,11 +32,11 @@ class LectureGuideRecommendView(APIView):
 
         recommends = LectureRecommend.objects.filter(user_id=user_id).order_by("-create_at")
         if len(recommends) > 0:
-            for lecture in recommends:
-                data = lecture.to_json()
+            for recommend in recommends:
+                data = recommend.lecture.to_json()
                 data["user_id"] = user_id
                 lecture_list.append(data)
-            message = "유저에 맞게 추천되었습니다."
+            message = "맞춤 추천 강의"
         else:
             # 임시로 랜덤함수 이용해 선택
             lecture_ids = Lecture.objects.exclude(memo="").values_list("id", flat=True)
@@ -48,7 +48,7 @@ class LectureGuideRecommendView(APIView):
                 data = lecture.to_json()
                 data["user_id"] = user_id
                 lecture_list.append(data)
-            message = "랜덤하게 추천되었습니다."
+            message = "랜덤 추천 강의"
 
         response_data = {
             "status" : "success",
