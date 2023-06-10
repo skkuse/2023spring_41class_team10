@@ -6,7 +6,7 @@ class Lecture(models.Model):
   video_link = models.CharField(max_length=2000)
   author_id = models.BigIntegerField()
   create_at = models.DateTimeField(auto_now_add=True)
-  memo = models.TextField(default="")
+  memo = models.TextField(blank=True, null=True, default="")
 
   def __str__(self) -> str:
     return f"#{self.id} {self.title}"
