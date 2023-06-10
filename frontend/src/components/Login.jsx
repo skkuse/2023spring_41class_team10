@@ -101,7 +101,8 @@ const FooterText = styled.p`
 const Login = () => {
   const handleGithubLogin = () => {
     // local 테스트용
-    window.location.href = 'https://github.com/login/oauth/authorize?client_id=Iv1.f8333c935b2b0479';
+    const client_id = import.meta.env.VITE_CLIENT_ID;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${client_id}`;
   };
 
   const handleLogout = () => {
