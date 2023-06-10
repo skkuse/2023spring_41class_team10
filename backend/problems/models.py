@@ -74,3 +74,10 @@ class UserCodeHistory(models.Model):
   memo = models.TextField()
   create_at = models.DateTimeField(auto_now_add=True)
   lang = models.CharField(max_length=50, default="python")
+
+class ProblemRecommend(models.Model):
+  id = models.AutoField(primary_key=True)
+  user_id = models.BigIntegerField()
+  problem = models.ForeignKey(Problem, models.CASCADE)
+  create_at = models.DateTimeField(auto_now_add=True)
+  update_at = models.DateTimeField(auto_now=True)

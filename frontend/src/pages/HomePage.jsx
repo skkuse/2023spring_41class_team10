@@ -37,41 +37,10 @@ const ProcessingList = styled.div`
 const RecommendContainer = styled(SectionContainer)``;
 
 function HomePage() {
-  const problems = [
-    {
-      slug: '1',
-      title: 'Test Problem 1',
-      problemNumber: '1',
-      problemCategory: 'I/O',
-      problemLevel: '2',
-      problemStatus: 'complete'
-    },
-    {
-      slug: '2',
-      title: 'Test Problem 2',
-      problemNumber: '2',
-      problemCategory: 'Looping',
-      problemLevel: '3',
-      problemStatus: 'processing'
-    }
-  ];
-
-  const lectures = [
-    {
-      youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
-      title: 'Lecture 1',
-      progress: 30
-    },
-    {
-      youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
-      title: 'Lecture 2',
-      progress: 70
-    }
-  ];
-
   const [problemData, setProblemData] = useState([]);
   const [recentLecture, setRecentLecture] = useState([]);
   const [recommendLecture, setRecommendLecture] = useState([]);
+  const [recommendMsg, setRecommendMsg] = useState('추천 강의');
   useEffect(() => {
     const fetchRecentLecture = async () => {
       try {
@@ -98,7 +67,10 @@ function HomePage() {
         const config = getHeader();
         const response = await axios.get(`${server_url}/users/v1/lectures/guideline/`, config);
         console.log('fetchRecommendLecture', response);
-        if (response.data.status !== 'fail') setRecommendLecture(response.data.data);
+        if (response.data.status !== 'fail') {
+          setRecommendLecture(response.data.data);
+          setRecommendMsg(response.data.message);
+        }
       } catch (error) {
         console.error('Failed to fetch RecentLecture:', error);
       }
@@ -116,8 +88,6 @@ function HomePage() {
     };
     return config;
   };
-
-  const processingProblems = problems.filter((problem) => problem.problemStatus === 'processing');
 
   return (
     <div className={`${common.container}`}>
@@ -156,7 +126,7 @@ function HomePage() {
           </ProcessingList>
         </SectionContainer>
         <RecommendContainer>
-          <h2>추천 강의</h2>
+          <h2>{recommendMsg}</h2>
           <LectureList>
             {recommendLecture.map((lecture, index) => (
               <Lectures

@@ -48,6 +48,8 @@ class LectureRecommend(models.Model):
   user_id = models.BigIntegerField()
   lecture = models.ForeignKey(Lecture, models.CASCADE)
   create_at = models.DateTimeField(auto_now_add=True)
+  update_at = models.DateTimeField(auto_now=True)
+
 
 class LectureComment(models.Model):
   id = models.AutoField(primary_key=True)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Problem, AlgorithmField, ProblemFieldRelation, Testcase, Execution, Submission, UserCodeHistory
+from .models import Problem, AlgorithmField, ProblemFieldRelation, Testcase, Execution, Submission, UserCodeHistory, ProblemRecommend
 from import_export.admin import ImportExportMixin
 
 class ProblemAdmin(ImportExportMixin, admin.ModelAdmin):
@@ -78,6 +78,13 @@ class UserCodeHistoryAdmin(ImportExportMixin, admin.ModelAdmin):
     else :
       return obj.memo
 
+class ProblemRecommendAdmin(ImportExportMixin, admin.ModelAdmin):
+  search_fields = ["id", "problem__title", "user_id"]
+  list_display = ("id", "get_problem", "user_id", "create_at", "update_at")
+  @admin.display(description='problem', ordering='problem__title')
+  def get_problem(self, obj):
+    return obj.problem.title
+
 admin.site.register(Problem, ProblemAdmin)
 admin.site.register(AlgorithmField, AlgorithmFieldAdmin)
 admin.site.register(ProblemFieldRelation, ProblemFieldRelationAdmin)
@@ -85,3 +92,4 @@ admin.site.register(Testcase, TestcaseAdmin)
 admin.site.register(Execution, ExecutionAdmin)
 admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(UserCodeHistory, UserCodeHistoryAdmin)
+admin.site.register(ProblemRecommend, ProblemRecommendAdmin)

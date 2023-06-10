@@ -73,3 +73,18 @@ class User(AbstractBaseUser):
     def login(self):
         self.last_login=timezone.now()
         self.save()
+
+class UserGitHubRepository(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.BigIntegerField()
+    github_username = models.CharField(max_length=50, default="")
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+    repo_name = models.CharField(max_length=128)
+    lang = models.CharField(max_length=50)
+    description = models.TextField(blank=True, null=True)
+    topics = models.TextField(blank=True, null=True)
+    memo = models.TextField(blank=True, null=True, default="")
+    
+    def to_info(self):
+        return f"name: {self.repo_name}\ndescription: {self.description}\ntopics: {self.topics}\nlanguage: {self.lang}"
