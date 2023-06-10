@@ -51,7 +51,7 @@ const StyledLinkBlack = styled(Link)`
   }
 `;
 
-function NavBar(props) {
+function Navbar(props) {
   const { isLoggedIn } = useContext(AuthContext);
 
   return (
@@ -84,4 +84,4 @@ function NavBar(props) {
   );
 }
 
-export default NavBar;
+export default Navbar;
