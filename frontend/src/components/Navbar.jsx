@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import AuthContext from './AuthContext';
 
@@ -17,9 +17,9 @@ const Logo = styled.div`
 `;
 
 const LogoImage = styled.img`
-    height: 100%;
-    max-height: 50px;
-    transform: translateY(3px);
+  height: 100%;
+  max-height: 50px;
+  transform: translateY(3px);
 `;
 
 const NavigationLinks = styled.div`
@@ -42,41 +42,46 @@ const StyledLink = styled(Link)`
 
 const StyledLinkBlack = styled(Link)`
   color: white;
-  background-color: black;
+  background-color: #23272b;
   text-decoration: none;
   padding: 4px 24px;
   border-radius: 6px;
+  &:hover {
+    background-color: black;
+  }
 `;
 
-
 function NavBar(props) {
-    const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn } = useContext(AuthContext);
 
-    return (
-        <StyledNavbar>
-          <NavigationLinks>
-            <Logo>
-              <StyledLink to="/">
-                <LogoImage src="/imgs/nav_logo.png" />
-              </StyledLink>
-            </Logo>
-            <StyledLink to="/home">Home</StyledLink>
-            <StyledLink to="/questions">Questions</StyledLink>
-          </NavigationLinks>
-          {isLoggedIn ? (
-            <AuthLinks>
-                <StyledLink to="/login">고객센터</StyledLink>
-                <StyledLinkBlack to="/login">{props.username} 님</StyledLinkBlack>
-            </AuthLinks>
+  return (
+    <StyledNavbar>
+      <NavigationLinks>
+        <Logo>
+          <StyledLink to="/">
+            <LogoImage src="/imgs/nav_logo.png" />
+          </StyledLink>
+        </Logo>
+        <StyledLink to="/home">Home</StyledLink>
+        <StyledLink to="/questions">Questions</StyledLink>
+      </NavigationLinks>
+      {isLoggedIn ? (
+        <AuthLinks>
+          <StyledLink to="/notice">고객센터</StyledLink>
+          {props.username ? (
+            <StyledLinkBlack to={`/profile/${props.username}`}>{props.username}</StyledLinkBlack>
           ) : (
-            <AuthLinks>
-                <StyledLink to="/login">Login</StyledLink>
-                <StyledLinkBlack to="/login">Sign Up</StyledLinkBlack>
-            </AuthLinks>
+            <StyledLinkBlack to="/login">Login</StyledLinkBlack>
           )}
-          
-        </StyledNavbar>
-      );
+        </AuthLinks>
+      ) : (
+        <AuthLinks>
+          <StyledLink to="/notice">고객센터</StyledLink>
+          <StyledLinkBlack to="/login">Login</StyledLinkBlack>
+        </AuthLinks>
+      )}
+    </StyledNavbar>
+  );
 }
 
 export default NavBar;

@@ -54,6 +54,10 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # GitHub OAuth Setting
 CLIENT_ID = get_secret('CLIENT_ID')
 CLIENT_SECRET = get_secret('CLIENT_SECRET')
+GITHUB_TOKEN = get_secret('GITHUB_TOKEN')
+
+# YouTube API KEY
+YOUTUBE_API_KEY = get_secret('YOUTUBE_API_KEY')
 
 ALLOWED_HOSTS = ["*"]
 
@@ -61,7 +65,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'HomePage.apps.HomepageConfig',
+    # 'HomePage.apps.HomepageConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,18 +73,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'import_export',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework.authtoken',
-    # 'dj_rest_auth',
-    # 'dj_rest_auth.registration',
-    # 'allauth',
-    # 'allauth.account',
-    # 'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.github',
     'corsheaders',
-    # 'login',
-    # 'accounts',
     "users",
     'problems',
     'codes',
@@ -99,8 +96,7 @@ REST_FRAMEWORK = {
     # 세션 인증과 JWT 쿠키 인증을 사용하여 API에 접근 가능하도록 인증 설정
     'DEFAULT_AUTHENTICATION_CLASSES': (  
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
 }
 
@@ -117,7 +113,7 @@ MIDDLEWARE = [
 
 
 # 유저 모델의 username 필드를 사용하지 않음
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # 이메일 필수 입력
 ACCOUNT_EMAIL_REQUIRED = True
 # 이메일 고유값으로 사용
@@ -135,7 +131,7 @@ REST_USE_JWT = True  # JWT 인증 사용
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  # Access Token의 유효 시간을 2시간으로 설정
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),  # Access Token의 유효 시간을 4시간으로 설정
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh Token의 유효 시간을 7일로 설정
     'ROTATE_REFRESH_TOKENS': False,  # Refresh Token 갱신 하지 않음
     'BLACKLIST_AFTER_ROTATION': True,  # Refresh Token 갱신 후 이전 토큰을 블랙리스트에 추가
@@ -240,3 +236,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 # ex) ~/media/img.jpg
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SCHEDULER_DEFAULT = True

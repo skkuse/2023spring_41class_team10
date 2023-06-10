@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, UserGitHubRepository
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -13,5 +13,22 @@ class UserAdmin(admin.ModelAdmin):
   def get_field(self, obj):
     return obj.field.field 
 
-admin.site.register(User, UserAdmin)
+class UserGitHubRepositoryAdmin(admin.ModelAdmin):
+  search_fields = ["id", "github_username", "repo_name"]
+  list_display = ("id", "github_username", "repo_name", "lang", "get_short_desc", "topics", "get_short_memo", "update_at")
 
+  @admin.display(description='description')
+  def get_short_desc(self, obj):
+    if len(obj.description) > 30:
+      return obj.description[:30] + "..."
+    else :
+      return obj.description
+  @admin.display(description='memo')
+  def get_short_memo(self, obj):
+    if len(obj.memo) > 60:
+      return obj.memo[:60] + "..."
+    else :
+      return obj.memo
+
+admin.site.register(User, UserAdmin)
+admin.site.register(UserGitHubRepository, UserGitHubRepositoryAdmin)

@@ -4,8 +4,10 @@ from backend.settings import BASE_DIR
 
 import json
 import os
+import random
 
 from lectures.models import *
+from users.models import User
 
 def get_fail_res(msg):
     """ 
@@ -18,30 +20,53 @@ def get_fail_res(msg):
     
 class LectureGuideRecommendView(APIView):
     
-    def post(self, request):
-        body = json.loads(request.body.decode('utf-8'))
-        
-        user_id = body.get("user_id", "")
-        
-        
-        
-        # response_data = {
-        #     "user_id" : user_id,
-        #     "lecture_link" : ,
-        #     "lecture_title" : 
-        # }
-        
-        # return Response(response_data)
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
 
+        N = request.GET.get('n', 4)
+        message = ""
+        lecture_list = []
+
+        recommends = LectureRecommend.objects.filter(user_id=user_id).order_by("-create_at")
+        if len(recommends) > 0:
+            for recommend in recommends:
+                data = recommend.lecture.to_json()
+                data["user_id"] = user_id
+                lecture_list.append(data)
+            message = "맞춤 추천 강의"
+        else:
+            # 임시로 랜덤함수 이용해 선택
+            lecture_ids = Lecture.objects.exclude(memo="").values_list("id", flat=True)
+            if len(lecture_ids) < 5:
+                lecture_ids = Lecture.objects.all().values_list("id", flat=True)
+            rids = random.sample(list(lecture_ids), N)
+            targets = Lecture.objects.filter(id__in=rids)
+            for lecture in targets:
+                data = lecture.to_json()
+                data["user_id"] = user_id
+                lecture_list.append(data)
+            message = "랜덤 추천 강의"
+
+        response_data = {
+            "status" : "success",
+            "message" : message,
+            "data" : lecture_list,
+            "user" : user.to_json()
+        }
+
+        return Response(response_data)
 
 
 class LectureHistoryView(APIView):
     
     def post(self, request):
-        # store user_id by parsing json data 
-        body = json.loads(request.body.decode('utf-8'))
-        
-        user_id = body.get("user_id", "")
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
         
         # Check whether the user's history exists
         user_history = LectureHistory.objects.filter(user_id = user_id)
@@ -49,55 +74,52 @@ class LectureHistoryView(APIView):
         
         # If user's history exists, make lecture_list for Response
         # lecture_list [ lecture_obj1, lecture_obj2, lecture_obj3, .... ]
-        if user_history.exists():
-            for uh in user_history:
-                lecture_obj = {}
-                lecture_obj["user_id"] = user_id
-                lecture_obj["link"] = uh.lecture.video_link
-                lecture_obj["title"] = uh.lecture.title
-                lecutre_list.append(lecture_obj)
-        # User's history not exist
-        else:
-            return Response(get_fail_res("LectureHistory Failed!: Don't exist History of User"))
-        
+        for uh in user_history:
+            lecture_obj = {}
+            lecture_obj["user_id"] = user_id
+            lecture_obj["link"] = uh.lecture.video_link
+            lecture_obj["title"] = uh.lecture.title
+            lecture_obj["lecture_id"] = uh.lecture.id
+            lecutre_list.append(lecture_obj)
+
         # Success Response Data
         response_data = {
-            "status": "Success",
-            "message": "User's Lecture Hisotry Info",
-            "data": lecutre_list
+            "status" : "Success",
+            "message" : "User's Lecture Hisotry Info",
+            "data" : lecutre_list,
+            "user" : user
         }
-        
+
         return Response(response_data)
 
 # For User's Lecture History Save
 class LectureHistorySaveView(APIView):
     def post(self, request):
-        # store user_id, lecture_title by parsing json data 
+        # lecture_id by parsing json data 
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
         body = json.loads(request.body.decode('utf-8'))
-        
-        user_id = body.get("user_id", "")
-        lecture_title = body.get("lecture_title", "")
-        
-        # When user_id is empty
-        if user_id == "":
-            return Response(get_fail_res("LectureHistorySaveView Failed!: User_id is empty!"))
-        
+        lecture_id = body.get("lecture_id", "")
+
         # Check whether the Lecture exists
         try:
-            selected_lecture = Lecture.objects.get(title = lecture_title)
+            selected_lecture = Lecture.objects.get(id=lecture_id)
         except Lecture.DoesNotExist:
             return Response(get_fail_res("LectureHistorySaveView Failed!: Selected Lecture not exist!"))
-        
+
         # Create User's Lecture History
         LectureHistory.objects.create(
             lecture = selected_lecture,
             user_id = user_id
         )
-        
+
         # Success Response Data
         response_data = {
-            "status": "Success",
+            "status": "success",
             "message": "Save Lecture Hisotry of User",
+            "user": user
         }
-        
+
         return Response(response_data)

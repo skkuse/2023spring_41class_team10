@@ -3,9 +3,11 @@ from rest_framework.views import APIView
 
 from lectures.models import Lecture, LectureHistory
 from problems.models import Submission, ProblemFieldRelation
+from users.models import User
 
 import logging
 import json
+import pytz
 
 def get_fail_res(msg):
     """ 
@@ -27,27 +29,39 @@ class SubmissionHistoryView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
-        
+        user = User.objects.get(id=request.user.id)
+        status = request.GET.get('status', "all")
+        status = status.upper()
         N = request.GET.get('n', 5)
         # user의 제출 history 조회, 제출을 내림차순으로 정렬
         user_id = request.user.id
         user_submissions = Submission.objects.filter(user=user_id).order_by("-create_at")
+        if status == "PASS" or status == "FAIL":
+            user_submissions.filter(status=status)
+        print("1 user_submissions", len(user_submissions))
+
+        print("2 user_submissions", len(user_submissions))
 
         data = []
         for submission in user_submissions[:N]:
+            fields = ProblemFieldRelation.objects.filter(problem=submission.problem).values_list("field__field", flat=True)
+            field_list = list(fields)
             obj = {
                 "user_id" : user_id,
                 "title" : submission.problem.title,
                 "problem_id" : submission.problem.id,
+                "level" : submission.problem.level,
                 "submit_at" : submission.create_at,
-                "result" : submission.status
+                "field" : field_list,
+                "status" : "complete" if submission.status == "PASS" else "processing"
             }
             data.append(obj)
 
         response_data = {
             "status": "success",
             "message": f"recent {len(data)} submissions",
-            "data": data
+            "data": data,
+            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -62,11 +76,12 @@ class SubmissionCodeView(APIView):
     def get(self, request, id):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
 
         # user의 특정문제 제출 history 조회
         user_id = request.user.id
         user_submissions = Submission.objects.filter(user=user_id, problem__id=id, status="PASS").order_by("-create_at")
-        print("user_submissions", user_submissions)
+
         if len(user_submissions) == 0:
             return Response(get_fail_res("유저가 통과하지 못한 문제입니다."))
         target = user_submissions.first()
@@ -92,7 +107,8 @@ class SubmissionCodeView(APIView):
         response_data = {
             "status": "success",
             "message": f"problem {id} submissions",
-            "data": data
+            "data": data,
+            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -107,7 +123,8 @@ class LectureHistoryView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
-        N = request.GET.get('n', 5)
+        user = User.objects.get(id=request.user.id)
+        N = request.GET.get('n', 4)
         # user의 강의 기록을 조회
         user_id = request.user.id
         user_lecture_histories = LectureHistory.objects.filter(user_id=user_id).order_by("-create_at")
@@ -115,15 +132,19 @@ class LectureHistoryView(APIView):
         data = []
         for history in user_lecture_histories[:N]:
             lecture_obj = {}
+            lecture_obj["lecture_id"] = history.lecture.id
             lecture_obj["user_id"] = user_id
-            lecture_obj["title"] = history.lecture.title
-            lecture_obj["link"] = history.lecture.video_link
+            lecture_obj["lecture_title"] = history.lecture.title
+            lecture_obj["lecture_link"] = history.lecture.video_link
+            # UTC => KST
+            lecture_obj["create_at"] = history.create_at.astimezone(pytz.timezone('Asia/Seoul'))
             data.append(lecture_obj)
 
         response_data = {
             "status": "success",
             "message": f"recent {len(data)} views",
-            "data" : data
+            "data" : data,
+            "user" : user.to_json()
         }
 
         return Response(response_data)
@@ -139,6 +160,8 @@ class LectureHistorySaveView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
+        
         try:
             body = json.loads(request.body.decode('utf-8'))
             lecture_id = body.get("lecture_id")
@@ -148,5 +171,10 @@ class LectureHistorySaveView(APIView):
         except Exception as e:
             logging.exception(f"[LectureHistoryCreateView] {e}")
             return Response(get_fail_res("lecture error"))
+        response_data = {
+            "status": "success", 
+            "message": f"{user_id}, {lecture.title}", 
+            "user": user.to_json()
+        }
 
-        return Response({"status": "success", "message": f"{user_id}, {lecture.title}"})
+        return Response(response_data)

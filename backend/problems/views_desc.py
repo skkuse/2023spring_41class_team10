@@ -6,6 +6,8 @@ import json
 import os
 
 from problems.models import *
+from users.models import User
+from backend.settings import EXECUTE_DIR
 
 import subprocess   # For execution user's code
 import time         # For measure execution time
@@ -23,7 +25,9 @@ def get_fail_res(msg):
 class ProblemDescView(APIView):
     
     def get(self, request, id):
-
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         # Check whether the problem exists
         try:
             target_problem = Problem.objects.get(id=id)
@@ -55,7 +59,7 @@ class ProblemDescView(APIView):
         else:
             status = "uncomplete"
                 
-        response_data = {
+        data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
             "field" : target_field,
@@ -64,6 +68,13 @@ class ProblemDescView(APIView):
             "tc_sample" : sample_tc,
             "status" : status
         }
+        response_data = {
+            "status" : "success",
+            "message" : f"문제 {target_problem.id}번 데이터입니다.",
+            "data" : data,
+            "user" : user.to_json()
+        }
+        user
         print("response_data", response_data)
         return Response(response_data)
 
@@ -80,10 +91,12 @@ class ProblemExecView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
         language = body.get("lang", "python")
         language = language.lower()
+        language = "cpp" if language == "c++" else language
         tc_user = body.get("tc_user", "")
         print("tc_user", tc_user)
 
@@ -97,101 +110,177 @@ class ProblemExecView(APIView):
         except Problem.DoesNotExist:
             return Response(get_fail_res("Exececution Failed!: Don't Exist Problem!"))
 
-        if language == "python":
-            # Create a new Python file
-            self.create_new_file(code, ".py")
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['python3', self.file_path, tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-        elif language == "c":
-            # Create a new C file
-            self.create_new_file(code, ".c")
-            
-            # Compile first before Execution
-            subprocess.run(['gcc', self.file_path, '-o', 'out'])
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-        elif language == "cpp":
-            # Create a new C++ file
-            self.create_new_file(code, ".cc")
-            
-            # Compile first before Execution
-            subprocess.run(['g++', self.file_path, '-o', 'out'])
-            
-            # Get result by using Subprocess
-            start_time = time.time()
-            result = subprocess.run(['./out', tc_user], capture_output=True, text=True, timeout=3)
-            end_time = time.time()
-            output = result.stdout
-
-        execution_time = end_time-start_time
+        # Check testcase user & Execute Code
+        exec_res = dict()
+        if tc_user == "":
+            msg=f"Execution Nothing: User's testcase does not exist!"
+        else:
+            exec_res = execution_code(code, language, tc_user)
 
         # Remove Execution files
         need_file = [".keep", "c.sh", "cpp.sh", "java.sh", "python.sh"]
-        file_list = os.listdir(self.dir_path)
+        file_list = os.listdir(EXECUTE_DIR)
         for file_name in file_list:
             if file_name not in need_file:
-                file_path = os.path.join(self.dir_path, file_name)
+                file_path = os.path.join(EXECUTE_DIR, file_name)
                 os.remove(file_path)
 
         # When execution fail due to timeout, return Error Response
-        if result.returncode < 0:
+        if exec_res["status"] == "Timeout":
             execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Timeout",
-                exec_time = execution_time,
+                exec_time = exec_res["exec_time"],
                 user = user_id,
-                result = output
+                result = exec_res["result"]
             )
             msg=f"Execution Failed: Timeout!"
         # Error Case, Create Table
-        elif result.returncode > 0:
+        elif exec_res["status"][0:5] == "Error":
             execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Error",
-                exec_time = execution_time,
+                exec_time = exec_res["exec_time"],
                 user = user_id,
-                result = result.stderr
+                result = exec_res["result"]
             )
-            msg=f"Execution Failed: Error! {result.stderr}"
+            error_msg=exec_res["status"][6:]
+            msg=f"Execution Failed: Error! {error_msg}"
         else:
             # Success Case, Create Table
             execution = Execution.objects.create(
                 problem = target_problem,
                 lang = language,
                 status = "Success",
-                exec_time = execution_time,
+                exec_time = exec_res["exec_time"],
                 user = user_id,
-                result = output
+                result = exec_res["result"]
             )
             msg="Execution Success!"
 
-        data = {"id":target_problem.id, "result":execution.result, "exec_time": execution.exec_time, "status": execution.status}
-        response_data = {"status": "success", 
-                        "message": msg, 
-                        "data":data}
+        data = {
+            "id":target_problem.id, 
+            "result":execution.result, 
+            "exec_time": execution.exec_time, 
+            "status": execution.status
+        }
+        response_data = {
+            "status" : "success", 
+            "message" : msg, 
+            "data" : data,
+            "user" : user.to_json()
+        }
 
         return Response(response_data)
 
-    def create_new_file(self, code, extension):
-        self.dir_path = os.path.join(BASE_DIR, "problems/temp_file_dir")
+    # def create_new_file(self, code, extension):
+    #     self.dir_path = os.path.join(BASE_DIR, "problems/temp_file_dir")
         
-        if not os.path.exists(self.dir_path):
-            os.makedirs(self.dir_path, exist_ok=True)
+    #     if not os.path.exists(self.dir_path):
+    #         os.makedirs(self.dir_path, exist_ok=True)
         
-        self.file_path = os.path.join(self.dir_path, "temp"+extension)
-        with open(self.file_path, "w") as file:
-            file.write(code)
+    #     self.file_path = os.path.join(self.dir_path, "temp"+extension)
+    #     with open(self.file_path, "w") as file:
+    #         file.write(code)
 
+def create_new_file(code, extension, testcase):        
+    if not os.path.exists(EXECUTE_DIR):
+        os.makedirs(EXECUTE_DIR, exist_ok=True)
+    
+    # Case Java, file name is Main
+    if extension == ".java":
+        file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
+            
+    # Other Case, file name is temp
+    else:
+        file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
+    
+        
+    test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
+    with open(test_file_path, "w") as file:
+        file.write(testcase)
+
+def execution_code(code, lang, testcase):
+    """ Receives the code, lang, and test case &
+        Executes the code in a way that fits the lang to return the test case result.
+
+    Args:
+        code (str): 유저가 입력한 프로그래밍 코드
+        lang (str): 유저가 선택한 프로그래밍 언어
+        testcase (str): Testcase of Problem
+
+    Returns:
+        result (dic): Result of Testcase & Execution Time & Status
+    """
+    result = {"result": "", "exec_time": -1, "status": ""}
+        
+    # Case 1. python
+    if lang == "python":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".py", testcase)
+
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "python.sh")
+        
+        # Measure Execution start time and Execute .py
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # Case 2. C
+    elif lang == "c":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".c", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "c.sh")
+        
+        # Measure Execution start time and Execute .c
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # Case 3. C++
+    elif lang == "cpp":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".cc", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "cpp.sh")
+
+        # Measure Execution start time and Execute .cc
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # TODO: Incomplete Case 4. JAVA
+    elif lang == "java":
+        # Make Code File & Connect Execution File
+        create_new_file(code, ".java", testcase)
+        
+        # Find location of shell script
+        script_name = os.path.join(EXECUTE_DIR, "java.sh")
+        
+        # Measure Execution start time and Execute .c
+        start_time = time.time()
+        re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
+
+    # Measure Execution end time
+    end_time = time.time()
+    result["exec_time"] = end_time - start_time
+        
+    if re.returncode < 0:
+        result["status"] = "Timeout"
+    elif re.returncode > 0:
+        result["status"] = "Error" + re.stderr.strip()
+    else:
+        result["status"] = "Success"
+        result["result"] = re.stdout
+        
+    return result
 
 class ProblemCodeSaveView(APIView):
     """ 유저가 문제 풀이코드를 임시저장
@@ -205,6 +294,7 @@ class ProblemCodeSaveView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
         body = json.loads(request.body.decode('utf-8'))
         user_code = body.get("code", "")
         language = body.get("lang", "python")
@@ -240,8 +330,9 @@ class ProblemCodeSaveView(APIView):
 
         response_data = {
             "id" : id,
+            "status" : "success",
             "message" : message,
-            "status" : "success"
+            "user": user.to_json()
         }
         
         return Response(response_data)
@@ -251,12 +342,13 @@ class ProblemCodeLoadView(APIView) :
 
     url        : problems/v1/<id>/load/
     Returns :
-        POST   : status, message, id
+        GET   : status, message, id
     """
     def get(self, request, id):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        user = User.objects.get(id=user_id)
 
         # Check whether the problem exists
         try:
@@ -286,7 +378,8 @@ class ProblemCodeLoadView(APIView) :
             "id" : id,
             "message" : message,
             "status" : "success",
-            "data": data
+            "data" : data,
+            "user" : user.to_json()
         }
 
         return Response(response_data)

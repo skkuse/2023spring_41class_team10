@@ -1,5 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import DatabaseError, transaction
+from django.db.models import Prefetch
 
 import json
 import re
@@ -8,7 +10,8 @@ import time
 import subprocess
 import logging
 
-from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation
+from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation, UserCodeHistory, ProblemRecommend
+from users.models import User
 from backend.settings import EXECUTE_DIR
 
 def get_fail_res(msg):
@@ -28,42 +31,59 @@ class ProblemListView(APIView):
         GET     : id, problem_title, algorithm_field, level
     """
     def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
         page = request.GET.get('page', 1)
+        page = int(page)
         PAGE_SIZE = 5
 
-        # Problem 모델에서 모든 객체를 가져온다.
-        problems = Problem.objects.all().order_by('id')
+        # Problem 모델에서 페이지에 맞춰 가져온다.
+        problems = Problem.objects.all().order_by('id')[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
 
-        if not problems.exists():
-            return Response(get_fail_res("ProblemListView Failed!: Any problems in Problem Table"))
-        problems = list(problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+        # Prefetch를 사용하여 submission 쿼리 최적화
+        submissions_prefetch = Prefetch(
+            'submission_set',
+            queryset=Submission.objects.filter(user=request.user.id),
+            to_attr='submissions'
+        )
+        # Prefetch를 사용하여 ProblemFieldRelation 쿼리 최적화
+        field_relations_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemFieldRelation.objects.only('field__field'),
+            to_attr='field_relations'
+        )
+        # Prefetch를 사용하여 ProblemRecommend 쿼리 최적화
+        recommend_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemRecommend.objects.filter(user_id=request.user.id),
+            to_attr='recommend'
+        )
+        # problems에 submissions, field_relations 객체 속성 추가
+        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch, recommend_prefetch)
 
         problem_list = []
-
         for prob in problems:
             prob_obj = {}
             prob_obj["id"] = prob.id
             prob_obj["title"] = prob.title
             prob_obj["level"] = prob.level
-            if request.user.is_authenticated:
-                user_submissions = Submission.objects.filter(user=request.user.id, problem_id=prob.id)
-                if len(user_submissions) == 0:
-                    prob_obj['status'] = "uncomplete"
-                else:
-                    pass_submissions = user_submissions.filter(status="PASS")
-                    if len(pass_submissions) == 0:
-                        prob_obj['status'] = "processing"
-                    else:
-                        prob_obj['status'] = "complete"
-                print(user_submissions)
-            else:
-                prob_obj['status'] = "uncomplete"
 
-            relations = ProblemFieldRelation.objects.filter(problem = prob)
-            field_list = []
-            if relations.exists():
-                for relation in relations:
-                    field_list.append(relation.field.field)
+            submissions = prob.submissions
+
+            if len(submissions) == 0:
+                if len(prob.recommend) == 0:
+                    prob_obj['status'] = "uncomplete"
+                else :
+                    prob_obj['status'] = "ai"
+            else:
+                prob_obj['status'] = "processing"
+                for submission in submissions:
+                    if submission.status == "PASS":
+                        prob_obj['status'] = "complete"
+                        break
+
+            field_list = [field_relation.field.field for field_relation in prob.field_relations]
 
             prob_obj["field"] = field_list
             problem_list.append(prob_obj)
@@ -71,11 +91,236 @@ class ProblemListView(APIView):
         response_data = {
             "status": "success",
             "message": "Problem List Info",
-            "data": problem_list
+            "data": problem_list,
+            "user": user.to_json()
         }
 
         return Response(response_data)
 
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        page = request.GET.get('page', 1)
+        page = int(page)
+        keyword = request.GET.get('q', "")
+        PAGE_SIZE=5
+        
+        # Load POST DATA
+        body = json.loads(request.body.decode('utf-8'))
+        filter_status = body.get("status", "all")
+        filter_status = filter_status.upper()
+        level = body.get("level", 0)
+        level = int(level)
+        field = body.get("field", [])
+        
+        # Filtering status
+        submissions = Submission.objects.filter(user=user.id)
+        if filter_status in ["PASS", "FAIL"]:
+            submissions = submissions.filter(status=filter_status)
+        
+        # Load problem_id within filtering status
+        problem_id_list = submissions.values_list("problem__id", flat=True)
+        
+        
+        problems = Problem.objects.filter(title__contains=keyword).order_by('id')
+        # problems = Problem.objects.all().order_by('id')
+        # Submission query optimize by using Prefetch
+        submissions_prefetch = Prefetch(
+            'submission_set',
+            queryset=Submission.objects.filter(user=request.user.id),
+            to_attr='submissions'
+        )
+        # ProblemFieldRelation query optimize by using Prefetch
+        field_relations_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemFieldRelation.objects.only('field__field'),
+            to_attr='field_relations'
+        )
+        # Add submissions, field_relations attributes to problems
+        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
+        if filter_status == "NONE": # Load not submit problems
+            problems = problems.exclude(id__in=problem_id_list)
+        else: # Load submit problems corresponding status
+            problems = problems.filter(id__in=problem_id_list)
+
+        # default response
+        response_data = {
+            "status": "success",
+            "message": "Problem Filter List",
+            "data": [],
+            "user": user.to_json()
+        }    
+        if len(problems) == 0:
+            return Response(response_data)
+
+        if level != 0: # filtering level
+            problems = problems.filter(level=level)
+        if len(field) != 0: # filtering field
+            filtered_field_problems = ProblemFieldRelation.objects.filter(field_id__in=field).values_list('problem__id', flat=True)
+            problems = problems.filter(id__in=filtered_field_problems)
+        if len(problems) < PAGE_SIZE:
+            problems = problems[:]
+        if len(problems) < PAGE_SIZE * page :
+            problems = problems[PAGE_SIZE * (page - 1):]
+        else:
+            problems = problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
+
+        problem_list = []
+        for prob in problems:
+            prob_obj = {}
+            prob_obj["id"] = prob.id
+            prob_obj["title"] = prob.title
+            prob_obj["level"] = prob.level
+
+            submissions = prob.submissions
+
+            if len(submissions) == 0:
+                prob_obj['status'] = "uncomplete"
+            else:
+                prob_obj['status'] = "processing"
+                for submission in submissions:
+                    if submission.status == "PASS":
+                        prob_obj['status'] = "complete"
+                        break
+
+            field_list = [field_relation.field.field for field_relation in prob.field_relations]
+
+            prob_obj["field"] = field_list
+            problem_list.append(prob_obj)
+
+        response_data = {
+            "status": "success",
+            "message": "Problem List Info",
+            "data": problem_list,
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+
+
+class ProblemFieldListView(APIView):
+    """ Problem List View
+    url        : problems/v1/fields/list/
+    Returns :
+        GET     : algorithm_field
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+
+        fields = AlgorithmField.objects.order_by('id')
+        
+        fields_list = []
+        for field in fields:
+            fields_list.append({"value":field.id, "label":field.field})
+
+        response_data = {
+            "status": "success",
+            "message": "Problem Fields List Info",
+            "data": fields_list,
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+
+
+class ProblemSaveView(APIView):
+    """ Problem Save View
+    url        : problems/v1/create/
+    Returns :
+        POST     : id
+    """
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        # POST 데이터 가져오기
+        body = json.loads(request.body.decode('utf-8'))
+        title = body.get("title", "")
+        level = body.get("level", 0)
+        level = int(level)
+        fields = body.get("field", [])
+        description = body.get("description", "")
+        testcases = body.get("tc", [{"testcase":"", "result":"", "is_sample":True}])
+        if title == "" :
+            return Response(get_fail_res("제목을 입력하지 않았습니다."))
+        if description == "":
+            return Response(get_fail_res("문제 설명을 입력하지 않았습니다."))
+        if level <= 0:
+            return Response(get_fail_res("난이도 설정에 오류가 있습니다."))
+        if testcases[0]["result"] == "":
+            return Response(get_fail_res("테스트케이스 결과를 입력하지 않았습니다."))
+        try:
+            with transaction.atomic():
+                # 문제 생성
+                problem = Problem.objects.create(title=title, level=level, description=description)
+
+                # 문제 분야 연결 생성
+                for field_id in fields:
+                    ProblemFieldRelation.objects.create(field_id=field_id, problem_id=problem.id)
+
+                # 문제 테스트케이스 생성
+                for tc in testcases:
+                    Testcase.objects.create(
+                        problem_id=problem.id,  
+                        testcase=tc["testcase"],
+                        result=tc["result"],
+                        is_sample=tc["is_sample"]
+                    )
+
+        except DatabaseError as error:
+            logging.error(f'[ProblemSaveView] DatabaseError {error}')
+            return Response(get_fail_res("문제 저장 중 DB에 오류가 발생했습니다."))
+        except Exception as exception:
+            logging.exception(f'[ProblemSaveView] Exception {exception}')
+            return Response(get_fail_res("문제 저장 중 문제가 발생했습니다."))
+        response_data = {
+            "status": "success",
+            "message": "문제를 저장했습니다. 홈으로 돌아갑니다.",
+            "data": problem.to_json(),
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+
+class ProblemRecommendView(APIView):
+    """ Problem List View
+    url        : users/v1/problems/guideline/
+    Returns :
+        GET     : id, problem_title, algorithm_field, level
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        page = request.GET.get('page', 1)
+        page = int(page)
+        PAGE_SIZE = 5
+
+        # Problem 모델에서 페이지에 맞춰 가져온다.
+        recommends = ProblemRecommend.objects.filter(user_id=request.user.id)[:PAGE_SIZE]
+
+        problem_list = []
+        for recommend in recommends:
+            prob_obj = {}
+            prob_obj["id"] = recommend.problem.id
+            prob_obj["title"] = recommend.problem.title
+            prob_obj["level"] = recommend.problem.level
+            prob_obj['status'] = "ai"
+            fields = ProblemFieldRelation.objects.filter(problem__id=recommend.problem.id).values_list("field__field")
+            field_list = list(fields)
+            prob_obj["field"] = field_list
+            problem_list.append(prob_obj)
+        response_data = {
+            "status": "success",
+            "message": "Problem List Info",
+            "data": problem_list,
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
 
 class ProblemSubmitView(APIView):
     """ 유저 코드 제출
@@ -87,6 +332,8 @@ class ProblemSubmitView(APIView):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
         user_id = request.user.id
+        
+        user = User.objects.get(id=user_id)
         print("ProblemSubmitView")
         # url 파라미터 problem_id 저장
         problem_id = kwargs.get('problem_id')
@@ -95,7 +342,7 @@ class ProblemSubmitView(APIView):
         # json data 파싱하여 code와 language 저장
         body = json.loads(request.body.decode('utf-8'))
         code = body.get("code", "")
-        lang = body.get("language", "python")
+        lang = body.get("lang", "python")
         lang = lang.lower()
         lang = "cpp" if lang == "c++" else lang
 
@@ -152,9 +399,13 @@ class ProblemSubmitView(APIView):
             num_pass = res["num_pass"],
             code = code
         )
-        response = {"status": "success", 
-                    "message": f"{res['num_pass']}개의 테스트케이스를 통과했습니다.", 
-                    "data":res}
+        response = {
+            "status": "success", 
+            "message": f"{res['num_pass']}/{num_testcase}개의 테스트케이스를 통과했습니다.", 
+            "data":res, 
+            "user":user.to_json()
+        }
+
         return Response(response)
 
 
@@ -290,7 +541,7 @@ def execution_code(code, lang, testcase, answer):
         # Measure Execution start time and Execute .c
         start_time = time.time()
         re = subprocess.run(f'sh {script_name}', shell=True, capture_output=True, text=True, timeout=3)
-    print("re", re)
+
     # Measure Execution end time
     end_time = time.time()
     result["exec_time"] = end_time - start_time
@@ -308,22 +559,23 @@ def execution_code(code, lang, testcase, answer):
     return result
 
 def create_new_file(code, extension, testcase):        
-        if not os.path.exists(EXECUTE_DIR):
-            os.makedirs(EXECUTE_DIR, exist_ok=True)
-        
-        # Case Java, file name is Main
-        if extension == ".java":
-            file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
-            with open(file_path, "w") as file:
-                file.write(code)
-                
-        # Other Case, file name is temp
-        else:
-            file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
-            with open(file_path, "w") as file:
-                file.write(code)
-        
+    if not os.path.exists(EXECUTE_DIR):
+        os.makedirs(EXECUTE_DIR, exist_ok=True)
+    
+    # Case Java, file name is Main
+    if extension == ".java":
+        file_path = os.path.join(EXECUTE_DIR, "Main"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
             
-        test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
-        with open(test_file_path, "w") as file:
-            file.write(testcase)
+    # Other Case, file name is temp
+    else:
+        file_path = os.path.join(EXECUTE_DIR, "temp"+extension)
+        with open(file_path, "w") as file:
+            file.write(code)
+    
+        
+    test_file_path = os.path.join(EXECUTE_DIR, "testcase.txt")
+    with open(test_file_path, "w") as file:
+        file.write(testcase)
+

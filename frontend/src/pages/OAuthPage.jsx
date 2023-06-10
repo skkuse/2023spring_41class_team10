@@ -2,8 +2,9 @@ import React, { useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import axios from 'axios';
-import { useAuth } from '../hooks';
-import { AuthContext}  from '../components';
+import { AuthContext } from '../components';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 const OAuthPage = () => {
   const { setLoggedIn } = useContext(AuthContext);
@@ -12,7 +13,6 @@ const OAuthPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
 
   useEffect(() => {
     console.log('location.search', location.search);
@@ -22,7 +22,7 @@ const OAuthPage = () => {
     console.log('code', code);
 
     if (code) {
-      const url = `http://127.0.0.1:8000/login/github/callback/?code=${code}`;
+      const url = `${server_url}/login/github/callback/?code=${code}`;
 
       axios
         .get(url)
@@ -33,13 +33,15 @@ const OAuthPage = () => {
           setLoggedIn(true);
           localStorage.setItem('access_token', response.data.data.access_token);
           localStorage.setItem('refresh_token', response.data.data.refresh_token);
-          navigate('/');
+          localStorage.setItem('isLoggedIn', true);
+          window.location.href = '/';
         })
         .catch((error) => {
           console.error('Callback request error:', error);
         });
     } else {
       console.error('Callback code is missing');
+      setLoggedIn(false);
     }
   }, [history, location.search]);
 

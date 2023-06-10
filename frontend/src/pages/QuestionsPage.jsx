@@ -1,52 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth, useProfileQuery } from '../hooks';
 import styled from 'styled-components';
-import ProblemInfo from '../components/ProblemInfo';
-// import { useQuestionQuery } from '../hooks';
 import axios from 'axios';
+import { BsFilter, BsSearch } from 'react-icons/bs';
+
+import ProblemInfo from '../components/ProblemInfo';
+import common from '../components/Common.module.css';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 const QuestionsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  background-color: #f2f2f2;
   margin-bottom: 100px;
 `;
 
-const TitleContainer = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Titleh1 = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-`;
-
 const HeadContainer = styled.div`
-  margin: 50px;
+  margin: 1rem;
   display: flex;
   justify-content: space-between;
+  gap: 5rem;
 `;
 
 const StatusContainer = styled.div`
-  margin: 10px;
-  margin-right: 200px;
+  margin: 10px 0;
   display: flex;
   justify-content: space-between;
 `;
 
 const FilterButton = styled.button`
-  margin: 20px;
-  margin-right: 200px;
+  margin: 0 10px;
   background-color: #ccc;
-  padding: 10px;
+  padding: 4px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   color: #333;
+  font-size: 18px;
   font-weight: bold;
   transition: background-color 0.3s ease;
 
@@ -56,9 +46,9 @@ const FilterButton = styled.button`
 `;
 
 const FirstDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #c6dbda;
   border-radius: 8px;
   text-align: center;
@@ -66,9 +56,9 @@ const FirstDiv = styled.div`
 `;
 
 const SecondDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #fef0d6;
   border-radius: 8px;
   text-align: center;
@@ -76,9 +66,9 @@ const SecondDiv = styled.div`
 `;
 
 const ThirdDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #ffffff;
   border-radius: 8px;
   text-align: center;
@@ -86,9 +76,9 @@ const ThirdDiv = styled.div`
 `;
 
 const FourthDiv = styled.div`
-  width: 80px;
-  margin: 10px;
-  padding: 10px;
+  width: 72px;
+  margin: 4px 8px;
+  padding: 4px 8px;
   background-color: #d9cfde;
   text-align: center;
   border-radius: 8px;
@@ -96,7 +86,7 @@ const FourthDiv = styled.div`
 `;
 
 const SearchContainer = styled.div`
-  margin: 1rem;
+  margin: 0.5rem 1rem;
   display: flex;
   align-items: center;
 `;
@@ -109,12 +99,13 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 8px 16px;
+  padding: 4px 8px;
   background-color: #333;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 18px;
 `;
 
 function QuestionsPage() {
@@ -123,7 +114,7 @@ function QuestionsPage() {
     const fetchQuestions = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await axios.get('http://127.0.0.1:8000/problems/v1/list/', {
+        const response = await axios.get(`${server_url}/problems/v1/list/`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -152,40 +143,46 @@ function QuestionsPage() {
   };
 
   return (
-    <QuestionsContainer>
-      <TitleContainer>
-        <Titleh1>문제 목록</Titleh1>
-        <hr style={{ height: '3px' }} />
-      </TitleContainer>
-      <HeadContainer>
-        <StatusContainer>
-          <FirstDiv>완료</FirstDiv>
-          <SecondDiv>진행중</SecondDiv>
-          <ThirdDiv>미완료</ThirdDiv>
-          <FourthDiv>AI 추천</FourthDiv>
-        </StatusContainer>
-        <FilterButton>필터</FilterButton>
-        <SearchContainer>
-          <SearchInput
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>문제 목록</h1>
+        <hr />
+      </div>
+      <QuestionsContainer>
+        <HeadContainer>
+          <StatusContainer>
+            <FirstDiv>완료</FirstDiv>
+            <SecondDiv>진행중</SecondDiv>
+            <ThirdDiv>미완료</ThirdDiv>
+            <FourthDiv>AI 추천</FourthDiv>
+          </StatusContainer>
+          <SearchContainer>
+            <FilterButton>
+              <BsFilter />
+            </FilterButton>
+            <SearchInput
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <SearchButton onClick={handleSearch}>
+              <BsSearch />
+            </SearchButton>
+          </SearchContainer>
+        </HeadContainer>
+        {questions.map((question) => (
+          <ProblemInfo
+            key={question.id}
+            problemNumber={question.id}
+            title={question.title}
+            problemCategory={question.field}
+            problemLevel={question.level}
+            problemStatus={question.status}
           />
-          <SearchButton onClick={handleSearch}>Search</SearchButton>
-        </SearchContainer>
-      </HeadContainer>
-      {questions.map((question) => (
-        <ProblemInfo
-          key={question.slug}
-          problemNumber={question.id}
-          title={question.title}
-          problemCategory={question.field}
-          problemLevel={question.level}
-          problemStatus={question.status}
-        />
-      ))}
-    </QuestionsContainer>
+        ))}
+      </QuestionsContainer>
+    </div>
   );
 }
 

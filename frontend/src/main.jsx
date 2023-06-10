@@ -1,20 +1,17 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-// import { QueryClient, QueryClientProvider } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
-import axios from 'axios'
-import App from './App'
-import './index.css'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import styled from 'styled-components';
 
+import App from './App';
+import './index.css';
 
-// const queryClient = new QueryClient();
+const Wrapper = styled.div`
+  background-color: #f2f2f2;
+`;
 
-ReactDOM.render(
-  <React.StrictMode>
-    {/* <QueryClientProvider client={queryClient}> */}
-      <App />
-      {/* <ReactQueryDevtools initialIsOpen={false} containerElement="div" /> */}
-    {/* </QueryClientProvider> */}
-  </React.StrictMode>,
-  document.getElementById('root')
+const root = createRoot(document.getElementById('root'));
+root.render(
+  <Wrapper>
+    <App />
+  </Wrapper>
 );

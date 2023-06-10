@@ -1,28 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { ProblemInfo } from '../components';
-import { useProblemQuery } from '../hooks';
 import { useParams, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import axios from 'axios';
 import { BsRobot } from 'react-icons/bs';
 import { FaSpinner } from 'react-icons/fa';
 
-const Container = styled.div`
-  width: 90%;
-  max-width: 1400px;
-  margin: auto;
-`;
+import { ProblemInfo } from '../components';
+import common from '../components/Common.module.css';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 const DescriptionContainer = styled.div`
   text-align: center;
   margin-bottom: 2vh;
-`;
-
-const TitleContainer = styled.div``;
-
-const Titleh1 = styled.h1`
-  margin: 0 auto;
-  padding: 10px 0;
 `;
 
 const MoreDescriptionContainer = styled.div`
@@ -69,10 +59,12 @@ const TypingContainer = styled.textarea`
   color: white;
   width: 100%;
   margin-bottom: 1vh;
+  resize: none;
 `;
 
 const Titleh2 = styled.h2`
   margin: 5px 0;
+  text-align: start;
 `;
 
 const CodeCompareContainer = styled.div`
@@ -104,10 +96,9 @@ const CodeReviewContainer = styled.div`
 `;
 
 const CodeReviewDiv = styled.pre`
-  width: 100%;
   background-color: white;
-  border-radius: 3vw;
-  padding: 15px;
+  border-radius: 1rem;
+  padding: 16px;
   min-height: 15vh;
   margin-bottom: 1vh;
   font-family: Inter, system-ui, sans-serif;
@@ -204,7 +195,7 @@ function Review() {
     const fetchProblemInfo = async () => {
       try {
         const config = getHeader();
-        const response = await axios.get(`http://127.0.0.1:8000/users/v1/problems/${slug}/`, config);
+        const response = await axios.get(`${server_url}/users/v1/problems/${slug}/`, config);
         console.log('response', response);
         if (response.data.status !== 'fail') {
           setSubmissionData(response.data.data);
@@ -244,12 +235,12 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/review/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/review/`, data, config);
         console.log('response', response);
-        setGPTReview(response.data.data);
+        setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        console.error('Failed to fetch review:', error);
         setLoading(0);
       }
     }
@@ -265,45 +256,88 @@ function Review() {
           problem: submissionData.description,
           submission_id: submissionData.submission_id
         };
-        const response = await axios.post(`http://127.0.0.1:8000/codes/v1/refactoring/`, data, config);
+        const response = await axios.post(`${server_url}/codes/v1/refactoring/`, data, config);
         console.log('response', response.data);
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        console.error('Failed to fetch refactoring:', error);
+        setLoading(0);
+      }
+    }
+  };
+  const handleDeadCode = async () => {
+    if (loading == 0) {
+      try {
+        setLoading(3);
+        const config = getHeader();
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
+        const response = await axios.post(`${server_url}/codes/v1/deadcode/`, data, config);
+        console.log('response', response);
+        setGPTReview(response.data);
+        setLoading(0);
+      } catch (error) {
+        console.error('Failed to fetch deadcode:', error);
+        setLoading(0);
+      }
+    }
+  };
+  const handleCodeComment = async () => {
+    if (loading == 0) {
+      try {
+        setLoading(4);
+        const config = getHeader();
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
+        const response = await axios.post(`${server_url}/codes/v1/comment/`, data, config);
+        console.log('response', response);
+        setGPTReview(response.data);
+        setLoading(0);
+      } catch (error) {
+        console.error('Failed to fetch comment:', error);
         setLoading(0);
       }
     }
   };
 
   return (
-    <Container>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>코드 리뷰</h1>
+        <hr />
+      </div>
+
       <DescriptionContainer>
-        <TitleContainer>
-          <Titleh1>코드 리뷰</Titleh1>
-          <hr style={{ height: '3px' }} />
-          {/* problem metadata component */}
-          <ProblemInfo
-            problemNumber={slug}
-            title={submissionData.title}
-            problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
-            problemLevel={submissionData.level}
-            isActive={false}
-          />
-          <MoreDescriptionContainer>
-            <ChooseLanguageContainer>
-              <LangDiv>선택한 언어</LangDiv>
-              <LanguageDiv> {submissionData.lang} </LanguageDiv>
-            </ChooseLanguageContainer>
-          </MoreDescriptionContainer>
-        </TitleContainer>
+        {/* problem metadata component */}
+        <ProblemInfo
+          problemNumber={slug}
+          title={submissionData.title}
+          problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
+          problemLevel={submissionData.level}
+          isActive={false}
+        />
+        <MoreDescriptionContainer>
+          <ChooseLanguageContainer>
+            <LangDiv>선택한 언어</LangDiv>
+            <LanguageDiv> {submissionData.lang} </LanguageDiv>
+          </ChooseLanguageContainer>
+        </MoreDescriptionContainer>
       </DescriptionContainer>
 
       <ReviewContainer>
         <Titleh2>Answer</Titleh2>
         <CodeCompareContainer>
           <OriginalCodeContainer>
-            <label>{username} 님</label>
+            <label>내가 쓴 코드</label>
             <TypingContainer value={submissionData.code} rows={15} readOnly={true} />
           </OriginalCodeContainer>
           <FeedbackContainer>
@@ -343,7 +377,7 @@ function Review() {
             )}
             &nbsp; Refactoring{' '}
           </LongButton>
-          <LongButton onClick={handleButtonClick} color={'#FEF0D6'}>
+          <LongButton onClick={handleDeadCode} color={'#FEF0D6'}>
             {' '}
             {loading == 3 ? (
               <FaSpinnerBlock>
@@ -354,7 +388,7 @@ function Review() {
             )}
             &nbsp; Dead Code{' '}
           </LongButton>
-          <LongButton onClick={handleButtonClick} color={'#AED5F8'}>
+          <LongButton onClick={handleCodeComment} color={'#AED5F8'}>
             {' '}
             {loading == 4 ? (
               <FaSpinnerBlock>
@@ -372,7 +406,7 @@ function Review() {
         </Controllers>
       </ReviewContainer>
       <hr />
-    </Container>
+    </div>
   );
 }
 export default Review;

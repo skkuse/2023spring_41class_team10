@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { BsGithub } from 'react-icons/bs';
+
+import common from '../components/Common.module.css';
 
 const LoginContainer = styled.div`
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,7 +16,7 @@ const LoginContainer = styled.div`
 const LogoContainer = styled.div`
   width: 100%;
   height: 60px;
-  padding: 0;
+  padding: 1rem 2rem;
   margin: 0;
   display: flex;
   align-items: center;
@@ -21,14 +24,14 @@ const LogoContainer = styled.div`
 `;
 
 const LogoImg = styled.img`
-  width: 5%;
+  width: 150px;
   aspect-ratio: 9/5;
   margin-top: 10px;
 `;
 
 const ContentContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  padding: 1rem 2rem;
   background-color: #f2f2f2;
   display: flex;
   flex-direction: column;
@@ -46,22 +49,44 @@ const LoginTitle = styled.h1`
 `;
 
 const LoginButton = styled.button`
-  margin-top: 20px;
-  width: 20vw;
-  aspect-ratio: 4/1;
+  margin-top: 16px;
+  width: 280px;
   font-family: Roboto;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+  transition: background-color 0.1s ease;
+  border: none;
+`;
+
+const ButtonIcon = styled.span`
+  margin: auto;
+  line-height: 1.25rem !important;
+`;
+
+const ButtonText = styled.span`
+  margin: auto;
 `;
 
 const GithubLoginButton = styled(LoginButton)`
-  background-color: #555555;
+  aspect-ratio: 9/2;
+  background-color: #212529;
+  &:hover {
+    background-color: black;
+  }
 `;
 
 const CustomerSupportButton = styled(LoginButton)`
-  background-color: #959595;
+  background-color: #ccc;
+  color: black;
+  font-size: 16px;
+  &:hover {
+    background-color: #aaa;
+  }
 `;
 
 const FooterText = styled.p`
@@ -79,20 +104,43 @@ const Login = () => {
     window.location.href = 'https://github.com/login/oauth/authorize?client_id=Iv1.f8333c935b2b0479';
   };
 
+  const handleLogout = () => {
+    localStorage.setItem('isLoggedIn', false);
+    localStorage.setItem('refresh_token', false);
+    localStorage.setItem('access_token', false);
+    window.location.reload();
+  };
+
   return (
-    <LoginContainer>
-      <LogoContainer>
-        <LogoImg src="/imgs/nav_logo.png" alt="Logo" />
-      </LogoContainer>
-      <ContentContainer>
-        <LoginTitle>로그인</LoginTitle>
-        <GithubLoginButton onClick={handleGithubLogin}>Github로 로그인</GithubLoginButton>
-        <Link to="/notice">
-          <CustomerSupportButton>고객 센터</CustomerSupportButton>
-        </Link>
-        <FooterText>© 2023 - Privacy — Terms</FooterText>
-      </ContentContainer>
-    </LoginContainer>
+    <div className={`${common.container}`}>
+      <div className={`${common.head}`}>
+        <h1>로그인</h1>
+        <hr />
+      </div>
+      <LoginContainer>
+        <LogoContainer>
+          <LogoImg src="/imgs/nav_logo.png" alt="Logo" />
+        </LogoContainer>
+        <ContentContainer>
+          <GithubLoginButton onClick={handleGithubLogin}>
+            {' '}
+            <ButtonIcon>
+              <BsGithub size="32" />
+            </ButtonIcon>
+            <ButtonText>GitHub로 시작하기</ButtonText>
+          </GithubLoginButton>
+          <CustomerSupportButton onClick={handleLogout}>
+            <ButtonText>로그아웃</ButtonText>
+          </CustomerSupportButton>
+          <Link to="/notice">
+            <CustomerSupportButton>
+              <ButtonText>고객센터</ButtonText>
+            </CustomerSupportButton>
+          </Link>
+          <FooterText>© 2023 - Privacy — Terms</FooterText>
+        </ContentContainer>
+      </LoginContainer>
+    </div>
   );
 };
 

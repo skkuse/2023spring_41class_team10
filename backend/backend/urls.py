@@ -17,14 +17,19 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from users import views
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('', lambda req: redirect('/login/')),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('admin/', admin.site.urls),
     path('login/', views.LoginView.as_view(), name='github_login'),
     path('login/github/callback/', views.GitHubLoginView.as_view(), name='github_login_callback'),
     path('problems/', include('problems.urls')),
-    path('HomePage/', include('HomePage.urls')),
+    # path('HomePage/', include('HomePage.urls')),
     path('users/', include('users.urls')),
     path('codes/', include('codes.urls')),
+    path('boards/', include('boards.urls')),
 ]

@@ -55,8 +55,6 @@ class GitHubLoginView(APIView):
                 user_account = users.first()
                 # 접속일 업데이트
                 user_account.login()
-                # 로그인
-                login(request, user_account, backend="django.contrib.auth.backends.ModelBackend", )
 
                 token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
                 print("token", token)
@@ -70,16 +68,29 @@ class GitHubLoginView(APIView):
                 return Response({"message": "로그인 성공", "data":data}, status=status.HTTP_200_OK)
 
             except Exception as e:
-                logging.exception("[github_login_callback] user_account", e)
+                logging.exception(f"[github_login_callback] user_account {e}")
                 return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
         else:
             # 유저가 존재하지 않으면 유저를 생성하여 데이터 반환
-            user = User.objects.create_user(
+            user_account = User.objects.create_user(
                 github_username=user_info['username'],
+                username=user_info['username'],
                 email=primary_email,
                 profile_image_url=user_info['profile_image']
             )
-            return Response(user.to_json())
+            # 접속일 업데이트
+            user_account.login()
+
+            token = RefreshToken.for_user(user_account) #simple jwt로 토큰 발급
+            print("token", token)
+            print("access_token", token.access_token)
+            
+            data = {
+                'user': user_account.to_json(),
+                'access_token': str(token.access_token),
+                'refresh_token': str(token),
+            }
+            return Response({"message": "로그인 성공", "data":data}, status=status.HTTP_200_OK)
 
 def get_access_token(code):
     try:
@@ -95,16 +106,20 @@ def get_access_token(code):
                     'https://github.com/login/oauth/access_token', 
                     data=github_data, headers=HEADERS)
         if res.status_code == 200:
-            access_token = res.json()['access_token']
-            refresh_token = res.json()['refresh_token']
-            print('access_token', access_token)
-            print('refresh_token', refresh_token)
+            access_token = None
+            try:
+                access_token = res.json()['access_token']
+                refresh_token = res.json()['refresh_token']
+                print('GitHub access_token', access_token)
+                print('GitHub refresh_token', refresh_token)
+            except Exception as e:
+                print("token exception: res", res.json())
             return access_token
         else:
-            logging.error("[get_access_token] status error", res.status_code)
+            logging.error(f"[get_access_token] status error {res.status_code}")
             return None
     except Exception as e:
-        logging.exception("[get_access_token] get_access_token error", e)
+        logging.exception(f"[get_access_token] get_access_token error {e}")
         return None
 
 
@@ -122,10 +137,10 @@ def get_user_info(access_token):
 
             return user_info
         else:
-            logging.error("[get_user_info] status error", res.status_code)
+            logging.error(f"[get_user_info] status error {res.status_code}")
             return None
     except Exception as e:
-        logging.exception("[get_user_info] get_user_info error", e)
+        logging.exception(f"[get_user_info] get_user_info error {e}")
         return None
 
 def get_user_primary_email(access_token):
@@ -141,6 +156,42 @@ def get_user_primary_email(access_token):
                 primary_email = email['email']
                 break
     else:
-        logging.error("[get_user_primary_email] status error", res.status_code)
+        logging.error(f"[get_user_primary_email] status error {res.status_code}")
 
     return primary_email
+
+
+class UserInfoView(APIView):
+    """
+    users/v1/info/
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+
+        return Response({"user":user.to_json()})
+
+class UserTargetInfoView(APIView):
+    """
+    users/v1/info/<id>
+    """
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        target = User.objects.get(id=id)
+
+        return Response({"data":target.to_json(), "user":user.to_json()})
+
+class UserGitHubUsernameView(APIView):
+    """
+    users/v1/usernames/<github_username>
+    """
+    def get(self, request, github_username):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        target = User.objects.get(github_username=github_username)
+
+        return Response({"data":target.to_json(), "user":user.to_json()})
