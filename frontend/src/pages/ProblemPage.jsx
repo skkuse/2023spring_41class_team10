@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import ReactAce from 'react-ace';
+
+import 'ace-builds/src-noconflict/mode-java';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/mode-c_cpp';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 import {} from '../components';
 import ProblemInfo from '../components/ProblemInfo';
 import { useParams, useNavigate } from 'react-router-dom';
 import common from '../components/Common.module.css';
+
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -81,7 +88,20 @@ const SolvingContainer = styled.div`
   margin-bottom: 5vh;
 `;
 
-const TypingContainer = styled.textarea`
+// const TypingContainer = styled.textarea`
+//   background-color: black;
+//   color: white;
+//   width: 100%;
+//   margin-bottom: 1vh;
+// `;
+
+const ReactAceContainer = styled.div`
+  width:100%;
+  height:100%;
+  background-color: pink;
+`;
+
+const TypingContainer = styled(ReactAce)`
   background-color: black;
   color: white;
   width: 100%;
@@ -191,11 +211,21 @@ function Problem() {
     return config;
   };
 
-  const handleCodeChange = (e) => {
-    setCodeTyped(e.target.value);
+  const getModeFromLanguage = (language) => {
+    switch(language) {
+      case 'Python': return 'python';
+      case 'C': return 'c_cpp';
+      case 'C++': return 'c_cpp';
+      case 'JAVA': return 'java';
+      default: return 'python';
+    }
   };
-  const handleInputChange = (e) => {
-    setInputTyped(e.target.value);
+
+  const handleCodeChange = (newValue) => {
+    setCodeTyped(newValue);
+  };
+  const handleInputChange = (newValue) => {
+    setInputTyped(newValue);
   };
   const handleLanguageSelect = (e) => {
     // 선택한 언어에 대한 동작 수행
@@ -345,15 +375,61 @@ function Problem() {
         </LeftAlign>
       </div>
       <SolvingContainer>
-        <TypingContainer value={codeTyped} onChange={handleCodeChange} rows={20} />
+        <TypingContainer 
+          width={"100%"}
+          mode={getModeFromLanguage(language)} 
+          theme="monokai" 
+          onChange={handleCodeChange} 
+          name="1" 
+          editorProps={{ $blockScrolling: true }}
+          fontSize={14}
+          showPrintMargin={true}
+          showGutter={true}
+          highlightActiveLine={true}
+          setOptions={{
+            showLineNumbers: true,
+            tabSize: 2,
+          }}
+        />
         <InputOutputContainer>
           <InputContainer>
             <label>Input</label>
-            <TypingContainer value={inputTyped} onChange={handleInputChange} rows={10} />
+            <TypingContainer 
+              width={"100%"}
+              mode="markdown"
+              theme="monokai" 
+              onChange={handleInputChange} 
+              name="2" 
+              editorProps={{ $blockScrolling: true }} 
+              fontSize={14}
+              showPrintMargin={true}
+              showGutter={true}
+              highlightActiveLine={true}
+              setOptions={{
+                showLineNumbers: true,
+                tabSize: 2,
+              }}
+            />
           </InputContainer>
           <OutputContainer>
             <label>Output</label>
-            <TypingContainer value={outputValue} rows={10} readOnly={true} />
+            <TypingContainer
+              width={"100%"}
+              mode="markdown"
+              theme="monokai"
+              name="3" 
+              editorProps={{ $blockScrolling: true }} 
+              fontSize={14}
+              showPrintMargin={true}
+              showGutter={true}
+              highlightActiveLine={true}
+              value={outputValue}
+              setOptions={{
+                showLineNumbers: true,
+                tabSize: 2,
+              }}
+              readOnly={true}
+            />
           </OutputContainer>
         </InputOutputContainer>
         <Controllers>

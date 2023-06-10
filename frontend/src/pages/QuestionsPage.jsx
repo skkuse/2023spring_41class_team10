@@ -4,7 +4,9 @@ import axios from 'axios';
 import { BsFilter, BsSearch } from 'react-icons/bs';
 
 import ProblemInfo from '../components/ProblemInfo';
+import Pagination from '../components/Pagination';
 import common from '../components/Common.module.css';
+import Select from 'react-select';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -108,8 +110,68 @@ const SearchButton = styled.button`
   font-size: 18px;
 `;
 
+const FilterWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const FilterButton2 = styled.button`
+  margin-bottom: 20px;
+`;
+
+const SquareContainer = styled.div`
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  border-radius: 4px;
+  border: 1px solid #23272b;
+  height: 26px;
+  margin: 0.25rem 1rem;
+  padding: 4px 8px;
+  background-color: white;
+`;
+
+const SelectItem = styled(Select)`
+  max-width: 817px;
+  width: 100%;
+  text-align: start;
+  margin: 0.25rem 1rem;
+  font-size: 14px;
+`;
+
+const SquareItem = styled.input`
+  text-align: start;
+  border: none;
+  font-size: 16px;
+  padding: 4px 8px;
+  width: 100%;
+`;
+
+const RightSquareItem = styled(SquareItem)`
+  border-left: 1px solid #23272b;
+`;
+
 function QuestionsPage() {
   const [questions, setQuestions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // number of items per page
+
+  const [fieldList, setFieldList] = useState([
+    { value: '입출력', label: '입출력' },
+    { value: '자료구조', label: '자료구조' },
+    { value: '알고리즘', label: '알고리즘' }]); // 백엔드 데이터 들어오기 전 기본 데이터
+  const [showFilters, setShowFilters] = useState(false);
+  const [status, setStatus] = useState("all");
+  const [level, setLevel] = useState(null);
+  const [field, setField] = useState(null);
+  const [allFilters, setAllFilters] = useState({ 
+    status: "all", 
+    level: null,
+    field: null 
+  });
+
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -126,9 +188,29 @@ function QuestionsPage() {
       }
     };
     fetchQuestions();
+
+    const fetchFieldList = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/problems/v1/fields/list/`, config);
+        console.log('response', response);
+        if (response.data.status !== 'fail') setFieldList(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch FieldList:', error);
+      }
+    };
+    fetchFieldList();
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  const getPaginatedData = () => {
+    const startIndex = currentPage * itemsPerPage - itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return questions.slice(startIndex, endIndex);
+  };
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSearch = () => {
     // Perform search logic based on the searchTerm
@@ -139,7 +221,26 @@ function QuestionsPage() {
     );
 
     // Use the filteredQuestions array for rendering or further processing
-    console.log(filteredQuestions);
+    console.log("search filtered:", filteredQuestions);
+  };
+
+  const handleFilter = () => {
+    setAllFilters({ 
+      status: status, 
+      level: level, 
+      field: field 
+    });
+
+    const filteredQuestions = questions.filter((question) =>
+      question.level.includes(level) && question.field.includes(field) && question.status.includes(status)
+    );
+
+    console.log("filters:", level, status, field);
+    console.log("filter filtered:", filteredQuestions);
+  };
+
+  const handleFieldChange = (selectedOption) => {
+    setField(selectedOption);
   };
 
   return (
@@ -171,6 +272,46 @@ function QuestionsPage() {
             </SearchButton>
           </SearchContainer>
         </HeadContainer>
+
+        <FilterWrapper>
+          <FilterButton2 onClick={() => setShowFilters(!showFilters)}>
+            Filter
+          </FilterButton2>
+          {showFilters && (
+            <>
+              <div>
+                <label>Status:</label>
+                <label>
+                  <input type="radio" value="all" checked={status === "all"} onChange={(e) => setStatus(e.target.value)} />
+                  All
+                </label>
+                <label>
+                  <input type="radio" value="pass" checked={status === "pass"} onChange={(e) => setStatus(e.target.value)} />
+                  Pass
+                </label>
+                <label>
+                  <input type="radio" value="fail" checked={status === "fail"} onChange={(e) => setStatus(e.target.value)} />
+                  Fail
+                </label>
+                <label>
+                  <input type="radio" value="none" checked={status === "none"} onChange={(e) => setStatus(e.target.value)} />
+                  None
+                </label>
+              </div>
+              <SquareContainer>
+                <SquareItem type="number" placeholder="Level" onChange={(e) => setLevel(e.target.value)} min={1} max={10} />
+              </SquareContainer>
+              <SelectItem
+                placeholder={'Field'}
+                options={fieldList}
+                value={field}
+                onChange={handleFieldChange}
+              />
+              <button onClick={handleFilter}>Apply Filter</button>
+            </>
+          )}
+        </FilterWrapper>
+
         {questions.map((question) => (
           <ProblemInfo
             key={question.id}
@@ -181,6 +322,12 @@ function QuestionsPage() {
             problemStatus={question.status}
           />
         ))}
+        <Pagination
+          itemsPerPage={itemsPerPage}
+          totalItems={questions.length}
+          onPageChange={handlePageChange}
+          currentPage={currentPage}
+        />
       </QuestionsContainer>
     </div>
   );
