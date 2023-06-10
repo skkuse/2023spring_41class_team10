@@ -10,7 +10,7 @@ import time
 import subprocess
 import logging
 
-from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation, UserCodeHistory
+from problems.models import Problem, Testcase, Submission, AlgorithmField, ProblemFieldRelation, UserCodeHistory, ProblemRecommend
 from users.models import User
 from backend.settings import EXECUTE_DIR
 
@@ -53,8 +53,14 @@ class ProblemListView(APIView):
             queryset=ProblemFieldRelation.objects.only('field__field'),
             to_attr='field_relations'
         )
+        # Prefetch를 사용하여 ProblemRecommend 쿼리 최적화
+        recommend_prefetch = Prefetch(
+            'problemfieldrelation_set',
+            queryset=ProblemRecommend.objects.filter(user_id=request.user.id),
+            to_attr='recommend'
+        )
         # problems에 submissions, field_relations 객체 속성 추가
-        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
+        problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch, recommend_prefetch)
 
         problem_list = []
         for prob in problems:
@@ -66,7 +72,10 @@ class ProblemListView(APIView):
             submissions = prob.submissions
 
             if len(submissions) == 0:
-                prob_obj['status'] = "uncomplete"
+                if len(prob.recommend) == 0:
+                    prob_obj['status'] = "uncomplete"
+                else :
+                    prob_obj['status'] = "ai"
             else:
                 prob_obj['status'] = "processing"
                 for submission in submissions:
@@ -87,8 +96,7 @@ class ProblemListView(APIView):
         }
 
         return Response(response_data)
-    
-    
+
     def post(self, request):
         if not request.user.is_authenticated:
             return Response(get_fail_res("user is not authenticated"))
@@ -272,6 +280,43 @@ class ProblemSaveView(APIView):
             "status": "success",
             "message": "문제를 저장했습니다. 홈으로 돌아갑니다.",
             "data": problem.to_json(),
+            "user": user.to_json()
+        }
+
+        return Response(response_data)
+
+class ProblemRecommendView(APIView):
+    """ Problem List View
+    url        : users/v1/problems/guideline/
+    Returns :
+        GET     : id, problem_title, algorithm_field, level
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(get_fail_res("user is not authenticated"))
+        user = User.objects.get(id=request.user.id)
+        page = request.GET.get('page', 1)
+        page = int(page)
+        PAGE_SIZE = 5
+
+        # Problem 모델에서 페이지에 맞춰 가져온다.
+        recommends = ProblemRecommend.objects.filter(user_id=request.user.id)[:PAGE_SIZE]
+
+        problem_list = []
+        for recommend in recommends:
+            prob_obj = {}
+            prob_obj["id"] = recommend.problem.id
+            prob_obj["title"] = recommend.problem.title
+            prob_obj["level"] = recommend.problem.level
+            prob_obj['status'] = "ai"
+            fields = ProblemFieldRelation.objects.filter(problem__id=recommend.problem.id).values_list("field__field")
+            field_list = list(fields)
+            prob_obj["field"] = field_list
+            problem_list.append(prob_obj)
+        response_data = {
+            "status": "success",
+            "message": "Problem List Info",
+            "data": problem_list,
             "user": user.to_json()
         }
 

@@ -38,6 +38,7 @@ const RecommendContainer = styled(SectionContainer)``;
 
 function HomePage() {
   const [problemData, setProblemData] = useState([]);
+  const [recommendProblem, setRecommendProblem] = useState([]);
   const [recentLecture, setRecentLecture] = useState([]);
   const [recommendLecture, setRecommendLecture] = useState([]);
   const [recommendMsg, setRecommendMsg] = useState('추천 강의');
@@ -75,9 +76,22 @@ function HomePage() {
         console.error('Failed to fetch RecentLecture:', error);
       }
     };
+    const fetchRecommendProblem = async () => {
+      try {
+        const config = getHeader();
+        const response = await axios.get(`${server_url}/users/v1/problems/guideline/`, config);
+        console.log('fetchRecommendProblem', response);
+        if (response.data.status !== 'fail') {
+          setRecommendProblem(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch RecommendProblem:', error);
+      }
+    };
     fetchRecentLecture();
     fetchProblem();
     fetchRecommendLecture();
+    fetchRecommendProblem();
   }, []);
   const getHeader = () => {
     const token = localStorage.getItem('access_token');
@@ -111,7 +125,7 @@ function HomePage() {
           </LectureList>
         </LecturesContainer>
         <SectionContainer>
-          <h2>풀고 있는 문제</h2>
+          <h2>최근 제출 내역</h2>
           <ProcessingList>
             {problemData.map((problem, idx) => (
               <ProblemInfo
@@ -120,7 +134,7 @@ function HomePage() {
                 title={problem.title}
                 problemCategory={problem.field}
                 problemLevel={problem.level}
-                problemStatus={problem.result}
+                problemStatus={problem.status}
               />
             ))}
           </ProcessingList>
@@ -139,6 +153,21 @@ function HomePage() {
             ))}
           </LectureList>
         </RecommendContainer>
+        <SectionContainer>
+          <h2>AI 추천 문제</h2>
+          <ProcessingList>
+            {recommendProblem.map((problem, idx) => (
+              <ProblemInfo
+                key={idx}
+                problemNumber={problem.problem_id}
+                title={problem.title}
+                problemCategory={problem.field}
+                problemLevel={problem.level}
+                problemStatus={problem.status}
+              />
+            ))}
+          </ProcessingList>
+        </SectionContainer>
       </BodyContainer>
     </div>
   );
