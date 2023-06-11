@@ -36,10 +36,15 @@ class ProblemListView(APIView):
         user = User.objects.get(id=request.user.id)
         page = request.GET.get('page', 1)
         page = int(page)
+        keyword = request.GET.get('q', "")
         PAGE_SIZE = 5
 
         # Problem 모델에서 페이지에 맞춰 가져온다.
-        problems = Problem.objects.all().order_by('id')[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
+        problems = Problem.objects
+        if keyword != "":
+            problems = problems.filter(title__contains=keyword)
+        problems = problems.order_by('id')
+        size = len(problems)
 
         # Prefetch를 사용하여 submission 쿼리 최적화
         submissions_prefetch = Prefetch(
@@ -61,6 +66,7 @@ class ProblemListView(APIView):
         )
         # problems에 submissions, field_relations 객체 속성 추가
         problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch, recommend_prefetch)
+        problems = problems[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]
 
         problem_list = []
         for prob in problems:
@@ -92,7 +98,9 @@ class ProblemListView(APIView):
             "status": "success",
             "message": "Problem List Info",
             "data": problem_list,
-            "user": user.to_json()
+            "user": user.to_json(),
+            "size": size,
+            "page_size": PAGE_SIZE
         }
 
         return Response(response_data)
@@ -123,7 +131,11 @@ class ProblemListView(APIView):
         problem_id_list = submissions.values_list("problem__id", flat=True)
         
         
-        problems = Problem.objects.filter(title__contains=keyword).order_by('id')
+        problems = Problem.objects
+        if keyword != "":
+            problems = problems.filter(title__contains=keyword)
+        problems = problems.order_by('id')
+        size = len(problems)
         # problems = Problem.objects.all().order_by('id')
         # Submission query optimize by using Prefetch
         submissions_prefetch = Prefetch(
@@ -193,7 +205,9 @@ class ProblemListView(APIView):
             "status": "success",
             "message": "Problem List Info",
             "data": problem_list,
-            "user": user.to_json()
+            "user": user.to_json(),
+            "size": size,
+            "page_size": PAGE_SIZE
         }
 
         return Response(response_data)

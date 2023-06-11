@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import { BsFilter, BsSearch } from 'react-icons/bs';
@@ -148,95 +149,109 @@ const SquareItem = styled.input`
   width: 100%;
 `;
 
-const RightSquareItem = styled(SquareItem)`
-  border-left: 1px solid #23272b;
-`;
-
 function QuestionsPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const [questions, setQuestions] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // number of items per page
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') ? searchParams.get('q') : '');
+  const [curPage, setCurPage] = useState(searchParams.get('page') ? searchParams.get('page') : 1);
 
   const [fieldList, setFieldList] = useState([
     { value: '입출력', label: '입출력' },
     { value: '자료구조', label: '자료구조' },
-    { value: '알고리즘', label: '알고리즘' }]); // 백엔드 데이터 들어오기 전 기본 데이터
+    { value: '알고리즘', label: '알고리즘' }
+  ]); // 백엔드 데이터 들어오기 전 기본 데이터
   const [showFilters, setShowFilters] = useState(false);
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState('all');
   const [level, setLevel] = useState(null);
   const [field, setField] = useState(null);
-  const [allFilters, setAllFilters] = useState({ 
-    status: "all", 
-    level: null,
-    field: null 
+  const [size, setSize] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const [allFilters, setAllFilters] = useState({
+    status: 'all',
+    level: 0,
+    field: ''
   });
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        const response = await axios.get(`${server_url}/problems/v1/list/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        console.log('response', response);
-        if (response.data.status !== 'fail') setQuestions(response.data['data']);
-      } catch (error) {
-        console.error('Failed to fetch questions:', error);
-      }
-    };
-    fetchQuestions();
-
-    const fetchFieldList = async () => {
-      try {
-        const config = getHeader();
-        const response = await axios.get(`${server_url}/problems/v1/fields/list/`, config);
-        console.log('response', response);
-        if (response.data.status !== 'fail') setFieldList(response.data.data);
-      } catch (error) {
-        console.error('Failed to fetch FieldList:', error);
-      }
-    };
+    fetchQuestions(curPage, searchTerm);
     fetchFieldList();
   }, []);
-
-  
-  const getPaginatedData = () => {
-    const startIndex = currentPage * itemsPerPage - itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return questions.slice(startIndex, endIndex);
+  const getHeader = () => {
+    const token = localStorage.getItem('access_token');
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
+    return config;
   };
+  const fetchQuestions = async (cur, keyword = '') => {
+    try {
+      const config = getHeader();
+      let queryString = '';
+      if (keyword) queryString += `?q=${keyword}`;
+      if (cur && queryString) queryString += `&page=${cur}`;
+      if (cur && !queryString) queryString += `?page=${cur}`;
+      console.log('queryString', queryString);
+      const response = await axios.get(`${server_url}/problems/v1/list/` + queryString, config);
+      console.log('response', response);
+      if (response.data.status !== 'fail') {
+        setQuestions(response.data['data']);
+        setSize(response.data['size']);
+        setPageSize(response.data['page_size']);
+      }
+    } catch (error) {
+      console.error('Failed to fetch questions:', error);
+    }
+  };
+  const fetchFieldList = async () => {
+    try {
+      const config = getHeader();
+      const response = await axios.get(`${server_url}/problems/v1/fields/list/`, config);
+      console.log('response', response);
+      if (response.data.status !== 'fail') setFieldList(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch FieldList:', error);
+    }
+  };
+
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    if (pageNumber !== curPage) {
+      if (searchTerm !== '') {
+        navigate(`?q=${searchTerm}&page=${pageNumber}`);
+        setCurPage(pageNumber);
+        fetchQuestions(pageNumber, searchTerm);
+      } else {
+        navigate(`?page=${pageNumber}`);
+        setCurPage(pageNumber);
+        fetchQuestions(pageNumber);
+      }
+    }
   };
 
   const handleSearch = () => {
-    // Perform search logic based on the searchTerm
-    // You can filter the questions array based on the searchTerm and update the filteredQuestions state
-    // For example:
-    const filteredQuestions = questions.filter((question) =>
-      question.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Use the filteredQuestions array for rendering or further processing
-    console.log("search filtered:", filteredQuestions);
+    if (searchTerm !== '') {
+      navigate(`?q=${searchTerm}&page=1`);
+      fetchQuestions(1, searchTerm);
+    }
   };
 
   const handleFilter = () => {
-    setAllFilters({ 
-      status: status, 
-      level: level, 
-      field: field 
+    setAllFilters({
+      status: status,
+      level: level,
+      field: field
     });
 
-    const filteredQuestions = questions.filter((question) =>
-      question.level.includes(level) && question.field.includes(field) && question.status.includes(status)
+    const filteredQuestions = questions.filter(
+      (question) => question.level.includes(level) && question.field.includes(field) && question.status.includes(status)
     );
 
-    console.log("filters:", level, status, field);
-    console.log("filter filtered:", filteredQuestions);
+    console.log('filters:', level, status, field);
+    console.log('filter filtered:', filteredQuestions);
   };
 
   const handleFieldChange = (selectedOption) => {
@@ -264,7 +279,7 @@ function QuestionsPage() {
             <SearchInput
               type="text"
               placeholder="Search..."
-              value={searchTerm}
+              value={searchTerm && searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <SearchButton onClick={handleSearch}>
@@ -274,39 +289,58 @@ function QuestionsPage() {
         </HeadContainer>
 
         <FilterWrapper>
-          <FilterButton2 onClick={() => setShowFilters(!showFilters)}>
-            Filter
-          </FilterButton2>
+          <FilterButton2 onClick={() => setShowFilters(!showFilters)}>Filter</FilterButton2>
           {showFilters && (
             <>
               <div>
                 <label>Status:</label>
                 <label>
-                  <input type="radio" value="all" checked={status === "all"} onChange={(e) => setStatus(e.target.value)} />
+                  <input
+                    type="radio"
+                    value="all"
+                    checked={status === 'all'}
+                    onChange={(e) => setStatus(e.target.value)}
+                  />
                   All
                 </label>
                 <label>
-                  <input type="radio" value="pass" checked={status === "pass"} onChange={(e) => setStatus(e.target.value)} />
+                  <input
+                    type="radio"
+                    value="pass"
+                    checked={status === 'pass'}
+                    onChange={(e) => setStatus(e.target.value)}
+                  />
                   Pass
                 </label>
                 <label>
-                  <input type="radio" value="fail" checked={status === "fail"} onChange={(e) => setStatus(e.target.value)} />
+                  <input
+                    type="radio"
+                    value="fail"
+                    checked={status === 'fail'}
+                    onChange={(e) => setStatus(e.target.value)}
+                  />
                   Fail
                 </label>
                 <label>
-                  <input type="radio" value="none" checked={status === "none"} onChange={(e) => setStatus(e.target.value)} />
+                  <input
+                    type="radio"
+                    value="none"
+                    checked={status === 'none'}
+                    onChange={(e) => setStatus(e.target.value)}
+                  />
                   None
                 </label>
               </div>
               <SquareContainer>
-                <SquareItem type="number" placeholder="Level" onChange={(e) => setLevel(e.target.value)} min={1} max={10} />
+                <SquareItem
+                  type="number"
+                  placeholder="Level"
+                  onChange={(e) => setLevel(e.target.value)}
+                  min={1}
+                  max={10}
+                />
               </SquareContainer>
-              <SelectItem
-                placeholder={'Field'}
-                options={fieldList}
-                value={field}
-                onChange={handleFieldChange}
-              />
+              <SelectItem placeholder={'분야'} options={fieldList} onChange={(e) => handleFieldChange(e)} isMulti />
               <button onClick={handleFilter}>Apply Filter</button>
             </>
           )}
@@ -322,12 +356,7 @@ function QuestionsPage() {
             problemStatus={question.status}
           />
         ))}
-        <Pagination
-          itemsPerPage={itemsPerPage}
-          totalItems={questions.length}
-          onPageChange={handlePageChange}
-          currentPage={currentPage}
-        />
+        <Pagination totalItems={size} onPageChange={handlePageChange} currentPage={curPage} itemsPerPage={pageSize} />
       </QuestionsContainer>
     </div>
   );
