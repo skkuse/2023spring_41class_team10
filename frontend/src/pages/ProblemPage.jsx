@@ -242,9 +242,9 @@ function Problem() {
   const navigate = useNavigate();
 
   const [language, setLanguage] = useState('Python');
-  const [codeTyped, setCodeTyped] = useState('Type your code here.');
-  const [inputTyped, setInputTyped] = useState('Type your input here.');
-  const [outputValue, setOutputValue] = useState('Default Output');
+  const [codeTyped, setCodeTyped] = useState('');
+  const [inputTyped, setInputTyped] = useState('');
+  const [outputValue, setOutputValue] = useState('');
 
   const [problemInfo, setProblemInfo] = useState([]);
   const [pass, setPass] = useState(false);
@@ -345,6 +345,10 @@ function Problem() {
     }
   };
   const handleSaveCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
     if (confirm('코드를 저장하시겠습니까?')) {
       try {
         const config = getHeader();
@@ -365,6 +369,14 @@ function Problem() {
     }
   };
   const handleRunCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
+    if (inputTyped.trim() === '') {
+      alert('입력한 테스트케이스가 없습니다.');
+      return;
+    }
     try {
       const config = getHeader();
       let data = { lang: language, code: codeTyped, tc_user: inputTyped };
@@ -384,6 +396,10 @@ function Problem() {
     }
   };
   const handleSubmitCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
     if (confirm('코드를 제출하시겠습니까?')) {
       try {
         const config = getHeader();
@@ -465,6 +481,7 @@ function Problem() {
           mode={getModeFromLanguage(language)}
           theme="monokai"
           onChange={handleCodeChange}
+          placeholder={'Type your code here.'}
           value={codeTyped}
           name="1"
           editorProps={{ $blockScrolling: true }}
@@ -491,6 +508,8 @@ function Problem() {
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
+              placeholder={'Type your input here.'}
+              value={inputTyped}
               setOptions={{
                 showLineNumbers: true,
                 tabSize: 2
@@ -509,6 +528,7 @@ function Problem() {
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
+              placeholder={'Execution Output'}
               value={outputValue}
               setOptions={{
                 showLineNumbers: true,

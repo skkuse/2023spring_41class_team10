@@ -219,8 +219,8 @@ class ChatDeadcodeAPIView(APIView):
         
         parsed_text, is_no_split = parse_code(answer)
         if is_no_split:
-            Deadcode.objects.create(code=answer, message="", target_id=submission_id)
-            return JsonResponse({"status": "success", "message": "", "code": answer})
+            Deadcode.objects.create(code="", message=answer, target_id=submission_id)
+            return JsonResponse({"status": "success", "message": answer, "code": ""})
         else:
             Deadcode.objects.create(code=parsed_text["code"], message=parsed_text["text"], target_id=submission_id)
             return JsonResponse({"status": "success", "message": parsed_text["text"], "code": parsed_text["code"]})

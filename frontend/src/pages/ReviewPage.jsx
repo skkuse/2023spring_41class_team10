@@ -195,7 +195,7 @@ const reviewData = {
 function Review() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const [{ code, message }, setGPTReview] = useState([]);
+  const [{ code, message }, setGPTReview] = useState({ code: '', message: '' });
   const [submissionData, setSubmissionData] = useState([]);
   const [loading, setLoading] = useState(0);
 
@@ -229,6 +229,10 @@ function Review() {
     if (e.target.innerText == 'Back') {
       navigate(`/problem/${slug}`);
     } else if (e.target.innerText == 'Save') {
+      if (code.trim() === '') {
+        alert('ChatGPT의 코드가 없습니다.');
+        return;
+      }
       if (confirm('ChatGPT가 작성한 코드를 저장하시겠습니까?')) {
         postSaveCode();
       }
