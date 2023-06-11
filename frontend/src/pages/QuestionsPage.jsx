@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import { BsFilter, BsSearch } from 'react-icons/bs';
+import Select from 'react-select';
 
 import ProblemInfo from '../components/ProblemInfo';
 import Pagination from '../components/Pagination';
 import common from '../components/Common.module.css';
-import Select from 'react-select';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -111,19 +111,63 @@ const SearchButton = styled.button`
   font-size: 18px;
 `;
 
-const FilterWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+// Filter Sytle
+const Backdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
 `;
 
-const FilterButton2 = styled.button`
-  margin-bottom: 20px;
+const ModalContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+`;
+
+const Modal = styled.div`
+  position: relative;
+  width: auto;
+  margin: auto;
+  margin-top: 5rem;
+  left: 0;
+  width: 50%;
+  height: 50vh;
+  background-color: white;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  overflow: hidden;
+  z-index: 2;
+`;
+
+const FlexSpaceDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+`;
+
+const FlexColumnDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const FlexRowDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0.25rem 1rem;
 `;
 
 const SquareContainer = styled.div`
-  max-width: 800px;
-  width: 100%;
   display: flex;
   border-radius: 4px;
   border: 1px solid #23272b;
@@ -132,10 +176,7 @@ const SquareContainer = styled.div`
   padding: 4px 8px;
   background-color: white;
 `;
-
 const SelectItem = styled(Select)`
-  max-width: 817px;
-  width: 100%;
   text-align: start;
   margin: 0.25rem 1rem;
   font-size: 14px;
@@ -163,17 +204,8 @@ function QuestionsPage() {
     { value: '알고리즘', label: '알고리즘' }
   ]); // 백엔드 데이터 들어오기 전 기본 데이터
   const [showFilters, setShowFilters] = useState(false);
-  const [status, setStatus] = useState('all');
-  const [level, setLevel] = useState(null);
-  const [field, setField] = useState(null);
   const [size, setSize] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-
-  const [allFilters, setAllFilters] = useState({
-    status: 'all',
-    level: 0,
-    field: ''
-  });
 
   useEffect(() => {
     fetchQuestions(curPage, searchTerm);
@@ -239,6 +271,27 @@ function QuestionsPage() {
     }
   };
 
+  // Filter
+  const [status, setStatus] = useState('all');
+  const [level, setLevel] = useState(null);
+  const [field, setField] = useState(null);
+  const [allFilters, setAllFilters] = useState({
+    status: 'all',
+    level: 0,
+    field: ''
+  });
+  const handleOpenFilter = () => {
+    console.log('showFilters', showFilters);
+    setShowFilters(true);
+  };
+  const handleCloseFilter = () => {
+    console.log('showFilters', showFilters);
+    setShowFilters(false);
+  };
+  const handleFieldChange = (selectedOption) => {
+    setField(selectedOption);
+  };
+
   const handleFilter = () => {
     setAllFilters({
       status: status,
@@ -253,9 +306,8 @@ function QuestionsPage() {
     console.log('filters:', level, status, field);
     console.log('filter filtered:', filteredQuestions);
   };
-
-  const handleFieldChange = (selectedOption) => {
-    setField(selectedOption);
+  const handleStatus = (e) => {
+    setStatus(e.target.value);
   };
 
   return (
@@ -273,9 +325,58 @@ function QuestionsPage() {
             <FourthDiv>AI 추천</FourthDiv>
           </StatusContainer>
           <SearchContainer>
-            <FilterButton>
+            <FilterButton onClick={handleOpenFilter}>
               <BsFilter />
             </FilterButton>
+            {showFilters && (
+              <ModalContainer>
+                <Backdrop onClick={handleCloseFilter}></Backdrop>
+                <Modal>
+                  <FlexSpaceDiv>
+                    <FlexColumnDiv>
+                      <FlexRowDiv>
+                        <span>Status:</span>
+                        <label>
+                          <input type="radio" value="all" checked={status === 'all'} onChange={handleStatus} />
+                          전체
+                        </label>
+                        <label>
+                          <input type="radio" value="pass" checked={status === 'pass'} onChange={handleStatus} />
+                          완료
+                        </label>
+                        <label>
+                          <input type="radio" value="fail" checked={status === 'fail'} onChange={handleStatus} />
+                          진행중
+                        </label>
+                        <label>
+                          <input type="radio" value="none" checked={status === 'none'} onChange={handleStatus} />
+                          미완료
+                        </label>
+                      </FlexRowDiv>
+                      <SquareContainer>
+                        <SquareItem
+                          type="number"
+                          placeholder="Level"
+                          onChange={(e) => setLevel(e.target.value)}
+                          min={1}
+                          max={10}
+                        />
+                      </SquareContainer>
+                      <SelectItem
+                        placeholder={'분야'}
+                        options={fieldList}
+                        onChange={(e) => handleFieldChange(e)}
+                        isMulti
+                      />
+                    </FlexColumnDiv>
+                    <FlexRowDiv>
+                      <button onClick={handleCloseFilter}>닫기</button>
+                      <button onClick={handleFilter}>필터링</button>
+                    </FlexRowDiv>
+                  </FlexSpaceDiv>
+                </Modal>
+              </ModalContainer>
+            )}
             <SearchInput
               type="text"
               placeholder="Search..."
@@ -287,65 +388,6 @@ function QuestionsPage() {
             </SearchButton>
           </SearchContainer>
         </HeadContainer>
-
-        <FilterWrapper>
-          <FilterButton2 onClick={() => setShowFilters(!showFilters)}>Filter</FilterButton2>
-          {showFilters && (
-            <>
-              <div>
-                <label>Status:</label>
-                <label>
-                  <input
-                    type="radio"
-                    value="all"
-                    checked={status === 'all'}
-                    onChange={(e) => setStatus(e.target.value)}
-                  />
-                  All
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="pass"
-                    checked={status === 'pass'}
-                    onChange={(e) => setStatus(e.target.value)}
-                  />
-                  Pass
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="fail"
-                    checked={status === 'fail'}
-                    onChange={(e) => setStatus(e.target.value)}
-                  />
-                  Fail
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="none"
-                    checked={status === 'none'}
-                    onChange={(e) => setStatus(e.target.value)}
-                  />
-                  None
-                </label>
-              </div>
-              <SquareContainer>
-                <SquareItem
-                  type="number"
-                  placeholder="Level"
-                  onChange={(e) => setLevel(e.target.value)}
-                  min={1}
-                  max={10}
-                />
-              </SquareContainer>
-              <SelectItem placeholder={'분야'} options={fieldList} onChange={(e) => handleFieldChange(e)} isMulti />
-              <button onClick={handleFilter}>Apply Filter</button>
-            </>
-          )}
-        </FilterWrapper>
-
         {questions.map((question) => (
           <ProblemInfo
             key={question.id}
