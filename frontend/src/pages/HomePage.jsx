@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 
@@ -37,6 +38,8 @@ const ProcessingList = styled.div`
 const RecommendContainer = styled(SectionContainer)``;
 
 function HomePage() {
+  const navigate = useNavigate();
+
   const [problemData, setProblemData] = useState([]);
   const [recommendProblem, setRecommendProblem] = useState([]);
   const [recentLecture, setRecentLecture] = useState([]);
@@ -50,7 +53,8 @@ function HomePage() {
         console.log('fetchRecentLecture', response);
         if (response.data.status !== 'fail') setRecentLecture(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch RecentLecture:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch RecentLecture:', error);
       }
     };
     const fetchProblem = async () => {
@@ -60,7 +64,8 @@ function HomePage() {
         console.log('fetchProblem', response);
         if (response.data.status !== 'fail') setProblemData(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch RecentLecture:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch RecentProblem:', error);
       }
     };
     const fetchRecommendLecture = async () => {
@@ -73,7 +78,8 @@ function HomePage() {
           setRecommendMsg(response.data.message);
         }
       } catch (error) {
-        console.error('Failed to fetch RecentLecture:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch RecommendLecture:', error);
       }
     };
     const fetchRecommendProblem = async () => {
@@ -85,7 +91,8 @@ function HomePage() {
           setRecommendProblem(response.data.data);
         }
       } catch (error) {
-        console.error('Failed to fetch RecommendProblem:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch RecommendProblem:', error);
       }
     };
     fetchRecentLecture();
@@ -111,62 +118,78 @@ function HomePage() {
       </div>
       <BodyContainer>
         <LecturesContainer>
-          <h2>최근 수강 강의</h2>
-          <LectureList>
-            {recentLecture.map((lecture, index) => (
-              <Lectures
-                key={index}
-                id={lecture.id}
-                youtubeLink={lecture.lecture_link}
-                title={lecture.lecture_title}
-                datetime={lecture.create_at}
-              />
-            ))}
-          </LectureList>
+          {recentLecture.length > 0 && (
+            <>
+              <h2>최근 수강 강의</h2>
+              <LectureList>
+                {recentLecture.map((lecture, index) => (
+                  <Lectures
+                    key={index}
+                    id={lecture.id}
+                    youtubeLink={lecture.lecture_link}
+                    title={lecture.lecture_title}
+                    datetime={lecture.create_at}
+                  />
+                ))}
+              </LectureList>
+            </>
+          )}
         </LecturesContainer>
         <SectionContainer>
-          <h2>최근 제출 내역</h2>
-          <ProcessingList>
-            {problemData.map((problem, idx) => (
-              <ProblemInfo
-                key={idx}
-                problemNumber={problem.problem_id}
-                title={problem.title}
-                problemCategory={problem.field}
-                problemLevel={problem.level}
-                problemStatus={problem.status}
-              />
-            ))}
-          </ProcessingList>
+          {problemData.length > 0 && (
+            <>
+              <h2>최근 제출 내역</h2>
+              <ProcessingList>
+                {problemData.map((problem, idx) => (
+                  <ProblemInfo
+                    key={idx}
+                    problemNumber={problem.problem_id}
+                    title={problem.title}
+                    problemCategory={problem.field}
+                    problemLevel={problem.level}
+                    problemStatus={problem.status}
+                  />
+                ))}
+              </ProcessingList>
+            </>
+          )}
         </SectionContainer>
         <RecommendContainer>
-          <h2>{recommendMsg}</h2>
-          <LectureList>
-            {recommendLecture.map((lecture, index) => (
-              <Lectures
-                key={index}
-                id={lecture.lecture_id}
-                youtubeLink={lecture.lecture_link}
-                title={lecture.lecture_title}
-                memo={lecture.memo}
-              />
-            ))}
-          </LectureList>
+          {recommendLecture.length > 0 && (
+            <>
+              <h2>{recommendMsg}</h2>
+              <LectureList>
+                {recommendLecture.map((lecture, index) => (
+                  <Lectures
+                    key={index}
+                    id={lecture.lecture_id}
+                    youtubeLink={lecture.lecture_link}
+                    title={lecture.lecture_title}
+                    memo={lecture.memo}
+                  />
+                ))}
+              </LectureList>
+            </>
+          )}
         </RecommendContainer>
         <SectionContainer>
-          <h2>AI 추천 문제</h2>
-          <ProcessingList>
-            {recommendProblem.map((problem, idx) => (
-              <ProblemInfo
-                key={idx}
-                problemNumber={problem.problem_id}
-                title={problem.title}
-                problemCategory={problem.field}
-                problemLevel={problem.level}
-                problemStatus={problem.status}
-              />
-            ))}
-          </ProcessingList>
+          {recommendProblem.length > 0 && (
+            <>
+              <h2>AI 추천 문제</h2>
+              <ProcessingList>
+                {recommendProblem.map((problem, idx) => (
+                  <ProblemInfo
+                    key={idx}
+                    problemNumber={problem.problem_id}
+                    title={problem.title}
+                    problemCategory={problem.field}
+                    problemLevel={problem.level}
+                    problemStatus={problem.status}
+                  />
+                ))}
+              </ProcessingList>
+            </>
+          )}
         </SectionContainer>
       </BodyContainer>
     </div>
