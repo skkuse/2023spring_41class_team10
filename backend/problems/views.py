@@ -322,7 +322,7 @@ class ProblemRecommendView(APIView):
         problem_list = []
         for recommend in recommends:
             prob_obj = {}
-            prob_obj["id"] = recommend.problem.id
+            prob_obj["problem_id"] = recommend.problem.id
             prob_obj["title"] = recommend.problem.title
             prob_obj["level"] = recommend.problem.level
             prob_obj['status'] = "ai"

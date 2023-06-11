@@ -173,20 +173,8 @@ const reviewData = {
 };
 
 function Review() {
-  //const { data } = useProblemQuery() // 나중에 백엔드 연결하면 바꾸기
-  const {
-    title,
-    problemNumber,
-    problemCategory,
-    problemLevel,
-    programmingLanguage,
-    description,
-    createdAt,
-    updatedAt
-  } = data;
+  const navigate = useNavigate();
   const { slug } = useParams();
-  // const { originalCode, feedbackCode, review } = reviewData;
-  const [username, setUsername] = useState('심윤보');
   const [{ code, message }, setGPTReview] = useState([]);
   const [submissionData, setSubmissionData] = useState([]);
   const [loading, setLoading] = useState(0);
@@ -201,7 +189,8 @@ function Review() {
           setSubmissionData(response.data.data);
         }
       } catch (error) {
-        console.error('Failed to fetch submission:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch submission:', error);
       }
     };
     fetchProblemInfo();
@@ -240,7 +229,8 @@ function Review() {
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch review:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch review:', error);
         setLoading(0);
       }
     }
@@ -261,7 +251,8 @@ function Review() {
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch refactoring:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch refactoring:', error);
         setLoading(0);
       }
     }
@@ -282,7 +273,8 @@ function Review() {
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch deadcode:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch deadcode:', error);
         setLoading(0);
       }
     }
@@ -303,7 +295,8 @@ function Review() {
         setGPTReview(response.data);
         setLoading(0);
       } catch (error) {
-        console.error('Failed to fetch comment:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch comment:', error);
         setLoading(0);
       }
     }

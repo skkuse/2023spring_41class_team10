@@ -30,7 +30,7 @@ class LectureGuideRecommendView(APIView):
         message = ""
         lecture_list = []
 
-        recommends = LectureRecommend.objects.filter(user_id=user_id).order_by("-create_at")
+        recommends = LectureRecommend.objects.filter(user_id=user_id).order_by("-create_at")[:N]
         if len(recommends) > 0:
             for recommend in recommends:
                 data = recommend.lecture.to_json()
@@ -40,7 +40,7 @@ class LectureGuideRecommendView(APIView):
         else:
             # 임시로 랜덤함수 이용해 선택
             lecture_ids = Lecture.objects.exclude(memo="").values_list("id", flat=True)
-            if len(lecture_ids) < 5:
+            if len(lecture_ids) < N:
                 lecture_ids = Lecture.objects.all().values_list("id", flat=True)
             rids = random.sample(list(lecture_ids), N)
             targets = Lecture.objects.filter(id__in=rids)

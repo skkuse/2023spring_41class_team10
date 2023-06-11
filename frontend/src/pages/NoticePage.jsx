@@ -73,8 +73,7 @@ function NoticePage() {
   useEffect(() => {
     const fetchNoticeInfo = async () => {
       try {
-        const config = getHeader();
-        const response = await axios.get(`${server_url}/boards/v1/notice/list/`, config);
+        const response = await axios.get(`${server_url}/boards/v1/notice/list/`);
         console.log('fetchNoticeInfo response', response);
         if (response.data.status !== 'fail') setNoticeDescriptions(response.data.data);
       } catch (error) {
@@ -83,8 +82,7 @@ function NoticePage() {
     };
     const fetchFAQInfo = async () => {
       try {
-        const config = getHeader();
-        const response = await axios.get(`${server_url}/boards/v1/faq/list/`, config);
+        const response = await axios.get(`${server_url}/boards/v1/faq/list/`);
         console.log('fetchFAQInfo response', response);
         if (response.data.status !== 'fail') setFAQDescriptions(response.data.data);
       } catch (error) {
@@ -94,16 +92,6 @@ function NoticePage() {
     fetchNoticeInfo();
     fetchFAQInfo();
   }, []);
-
-  const getHeader = () => {
-    const token = localStorage.getItem('access_token');
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    };
-    return config;
-  };
 
   const handleNoticeClick = () => {
     if (!showNoticeContent) {
