@@ -1,19 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-
-import ProblemInfo from '../components/ProblemInfo';
-import Lectures from '../components/Lectures';
-import common from '../components/Common.module.css';
-
 import { BsGithub } from 'react-icons/bs';
 
-const BodyContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-left: 200px;
-  padding: 2rem;
-`;
+import common from '../components/Common.module.css';
 
 const ProfileContainer = styled.div`
   display: flex;
@@ -80,71 +70,8 @@ const ButtonText = styled.span`
   margin: auto;
 `;
 
-const RecentQuestions = styled.div`
-  margin-top: 1rem;
-  width: 80%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const RecentQuesDiv = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-`;
-
-const RecentQuesList = styled.div`
-  margin-top: 2rem;
-`;
-
-const RecentLecList = styled.div`
-  margin-top: 2rem;
-  display: flex;
-`;
-
-const RecentLectures = styled.div`
-  margin-top: 2rem;
-`;
-
-const RecentLecDiv = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  display: flex;
-`;
-
 function ProfilePage(props) {
   const { slugUsername } = useParams();
-
-  const processingProblems = [
-    {
-      slug: '1',
-      title: 'Test Problem 1',
-      problemNumber: '1',
-      problemCategory: 'I/O',
-      problemLevel: '2',
-      problemStatus: 'processing'
-    },
-    {
-      slug: '2',
-      title: 'Test Problem 2',
-      problemNumber: '2',
-      problemCategory: 'Looping',
-      problemLevel: '3',
-      problemStatus: 'processing'
-    }
-  ];
-
-  const lectures = [
-    {
-      youtubeLink: 'https://www.youtube.com/watch?v=kWiCuklohdY',
-      title: 'Lecture 1',
-      progress: 30
-    },
-    {
-      youtubeLink: 'https://www.youtube.com/watch?v=q6fPjQAzll8',
-      title: 'Lecture 2',
-      progress: 70
-    }
-  ];
 
   const handleLogout = () => {
     localStorage.setItem('isLoggedIn', false);
@@ -159,12 +86,12 @@ function ProfilePage(props) {
 
   return (
     <div className={`${common.container}`}>
-      <div className={`${common.head}`}>
-        <h1>프로필</h1>
-        <hr />
-      </div>
       {slugUsername === props.user.github_username ? (
         <>
+          <div className={`${common.head}`}>
+            <h1>프로필</h1>
+            <hr />
+          </div>
           <ProfileContainer>
             <ProfileImage src={props.user.profile_image_url} alt="Profile Image" />
             <ProfileUsername>{slugUsername}</ProfileUsername>
@@ -178,47 +105,13 @@ function ProfilePage(props) {
               <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
             </ButtonContainer>
           </ProfileContainer>
-          <BodyContainer>
-            <RecentQuestions>
-              <RecentQuesDiv>최근 푼 문제</RecentQuesDiv>
-              <RecentQuesList>
-                {processingProblems.map((problem) => (
-                  <ProblemInfo
-                    key={problem.slug}
-                    problemNumber={problem.problemNumber}
-                    title={problem.title}
-                    problemCategory={problem.problemCategory}
-                    problemLevel={problem.problemLevel}
-                    problemStatus={problem.problemStatus}
-                  />
-                ))}
-              </RecentQuesList>
-            </RecentQuestions>
-            <RecentLectures>
-              <RecentLecDiv>최근 본 강의</RecentLecDiv>
-              <RecentLecList>
-                {lectures.map((lecture, index) => (
-                  <Lectures
-                    key={index}
-                    youtubeLink={lecture.youtubeLink}
-                    title={lecture.title}
-                    progress={lecture.progress}
-                  />
-                ))}
-              </RecentLecList>
-            </RecentLectures>
-          </BodyContainer>
         </>
       ) : (
         <>
-          <ProfileContainer>
-            {/* TODO 프로필 이미지를 유저 정보를 받아와서 처리하거나 디폴트 이미지 사용 */}
-            <ProfileImage src={`https://i.ytimg.com/vi/sXeYkw4VE24/mqdefault.jpg`} alt="Profile Image" />
-            <ProfileUsername>{slugUsername}</ProfileUsername>
-            <ButtonContainer>
-              <ProfileGithub onClick={handleClick}>GitHub 페이지</ProfileGithub>
-            </ButtonContainer>
-          </ProfileContainer>
+          <div className={`${common.head}`}>
+            <h1>접근권한이 없습니다.</h1>
+            <hr />
+          </div>
         </>
       )}
     </div>
