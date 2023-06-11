@@ -19,7 +19,14 @@ const ProfileImage = styled.img`
   object-fit: cover;
 `;
 
-const ProfileUsername = styled.h2``;
+const ProfileUsername = styled.span`
+  font-size: 1.5rem;
+  font-weight: 800;
+`;
+const Role = styled.span`
+  font-size: 18px;
+  font-weight: 500;
+`;
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -95,6 +102,8 @@ function ProfilePage(props) {
           <ProfileContainer>
             <ProfileImage src={props.user.profile_image_url} alt="Profile Image" />
             <ProfileUsername>{slugUsername}</ProfileUsername>
+            <Role>{props.user.is_staff ? '스태프' : '수강생'}</Role>
+
             <ButtonContainer>
               <ProfileGithub onClick={handleClick}>
                 <ButtonIcon>
