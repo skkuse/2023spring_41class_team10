@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import { BsFilter, BsSearch } from 'react-icons/bs';
 import Select from 'react-select';
+import { FaSpinner } from 'react-icons/fa';
 
 import ProblemInfo from '../components/ProblemInfo';
 import Pagination from '../components/Pagination';
@@ -192,6 +193,24 @@ const SquareItem = styled.input`
   padding: 4px 8px;
   width: 100%;
 `;
+const LoadingContainer = styled.div`
+  width: 328px;
+  height: 328px;
+  animation: animate 2s infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 50px;
+  @keyframes animate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(720deg);
+    }
+  }
+`;
 
 function QuestionsPage() {
   const [searchParams] = useSearchParams();
@@ -202,8 +221,11 @@ function QuestionsPage() {
   const [curPage, setCurPage] = useState(searchParams.get('page') ? searchParams.get('page') : 1);
   const [size, setSize] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [loading, setLoding] = useState(false);
+
   const fetchQuestions = async (cur, keyword = '') => {
     try {
+      setLoding(true);
       const config = getHeader();
       let queryString = '';
       if (keyword) queryString += `?q=${keyword}`;
@@ -216,9 +238,11 @@ function QuestionsPage() {
         setQuestions(response.data['data']);
         setSize(response.data['size']);
         setPageSize(response.data['page_size']);
+        setLoding(false);
       }
     } catch (error) {
       console.error('Failed to fetch questions:', error);
+      setLoding(false);
     }
   };
 
@@ -281,6 +305,9 @@ function QuestionsPage() {
 
   const handleOpenFilter = () => {
     setShowFilters(true);
+    setStatus('all');
+    setLevel(0);
+    setSelectedFieldData([]);
   };
   const handleCloseFilter = () => {
     setShowFilters(false);
@@ -306,21 +333,26 @@ function QuestionsPage() {
   };
   const fetchFilterQuestions = async (data, cur, keyword = '') => {
     try {
+      setLoding(true);
       const config = getHeader();
       let queryString = '';
       if (keyword) queryString += `?q=${keyword}`;
       if (cur && queryString) queryString += `&page=${cur}`;
       if (cur && !queryString) queryString += `?page=${cur}`;
       console.log('queryString', queryString);
+      console.log('data', data);
+
       const response = await axios.post(`${server_url}/problems/v1/list/` + queryString, data, config);
       console.log('FilterQuestions', response);
       if (response.data.status !== 'fail') {
         setQuestions(response.data['data']);
         setSize(response.data['size']);
         setPageSize(response.data['page_size']);
+        setLoding(false);
       }
     } catch (error) {
       console.error('Failed to fetch FilterQuestions:', error);
+      setLoding(false);
     }
   };
   const handleStatus = (e) => {
@@ -406,16 +438,23 @@ function QuestionsPage() {
             </SearchButton>
           </SearchContainer>
         </HeadContainer>
-        {questions.map((question) => (
-          <ProblemInfo
-            key={question.id}
-            problemNumber={question.id}
-            title={question.title}
-            problemCategory={question.field}
-            problemLevel={question.level}
-            problemStatus={question.status}
-          />
-        ))}
+
+        {loading ? (
+          <LoadingContainer>
+            <FaSpinner />
+          </LoadingContainer>
+        ) : (
+          questions.map((question) => (
+            <ProblemInfo
+              key={question.id}
+              problemNumber={question.id}
+              title={question.title}
+              problemCategory={question.field}
+              problemLevel={question.level}
+              problemStatus={question.status}
+            />
+          ))
+        )}
         <Pagination totalItems={size} onPageChange={handlePageChange} currentPage={curPage} itemsPerPage={pageSize} />
       </QuestionsContainer>
     </div>

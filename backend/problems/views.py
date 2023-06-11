@@ -151,7 +151,9 @@ class ProblemListView(APIView):
         )
         # Add submissions, field_relations attributes to problems
         problems = problems.prefetch_related(submissions_prefetch, field_relations_prefetch)
-        if filter_status == "NONE": # Load not submit problems
+        if filter_status == "ALL":
+            pass
+        elif filter_status == "NONE": # Load not submit problems
             problems = problems.exclude(id__in=problem_id_list)
         else: # Load submit problems corresponding status
             problems = problems.filter(id__in=problem_id_list)
