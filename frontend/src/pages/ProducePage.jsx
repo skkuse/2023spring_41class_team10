@@ -26,7 +26,7 @@ const TypingContainer = styled.textarea`
   width: 100%;
   border: 1px solid #e1e1e8;
   background-color: #f7f7f9;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: consolas;
   overflow: auto;
   outline: none;
   resize: none;
@@ -133,7 +133,7 @@ const data = {
   programmingLanguage: 'C'
 };
 
-function Produce() {
+function Produce(props) {
   const navigate = useNavigate();
   const [problemData, setProblemData] = useState({
     title: '',
@@ -159,6 +159,7 @@ function Produce() {
         else console.error('Failed to fetch FieldList:', error);
       }
     };
+    if (!props.user.is_staff) navigate('/');
     fetchFieldList();
   }, []);
 

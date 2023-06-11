@@ -9,6 +9,7 @@ const StyledNavbar = styled.nav`
   align-items: center;
   padding: 5px 10px;
   background-color: #ffffff;
+  gap: 1rem;
 `;
 
 const Logo = styled.div`
@@ -25,7 +26,7 @@ const LogoImage = styled.img`
 const NavigationLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1rem;
 `;
 
 const AuthLinks = styled.div`
@@ -35,12 +36,15 @@ const AuthLinks = styled.div`
 `;
 
 const StyledLink = styled(Link)`
+  font-family: 'Roboto', Helvetica;
   color: #000000;
   text-decoration: none;
   padding: 4px 4px;
+  text-wrap: nowrap;
 `;
 
 const StyledLinkBlack = styled(Link)`
+  font-family: 'Roboto', Helvetica;
   color: white;
   background-color: #23272b;
   text-decoration: none;
@@ -64,12 +68,15 @@ function Navbar(props) {
         </Logo>
         <StyledLink to="/home">Home</StyledLink>
         <StyledLink to="/questions">Questions</StyledLink>
+        {props.user.is_staff && <StyledLink to="/produce">Produce</StyledLink>}
       </NavigationLinks>
       {isLoggedIn ? (
         <AuthLinks>
           <StyledLink to="/notice">고객센터</StyledLink>
-          {props.username ? (
-            <StyledLinkBlack to={`/profile/${props.username}`}>{props.username}</StyledLinkBlack>
+          {props.user.github_username ? (
+            <StyledLinkBlack to={`/profile/${props.user.github_username}`}>
+              {props.user.github_username}
+            </StyledLinkBlack>
           ) : (
             <StyledLinkBlack to="/login">Login</StyledLinkBlack>
           )}

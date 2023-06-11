@@ -49,10 +49,10 @@ function App() {
   return (
     <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
       <Router>
-        <Navbar username={userInfo ? userInfo.github_username : ''} />
+        <Navbar user={userInfo ? userInfo : {}} />
         {/* Navbar에 props로 username 넘겨주기 */}
         <Routes>
-          <Route path="/" element={<Main username={userInfo ? userInfo.github_username : ''} />} />
+          <Route path="/" element={<Main user={userInfo ? userInfo : ''} />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<LoginView />} />
           <Route path="/login/github/callback/" element={<OAuth />} />{' '}
@@ -62,7 +62,7 @@ function App() {
           {/* 추가해야함: 본인 프로필에 로그인되어 있는 상태에서만 입장 가능*/}
           <Route path="/notice" element={<Notice />} />
           <Route path="/questions" element={<Questions />} />
-          <Route path="/produce" element={<Produce />} />{' '}
+          <Route path="/produce" element={<Produce user={userInfo ? userInfo : {}} />} />{' '}
           {/* produce page(문제 추가 페이지): 허가된 관리자만 입장할 수 있도록 설정해야함*/}
         </Routes>
         <Footer />
