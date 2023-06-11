@@ -58,7 +58,7 @@ class ProblemDescView(APIView):
             print(user_submissions)
         else:
             status = "uncomplete"
-                
+
         data = {
             "id" : target_problem.id,
             "title" : target_problem.title,
@@ -74,7 +74,7 @@ class ProblemDescView(APIView):
             "data" : data,
             "user" : user.to_json()
         }
-        user
+
         print("response_data", response_data)
         return Response(response_data)
 
@@ -158,7 +158,7 @@ class ProblemExecView(APIView):
                 user = user_id,
                 result = exec_res["result"]
             )
-            msg="Execution Success!"
+            msg="실행에 성공했습니다. 결과를 확인해주세요."
 
         data = {
             "id":target_problem.id, 
@@ -175,15 +175,6 @@ class ProblemExecView(APIView):
 
         return Response(response_data)
 
-    # def create_new_file(self, code, extension):
-    #     self.dir_path = os.path.join(BASE_DIR, "problems/temp_file_dir")
-        
-    #     if not os.path.exists(self.dir_path):
-    #         os.makedirs(self.dir_path, exist_ok=True)
-        
-    #     self.file_path = os.path.join(self.dir_path, "temp"+extension)
-    #     with open(self.file_path, "w") as file:
-    #         file.write(code)
 
 def create_new_file(code, extension, testcase):        
     if not os.path.exists(EXECUTE_DIR):

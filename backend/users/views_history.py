@@ -89,13 +89,18 @@ class SubmissionCodeView(APIView):
         # 알고리즘 분류 조회
         fields = ProblemFieldRelation.objects.filter(problem=target.problem).values_list("field__field", flat=True)
         target_fields = list(fields)
+        lang = target.lang.upper()
+        if lang == "PYTHON":
+            lang = "Python"
+        elif lang == "CPP":
+            lang = "C++"
 
         data = {
             "user_id" : user_id,
             "title" : target.problem.title,
             "problem_id" : target.problem.id,
             "level": target.problem.level,
-            "lang" : target.lang,
+            "lang" : lang,
             "field": target_fields,
             "submit_at" : target.create_at,
             "result" : target.status,

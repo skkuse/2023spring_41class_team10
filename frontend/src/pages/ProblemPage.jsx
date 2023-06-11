@@ -166,8 +166,8 @@ const ExtendButton = styled.button`
 const NextButton = styled(ExtendButton)`
   transform: translateX(5px);
   transition: all 0.3s infinity;
-  animation: animate 2.2s infinite;
-  @keyframes animate {
+  animation: next 2.2s infinite;
+  @keyframes next {
     0% {
       transform: translateX(0px);
     }
