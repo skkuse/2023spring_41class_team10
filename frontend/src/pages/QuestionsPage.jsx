@@ -15,20 +15,23 @@ const QuestionsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 100px;
+  margin-bottom: 2rem;
 `;
 
 const HeadContainer = styled.div`
   margin: 1rem;
   display: flex;
   justify-content: space-between;
-  gap: 5rem;
+  width: 100%;
+  max-width: 800px;
+  flex-wrap: wrap;
 `;
 
 const StatusContainer = styled.div`
   margin: 10px 0;
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
 `;
 
 const FilterButton = styled.button`
@@ -89,7 +92,7 @@ const FourthDiv = styled.div`
 `;
 
 const SearchContainer = styled.div`
-  margin: 0.5rem 1rem;
+  margin: 0.5rem 0;
   display: flex;
   align-items: center;
 `;
@@ -197,15 +200,27 @@ function QuestionsPage() {
   const [questions, setQuestions] = useState([]);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') ? searchParams.get('q') : '');
   const [curPage, setCurPage] = useState(searchParams.get('page') ? searchParams.get('page') : 1);
-
-  const [fieldList, setFieldList] = useState([
-    { value: '입출력', label: '입출력' },
-    { value: '자료구조', label: '자료구조' },
-    { value: '알고리즘', label: '알고리즘' }
-  ]); // 백엔드 데이터 들어오기 전 기본 데이터
-  const [showFilters, setShowFilters] = useState(false);
   const [size, setSize] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const fetchQuestions = async (cur, keyword = '') => {
+    try {
+      const config = getHeader();
+      let queryString = '';
+      if (keyword) queryString += `?q=${keyword}`;
+      if (cur && queryString) queryString += `&page=${cur}`;
+      if (cur && !queryString) queryString += `?page=${cur}`;
+      console.log('queryString', queryString);
+      const response = await axios.get(`${server_url}/problems/v1/list/` + queryString, config);
+      console.log('Questions', response);
+      if (response.data.status !== 'fail') {
+        setQuestions(response.data['data']);
+        setSize(response.data['size']);
+        setPageSize(response.data['page_size']);
+      }
+    } catch (error) {
+      console.error('Failed to fetch questions:', error);
+    }
+  };
 
   useEffect(() => {
     fetchQuestions(curPage, searchTerm);
@@ -220,25 +235,7 @@ function QuestionsPage() {
     };
     return config;
   };
-  const fetchQuestions = async (cur, keyword = '') => {
-    try {
-      const config = getHeader();
-      let queryString = '';
-      if (keyword) queryString += `?q=${keyword}`;
-      if (cur && queryString) queryString += `&page=${cur}`;
-      if (cur && !queryString) queryString += `?page=${cur}`;
-      console.log('queryString', queryString);
-      const response = await axios.get(`${server_url}/problems/v1/list/` + queryString, config);
-      console.log('response', response);
-      if (response.data.status !== 'fail') {
-        setQuestions(response.data['data']);
-        setSize(response.data['size']);
-        setPageSize(response.data['page_size']);
-      }
-    } catch (error) {
-      console.error('Failed to fetch questions:', error);
-    }
-  };
+
   const fetchFieldList = async () => {
     try {
       const config = getHeader();
@@ -272,39 +269,59 @@ function QuestionsPage() {
   };
 
   // Filter
+  const [showFilters, setShowFilters] = useState(false);
   const [status, setStatus] = useState('all');
-  const [level, setLevel] = useState(null);
-  const [field, setField] = useState(null);
-  const [allFilters, setAllFilters] = useState({
-    status: 'all',
-    level: 0,
-    field: ''
-  });
+  const [level, setLevel] = useState(0);
+  const [selectedFieldData, setSelectedFieldData] = useState([]);
+  const [fieldList, setFieldList] = useState([
+    { value: '입출력', label: '입출력' },
+    { value: '자료구조', label: '자료구조' },
+    { value: '알고리즘', label: '알고리즘' }
+  ]); // 백엔드 데이터 들어오기 전 기본 데이터
+
   const handleOpenFilter = () => {
-    console.log('showFilters', showFilters);
     setShowFilters(true);
   };
   const handleCloseFilter = () => {
-    console.log('showFilters', showFilters);
     setShowFilters(false);
   };
-  const handleFieldChange = (selectedOption) => {
-    setField(selectedOption);
+  const handleFieldChange = (e) => {
+    setSelectedFieldData(e);
+    console.log('selectedFieldData', selectedFieldData);
   };
 
   const handleFilter = () => {
-    setAllFilters({
+    const data = {
       status: status,
       level: level,
-      field: field
-    });
-
-    const filteredQuestions = questions.filter(
-      (question) => question.level.includes(level) && question.field.includes(field) && question.status.includes(status)
-    );
-
-    console.log('filters:', level, status, field);
-    console.log('filter filtered:', filteredQuestions);
+      field: selectedFieldData.map((obj) => obj['value'])
+    };
+    if (searchTerm) {
+      navigate(`?q=${searchTerm}&page=1`);
+    } else {
+      navigate(`?page=1`);
+    }
+    fetchFilterQuestions(data, 1, searchTerm);
+    setShowFilters(false);
+  };
+  const fetchFilterQuestions = async (data, cur, keyword = '') => {
+    try {
+      const config = getHeader();
+      let queryString = '';
+      if (keyword) queryString += `?q=${keyword}`;
+      if (cur && queryString) queryString += `&page=${cur}`;
+      if (cur && !queryString) queryString += `?page=${cur}`;
+      console.log('queryString', queryString);
+      const response = await axios.post(`${server_url}/problems/v1/list/` + queryString, data, config);
+      console.log('FilterQuestions', response);
+      if (response.data.status !== 'fail') {
+        setQuestions(response.data['data']);
+        setSize(response.data['size']);
+        setPageSize(response.data['page_size']);
+      }
+    } catch (error) {
+      console.error('Failed to fetch FilterQuestions:', error);
+    }
   };
   const handleStatus = (e) => {
     setStatus(e.target.value);
@@ -365,7 +382,8 @@ function QuestionsPage() {
                       <SelectItem
                         placeholder={'분야'}
                         options={fieldList}
-                        onChange={(e) => handleFieldChange(e)}
+                        onChange={handleFieldChange}
+                        value={selectedFieldData}
                         isMulti
                       />
                     </FlexColumnDiv>

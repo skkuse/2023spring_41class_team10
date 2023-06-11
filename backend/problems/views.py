@@ -135,7 +135,7 @@ class ProblemListView(APIView):
         if keyword != "":
             problems = problems.filter(title__contains=keyword)
         problems = problems.order_by('id')
-        size = len(problems)
+        
         # problems = Problem.objects.all().order_by('id')
         # Submission query optimize by using Prefetch
         submissions_prefetch = Prefetch(
@@ -171,6 +171,7 @@ class ProblemListView(APIView):
         if len(field) != 0: # filtering field
             filtered_field_problems = ProblemFieldRelation.objects.filter(field_id__in=field).values_list('problem__id', flat=True)
             problems = problems.filter(id__in=filtered_field_problems)
+        size = len(problems)
         if len(problems) < PAGE_SIZE:
             problems = problems[:]
         if len(problems) < PAGE_SIZE * page :

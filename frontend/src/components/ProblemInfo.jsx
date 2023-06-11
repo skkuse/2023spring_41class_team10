@@ -9,7 +9,6 @@ const SquareContainer = styled.div`
   grid-template-columns: 1fr 4fr 3fr 1fr;
   border-radius: 10px;
   border: 0.1px solid black;
-  margin: 1rem;
   padding: 4px 0;
   background-color: white;
   box-shadow: 2px 4px 4px #cccccc;
@@ -58,6 +57,8 @@ const ProblemLink = styled(Link)`
   text-decoration: none;
   color: #000;
   width: 100%;
+  max-width: 800px;
+  margin: 1rem;
 `;
 
 function ProblemInfo({ problemNumber, title, problemCategory, problemLevel, problemStatus, isActive = true }) {
