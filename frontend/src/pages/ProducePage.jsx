@@ -137,7 +137,7 @@ function Produce(props) {
   const navigate = useNavigate();
   const [problemData, setProblemData] = useState({
     title: '',
-    level: '',
+    level: 0,
     field: [],
     description: '',
     tc: []
@@ -216,6 +216,27 @@ function Produce(props) {
     // Field 데이터 업데이트
     updated.field = selectedFieldData.map((obj) => obj.value);
     setProblemData(updated);
+    if (problemData.title.trim() === '') {
+      alert('제목을 입력하지 않았습니다.');
+      return;
+    }
+    if (problemData.description.trim() === '') {
+      alert('문제 설명을 입력하지 않았습니다.');
+      return;
+    }
+    if (problemData.level === 0) {
+      alert('난이도를 입력하지 않았습니다.');
+      return;
+    }
+    if (updated.tc.length === 0) {
+      alert('테스트케이스를 입력하지 않았습니다.');
+      return;
+    }
+    if (updated.field.length === 0) {
+      alert('분야를 추가하지 않았습니다.');
+      return;
+    }
+
     postNewProblem();
   };
 

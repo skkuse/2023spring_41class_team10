@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import ReactAce from 'react-ace';
+import { BsArrowLeftShort, BsArrowRightShort } from 'react-icons/bs';
 
 import 'ace-builds/src-noconflict/mode-java';
 import 'ace-builds/src-noconflict/mode-python';
@@ -37,10 +38,9 @@ const ActualDescriptionContainer = styled.pre`
   background-color: white;
   border-radius: 1rem;
   padding: 16px;
-
   margin: 0 5px;
   text-align: left;
-  font-size: 18px;
+  font-size: 16px;
   font-family: Inter, system-ui, sans-serif;
   flex: 100%;
   white-space: pre-wrap;
@@ -75,7 +75,7 @@ const LanguageDiv = styled.select`
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
-  height: 24px;
+  height: 22px;
   width: 80px;
 `;
 
@@ -85,6 +85,7 @@ const SolvingContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 5vh;
+  gap: 1.5rem;
 `;
 
 // const TypingContainer = styled.textarea`
@@ -105,6 +106,7 @@ const TypingContainer = styled(ReactAce)`
   color: white;
   width: 100%;
   margin-bottom: 1vh;
+  max-height: 400px;
 `;
 
 const InputOutputContainer = styled.div`
@@ -130,19 +132,70 @@ const OutputContainer = styled.div`
 
 const Controllers = styled.div`
   display: flex;
+  justify-content: space-between;
+  width: 100%;
+`;
+const ActionButton = styled.div`
+  display: flex;
   justify-content: center;
 `;
-
 const Button = styled.button`
   background-color: ${(props) => props.color};
   width: 60px;
   height: 30px;
   margin: 5px;
-  font-size: 15px;
-
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+`;
+
+const ExtendButton = styled.button`
+  height: 30px;
+  background-color: ${(props) => props.color};
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  gap: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+`;
+
+const NextButton = styled(ExtendButton)`
+  transform: translateX(5px);
+  transition: all 0.3s infinity;
+  animation: next 2.2s infinite;
+  @keyframes next {
+    0% {
+      transform: translateX(0px);
+    }
+    30% {
+      transform: translateX(0px);
+    }
+    40% {
+      transform: translateX(8px);
+    }
+    50% {
+      transform: translateX(0);
+    }
+    60% {
+      transform: translateX(8px);
+    }
+    70% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+`;
+const PrevButton = styled(ExtendButton)`
+  &:hover {
+    transform: translateX(-5px);
+    transition: all 0.3s;
+  }
 `;
 
 const TestCaseArea = styled.div`
@@ -158,8 +211,10 @@ const TestCase = styled.pre`
   background-color: #f7f7f9;
   padding: 1rem;
   font-family: consolas;
-  font-size: 18px;
+  font-size: 16px;
   width: 50%;
+  max-height: 400px;
+  overflow-y: scroll;
 `;
 
 const ProblemContainer = styled.div`
@@ -187,11 +242,13 @@ function Problem() {
   const navigate = useNavigate();
 
   const [language, setLanguage] = useState('Python');
-  const [codeTyped, setCodeTyped] = useState('Type your code here.');
-  const [inputTyped, setInputTyped] = useState('Type your input here.');
-  const [outputValue, setOutputValue] = useState('Default Output');
+  const [codeTyped, setCodeTyped] = useState('');
+  const [inputTyped, setInputTyped] = useState('');
+  const [outputValue, setOutputValue] = useState('');
 
   const [problemInfo, setProblemInfo] = useState([]);
+  const [pass, setPass] = useState(false);
+
   useEffect(() => {
     const fetchProblemInfo = async () => {
       try {
@@ -247,7 +304,6 @@ function Problem() {
     console.log('button clicked ', e);
     if (e.target.innerText == 'Back') {
       // Go back page
-      console.log('back clicked');
       navigate('/questions');
     } else if (e.target.innerText == 'Load') {
       // Load Code
@@ -265,6 +321,8 @@ function Problem() {
       // Submit code
       console.log('submit clicked');
       handleSubmitCode();
+    } else if (e.target.innerText == 'Review') {
+      navigate('./review');
     }
   };
   const handleLoadCode = async () => {
@@ -287,6 +345,10 @@ function Problem() {
     }
   };
   const handleSaveCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
     if (confirm('코드를 저장하시겠습니까?')) {
       try {
         const config = getHeader();
@@ -307,6 +369,14 @@ function Problem() {
     }
   };
   const handleRunCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
+    if (inputTyped.trim() === '') {
+      alert('입력한 테스트케이스가 없습니다.');
+      return;
+    }
     try {
       const config = getHeader();
       let data = { lang: language, code: codeTyped, tc_user: inputTyped };
@@ -326,6 +396,10 @@ function Problem() {
     }
   };
   const handleSubmitCode = async () => {
+    if (codeTyped.trim() === '') {
+      alert('입력한 코드가 없습니다.');
+      return;
+    }
     if (confirm('코드를 제출하시겠습니까?')) {
       try {
         const config = getHeader();
@@ -337,6 +411,7 @@ function Problem() {
         if (response.data.status !== 'fail') {
           alert(response.data.message);
           setOutputValue(response.data.data.result);
+          setPass(true);
         } else alert(response.data.message);
       } catch (error) {
         if (error.response.status === 401) navigate('/login');
@@ -362,6 +437,7 @@ function Problem() {
             title={problemInfo.title}
             problemCategory={problemInfo.field}
             problemLevel={problemInfo.level}
+            problemStatus={problemInfo.status}
             isActive={false}
           />
         </ProblemContainer>
@@ -405,6 +481,8 @@ function Problem() {
           mode={getModeFromLanguage(language)}
           theme="monokai"
           onChange={handleCodeChange}
+          placeholder={'Type your code here.'}
+          value={codeTyped}
           name="1"
           editorProps={{ $blockScrolling: true }}
           fontSize={14}
@@ -430,6 +508,8 @@ function Problem() {
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
+              placeholder={'Type your input here.'}
+              value={inputTyped}
               setOptions={{
                 showLineNumbers: true,
                 tabSize: 2
@@ -448,6 +528,7 @@ function Problem() {
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
+              placeholder={'Execution Output'}
               value={outputValue}
               setOptions={{
                 showLineNumbers: true,
@@ -458,26 +539,36 @@ function Problem() {
           </OutputContainer>
         </InputOutputContainer>
         <Controllers>
-          <Button onClick={handleButtonClick} color={'#C6DBDA'}>
-            {' '}
-            Back{' '}
-          </Button>
-          <Button onClick={handleButtonClick} color={'#FACFCF'}>
-            {' '}
-            Load{' '}
-          </Button>
-          <Button onClick={handleButtonClick} color={'#FEF0D6'}>
-            {' '}
-            Run{' '}
-          </Button>
-          <Button onClick={handleButtonClick} color={'#AED5F8 '}>
-            {' '}
-            Save{' '}
-          </Button>
-          <Button onClick={handleButtonClick} color={'#D9CFDE'}>
-            {' '}
-            Submit{' '}
-          </Button>
+          <PrevButton onClick={handleButtonClick} color={'#D9CFDE '}>
+            <BsArrowLeftShort />
+            Back
+          </PrevButton>
+          <ActionButton>
+            <Button onClick={handleButtonClick} color={'#C6DBDA'}>
+              {' '}
+              Load{' '}
+            </Button>
+            <Button onClick={handleButtonClick} color={'#FEF0D6'}>
+              {' '}
+              Run{' '}
+            </Button>
+            <Button onClick={handleButtonClick} color={'#AED5F8 '}>
+              {' '}
+              Save{' '}
+            </Button>
+            <Button onClick={handleButtonClick} color={'#FACFCF'}>
+              {' '}
+              Submit{' '}
+            </Button>
+          </ActionButton>
+          <div>
+            {(pass || problemInfo.status === 'complete') && (
+              <NextButton onClick={handleButtonClick} color={'#A9A0FC'}>
+                <span>Review</span>
+                <BsArrowRightShort />
+              </NextButton>
+            )}
+          </div>
         </Controllers>
       </SolvingContainer>
       <hr />

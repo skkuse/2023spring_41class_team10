@@ -196,13 +196,13 @@ const SquareItem = styled.input`
 const LoadingContainer = styled.div`
   width: 328px;
   height: 328px;
-  animation: animate 2s infinite;
+  animation: spin 2s infinite;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   font-size: 50px;
-  @keyframes animate {
+  @keyframes spin {
     0% {
       transform: rotate(0deg);
     }

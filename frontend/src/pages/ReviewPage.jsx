@@ -15,6 +15,14 @@ const DescriptionContainer = styled.div`
   margin-bottom: 2vh;
 `;
 
+const ProblemContainer = styled.div`
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+`;
+
 const MoreDescriptionContainer = styled.div`
   display: flex;
   justify-content: right;
@@ -43,7 +51,7 @@ const LanguageDiv = styled.div`
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
-  height: 24px;
+  height: 22px;
   width: 80px;
 `;
 
@@ -100,7 +108,7 @@ const CodeReviewDiv = styled.pre`
   border-radius: 1rem;
   padding: 16px;
   min-height: 15vh;
-  margin-bottom: 1vh;
+  margin-bottom: 1.5rem;
   font-family: Inter, system-ui, sans-serif;
   white-space: pre-wrap;
   word-break: normal;
@@ -109,7 +117,14 @@ const CodeReviewDiv = styled.pre`
 
 const Controllers = styled.div`
   display: flex;
-  justify-content: flex-center;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`;
+
+const ActionButton = styled.div`
+  display: flex;
+  justify-content: center;
   flex-wrap: wrap;
 `;
 
@@ -124,7 +139,12 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
 `;
-
+const PrevButton = styled(Button)`
+  &:hover {
+    transform: translateX(-5px);
+    transition: all 0.3s;
+  }
+`;
 const LongButton = styled.button`
   background-color: ${(props) => props.color};
   width: 130px;
@@ -140,9 +160,9 @@ const LongButton = styled.button`
 const FaSpinnerBlock = styled.div`
   display: flex;
   align-items: center;
-  animation: animate 2s infinite;
+  animation: spin 2s infinite;
 
-  @keyframes animate {
+  @keyframes spin {
     0% {
       transform: rotate(0deg);
     }
@@ -175,7 +195,7 @@ const reviewData = {
 function Review() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const [{ code, message }, setGPTReview] = useState([]);
+  const [{ code, message }, setGPTReview] = useState({ code: '', message: '' });
   const [submissionData, setSubmissionData] = useState([]);
   const [loading, setLoading] = useState(0);
 
@@ -206,10 +226,34 @@ function Review() {
   };
 
   const handleButtonClick = (e) => {
-    console.log('button clicked ', e);
-    if (e.target.value == 'Exit') {
-      // Exit to problem list page
-      console.log('exit clicked ', e);
+    if (e.target.innerText == 'Back') {
+      navigate(`/problem/${slug}`);
+    } else if (e.target.innerText == 'Save') {
+      if (code.trim() === '') {
+        alert('ChatGPT의 코드가 없습니다.');
+        return;
+      }
+      if (confirm('ChatGPT가 작성한 코드를 저장하시겠습니까?')) {
+        postSaveCode();
+      }
+    }
+  };
+  const postSaveCode = async () => {
+    try {
+      const config = getHeader();
+      let data = { lang: submissionData.lang, code: code };
+      console.log('data', data);
+      const response = await axios.post(`${server_url}/problems/v1/${slug}/save/`, data, config);
+      console.log('response', response);
+      if (response.data.status !== 'fail') {
+        alert(response.data.message);
+      } else alert(response.data.message);
+    } catch (error) {
+      if (error.response.status === 401) navigate('/login');
+      else {
+        console.error('Failed to Save Code:', error);
+        alert('코드 저장에 실패했습니다.');
+      }
     }
   };
 
@@ -257,32 +301,10 @@ function Review() {
       }
     }
   };
-  const handleDeadCode = async () => {
-    if (loading == 0) {
-      try {
-        setLoading(3);
-        const config = getHeader();
-        const data = {
-          lang: submissionData.lang,
-          code: submissionData.code,
-          problem: submissionData.description,
-          submission_id: submissionData.submission_id
-        };
-        const response = await axios.post(`${server_url}/codes/v1/deadcode/`, data, config);
-        console.log('response', response);
-        setGPTReview(response.data);
-        setLoading(0);
-      } catch (error) {
-        if (error.response.status === 401) navigate('/login');
-        else console.error('Failed to fetch deadcode:', error);
-        setLoading(0);
-      }
-    }
-  };
   const handleCodeComment = async () => {
     if (loading == 0) {
       try {
-        setLoading(4);
+        setLoading(3);
         const config = getHeader();
         const data = {
           lang: submissionData.lang,
@@ -301,7 +323,28 @@ function Review() {
       }
     }
   };
-
+  const handleDeadCode = async () => {
+    if (loading == 0) {
+      try {
+        setLoading(4);
+        const config = getHeader();
+        const data = {
+          lang: submissionData.lang,
+          code: submissionData.code,
+          problem: submissionData.description,
+          submission_id: submissionData.submission_id
+        };
+        const response = await axios.post(`${server_url}/codes/v1/deadcode/`, data, config);
+        console.log('response', response);
+        setGPTReview(response.data);
+        setLoading(0);
+      } catch (error) {
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch deadcode:', error);
+        setLoading(0);
+      }
+    }
+  };
   return (
     <div className={`${common.container}`}>
       <div className={`${common.head}`}>
@@ -311,13 +354,16 @@ function Review() {
 
       <DescriptionContainer>
         {/* problem metadata component */}
-        <ProblemInfo
-          problemNumber={slug}
-          title={submissionData.title}
-          problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
-          problemLevel={submissionData.level}
-          isActive={false}
-        />
+        <ProblemContainer>
+          <ProblemInfo
+            problemNumber={slug}
+            title={submissionData.title}
+            problemCategory={Array.isArray(submissionData.field) ? submissionData.field.join(', ') : ''}
+            problemLevel={submissionData.level}
+            problemStatus="complete"
+            isActive={false}
+          />
+        </ProblemContainer>
         <MoreDescriptionContainer>
           <ChooseLanguageContainer>
             <LangDiv>선택한 언어</LangDiv>
@@ -327,72 +373,72 @@ function Review() {
       </DescriptionContainer>
 
       <ReviewContainer>
-        <Titleh2>Answer</Titleh2>
         <CodeCompareContainer>
           <OriginalCodeContainer>
-            <label>내가 쓴 코드</label>
+            <h3>내가 쓴 코드</h3>
             <TypingContainer value={submissionData.code} rows={15} readOnly={true} />
           </OriginalCodeContainer>
           <FeedbackContainer>
-            <label>ChatGPT 보완</label>
+            <h3>ChatGPT의 코드</h3>
             <TypingContainer value={code} rows={15} readOnly={true} />
           </FeedbackContainer>
         </CodeCompareContainer>
-        <Titleh2>Code Review</Titleh2>
         <CodeReviewContainer>
-          <label>ChatGPT의 코드 리뷰</label>
+          <h3>ChatGPT의 답변</h3>
           <CodeReviewDiv>{message}</CodeReviewDiv>
         </CodeReviewContainer>
         <Controllers>
-          <Button onClick={handleButtonClick} color={'white'}>
+          <PrevButton onClick={handleButtonClick} color={'#D9CFDE'}>
             {' '}
-            Exit{' '}
-          </Button>
-          <LongButton onClick={handleCodeReview} color={'#C6DBDA'}>
-            {' '}
-            {loading == 1 ? (
-              <FaSpinnerBlock>
-                <FaSpinner />
-              </FaSpinnerBlock>
-            ) : (
-              <BsRobot />
-            )}
-            &nbsp; Code Review{' '}
-          </LongButton>
-          <LongButton onClick={handleCodeRefactor} color={'#FACFCF'}>
-            {' '}
-            {loading == 2 ? (
-              <FaSpinnerBlock>
-                <FaSpinner />
-              </FaSpinnerBlock>
-            ) : (
-              <BsRobot />
-            )}
-            &nbsp; Refactoring{' '}
-          </LongButton>
-          <LongButton onClick={handleDeadCode} color={'#FEF0D6'}>
-            {' '}
-            {loading == 3 ? (
-              <FaSpinnerBlock>
-                <FaSpinner />
-              </FaSpinnerBlock>
-            ) : (
-              <BsRobot />
-            )}
-            &nbsp; Dead Code{' '}
-          </LongButton>
-          <LongButton onClick={handleCodeComment} color={'#AED5F8'}>
-            {' '}
-            {loading == 4 ? (
-              <FaSpinnerBlock>
-                <FaSpinner />
-              </FaSpinnerBlock>
-            ) : (
-              <BsRobot />
-            )}
-            &nbsp; Comment{' '}
-          </LongButton>
-          <Button onClick={handleButtonClick} color={'#D9CFDE'}>
+            Back{' '}
+          </PrevButton>
+          <ActionButton>
+            <LongButton onClick={handleCodeReview} color={'#C6DBDA'}>
+              {' '}
+              {loading == 1 ? (
+                <FaSpinnerBlock>
+                  <FaSpinner />
+                </FaSpinnerBlock>
+              ) : (
+                <BsRobot />
+              )}
+              &nbsp; Code Review{' '}
+            </LongButton>
+            <LongButton onClick={handleCodeRefactor} color={'#FEF0D6'}>
+              {' '}
+              {loading == 2 ? (
+                <FaSpinnerBlock>
+                  <FaSpinner />
+                </FaSpinnerBlock>
+              ) : (
+                <BsRobot />
+              )}
+              &nbsp; Refactoring{' '}
+            </LongButton>
+            <LongButton onClick={handleCodeComment} color={'#AED5F8'}>
+              {' '}
+              {loading == 3 ? (
+                <FaSpinnerBlock>
+                  <FaSpinner />
+                </FaSpinnerBlock>
+              ) : (
+                <BsRobot />
+              )}
+              &nbsp; Comment{' '}
+            </LongButton>
+            <LongButton onClick={handleDeadCode} color={'#FACFCF'}>
+              {' '}
+              {loading == 4 ? (
+                <FaSpinnerBlock>
+                  <FaSpinner />
+                </FaSpinnerBlock>
+              ) : (
+                <BsRobot />
+              )}
+              &nbsp; Dead Code{' '}
+            </LongButton>
+          </ActionButton>
+          <Button onClick={handleButtonClick} color={'#A9A0FC'}>
             {' '}
             Save{' '}
           </Button>
