@@ -1,17 +1,21 @@
 import React, { useEffect, useContext } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-
+import { useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import axios from 'axios';
+
 import { AuthContext } from '../components';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
-
+const Loading = styled.div`
+  height: 800px;
+  overflow: hidden;
+  background-color: #f2f2f2;
+`;
 const OAuthPage = () => {
   const { setLoggedIn } = useContext(AuthContext);
 
   console.log('OAuthPage');
 
-  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -38,6 +42,8 @@ const OAuthPage = () => {
         })
         .catch((error) => {
           console.error('Callback request error:', error);
+          alert('일시적인 장애가 발생했습니다. 잠시후 다시 시도해주세요.');
+          window.location.href = '/login';
         });
     } else {
       console.error('Callback code is missing');
@@ -45,7 +51,7 @@ const OAuthPage = () => {
     }
   }, [history, location.search]);
 
-  return <div>Loading...</div>;
+  return <Loading></Loading>;
 };
 
 export default OAuthPage;

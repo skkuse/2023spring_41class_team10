@@ -77,7 +77,7 @@ function ProfilePage(props) {
     localStorage.setItem('isLoggedIn', false);
     localStorage.setItem('refresh_token', false);
     localStorage.setItem('access_token', false);
-    window.location.reload();
+    window.location.href = '/';
   };
 
   const handleClick = () => {

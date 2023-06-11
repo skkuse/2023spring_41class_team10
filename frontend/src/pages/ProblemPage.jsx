@@ -13,7 +13,6 @@ import ProblemInfo from '../components/ProblemInfo';
 import { useParams, useNavigate } from 'react-router-dom';
 import common from '../components/Common.module.css';
 
-
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 const Titleh3 = styled.h3`
@@ -96,8 +95,8 @@ const SolvingContainer = styled.div`
 // `;
 
 const ReactAceContainer = styled.div`
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
   background-color: pink;
 `;
 
@@ -163,6 +162,13 @@ const TestCase = styled.pre`
   width: 50%;
 `;
 
+const ProblemContainer = styled.div`
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+`;
+
 //백엔드 없을 때 테스트용 데이터
 const tempdate1 = new Date(2023, 5, 26, 15, 55, 5).toDateString();
 const data = {
@@ -177,7 +183,6 @@ const data = {
 };
 
 function Problem() {
-  //const { data } = useProblemQuery() // 나중에 백엔드 연결하면 바꾸기
   const { slug } = useParams();
   const navigate = useNavigate();
 
@@ -195,7 +200,8 @@ function Problem() {
         console.log('response', response);
         if (response.data.status !== 'fail') setProblemInfo(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch questions:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch questions:', error);
       }
     };
     fetchProblemInfo();
@@ -212,12 +218,17 @@ function Problem() {
   };
 
   const getModeFromLanguage = (language) => {
-    switch(language) {
-      case 'Python': return 'python';
-      case 'C': return 'c_cpp';
-      case 'C++': return 'c_cpp';
-      case 'JAVA': return 'java';
-      default: return 'python';
+    switch (language) {
+      case 'Python':
+        return 'python';
+      case 'C':
+        return 'c_cpp';
+      case 'C++':
+        return 'c_cpp';
+      case 'JAVA':
+        return 'java';
+      default:
+        return 'python';
     }
   };
 
@@ -267,8 +278,11 @@ function Problem() {
           setCodeTyped(response.data.data.code);
         } else alert(response.data.message);
       } catch (error) {
-        console.error('Failed to Load Code:', error);
-        alert('Fail to Load Code');
+        if (error.response.status === 401) navigate('/login');
+        else {
+          console.error('Failed to Load Code:', error);
+          alert('코드를 불러오는데 실패했습니다.');
+        }
       }
     }
   };
@@ -284,8 +298,11 @@ function Problem() {
           alert(response.data.message);
         } else alert(response.data.message);
       } catch (error) {
-        console.error('Failed to Run Code:', error);
-        alert('Fail to Run Code');
+        if (error.response.status === 401) navigate('/login');
+        else {
+          console.error('Failed to Save Code:', error);
+          alert('코드 저장에 실패했습니다.');
+        }
       }
     }
   };
@@ -301,8 +318,11 @@ function Problem() {
         setOutputValue(response.data.data.result);
       } else alert(response.data.message);
     } catch (error) {
-      console.error('Failed to Run Code:', error);
-      alert('Fail to Run Code');
+      if (error.response.status === 401) navigate('/login');
+      else {
+        console.error('Failed to Run Code:', error);
+        alert('코드 실행에 실패했습니다.');
+      }
     }
   };
   const handleSubmitCode = async () => {
@@ -319,8 +339,11 @@ function Problem() {
           setOutputValue(response.data.data.result);
         } else alert(response.data.message);
       } catch (error) {
-        console.error('Failed to Run Code:', error);
-        alert('Fail to Run Code');
+        if (error.response.status === 401) navigate('/login');
+        else {
+          console.error('Failed to Submit Code:', error);
+          alert('코드 제출에 실패했습니다.');
+        }
       }
     }
   };
@@ -333,13 +356,15 @@ function Problem() {
       </div>
       <DescriptionContainer>
         {/* problem metadata component */}
-        <ProblemInfo
-          problemNumber={slug}
-          title={problemInfo.title}
-          problemCategory={problemInfo.field}
-          problemLevel={problemInfo.level}
-          isActive={false}
-        />
+        <ProblemContainer>
+          <ProblemInfo
+            problemNumber={slug}
+            title={problemInfo.title}
+            problemCategory={problemInfo.field}
+            problemLevel={problemInfo.level}
+            isActive={false}
+          />
+        </ProblemContainer>
         <Titleh3>문제 설명</Titleh3>
         <MoreDescriptionContainer>
           <ActualDescriptionContainer>{problemInfo.description}</ActualDescriptionContainer>
@@ -375,12 +400,12 @@ function Problem() {
         </LeftAlign>
       </div>
       <SolvingContainer>
-        <TypingContainer 
-          width={"100%"}
-          mode={getModeFromLanguage(language)} 
-          theme="monokai" 
-          onChange={handleCodeChange} 
-          name="1" 
+        <TypingContainer
+          width={'100%'}
+          mode={getModeFromLanguage(language)}
+          theme="monokai"
+          onChange={handleCodeChange}
+          name="1"
           editorProps={{ $blockScrolling: true }}
           fontSize={14}
           showPrintMargin={true}
@@ -388,37 +413,37 @@ function Problem() {
           highlightActiveLine={true}
           setOptions={{
             showLineNumbers: true,
-            tabSize: 2,
+            tabSize: 2
           }}
         />
         <InputOutputContainer>
           <InputContainer>
             <label>Input</label>
-            <TypingContainer 
-              width={"100%"}
+            <TypingContainer
+              width={'100%'}
               mode="markdown"
-              theme="monokai" 
-              onChange={handleInputChange} 
-              name="2" 
-              editorProps={{ $blockScrolling: true }} 
+              theme="monokai"
+              onChange={handleInputChange}
+              name="2"
+              editorProps={{ $blockScrolling: true }}
               fontSize={14}
               showPrintMargin={true}
               showGutter={true}
               highlightActiveLine={true}
               setOptions={{
                 showLineNumbers: true,
-                tabSize: 2,
+                tabSize: 2
               }}
             />
           </InputContainer>
           <OutputContainer>
             <label>Output</label>
             <TypingContainer
-              width={"100%"}
+              width={'100%'}
               mode="markdown"
               theme="monokai"
-              name="3" 
-              editorProps={{ $blockScrolling: true }} 
+              name="3"
+              editorProps={{ $blockScrolling: true }}
               fontSize={14}
               showPrintMargin={true}
               showGutter={true}
@@ -426,7 +451,7 @@ function Problem() {
               value={outputValue}
               setOptions={{
                 showLineNumbers: true,
-                tabSize: 2,
+                tabSize: 2
               }}
               readOnly={true}
             />

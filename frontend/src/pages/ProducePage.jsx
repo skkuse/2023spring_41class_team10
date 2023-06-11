@@ -134,6 +134,7 @@ const data = {
 };
 
 function Produce() {
+  const navigate = useNavigate();
   const [problemData, setProblemData] = useState({
     title: '',
     level: '',
@@ -154,7 +155,8 @@ function Produce() {
         console.log('response', response);
         if (response.data.status !== 'fail') setFieldData(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch FieldList:', error);
+        if (error.response.status === 401) navigate('/login');
+        else console.error('Failed to fetch FieldList:', error);
       }
     };
     fetchFieldList();
@@ -169,8 +171,6 @@ function Produce() {
     };
     return config;
   };
-
-  const navigate = useNavigate();
 
   const handleTitleChange = (e) => {
     let tempdata = problemData;
@@ -249,7 +249,8 @@ function Produce() {
         if (response.data.status !== 'fail') navigate('/home');
       }
     } catch (error) {
-      console.error('Failed to post new problem:', error);
+      if (error.response.status === 401) navigate('/login');
+      else console.error('Failed to post new problem:', error);
     }
   };
 
