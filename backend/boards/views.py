@@ -1,11 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import json
-import logging
-
-from boards.models import Board, Article
-from users.models import User
+from boards.models import Article
 
 def get_fail_res(msg):
     """ 
@@ -23,9 +19,6 @@ class NoticeListView(APIView):
         GET     : id, problem_title, algorithm_field, level
     """
     def get(self, request):
-        if not request.user.is_authenticated:
-            return Response(get_fail_res("user is not authenticated"))
-        user = User.objects.get(id=request.user.id)
         page = request.GET.get('page', 1)
         page = int(page)
         PAGE_SIZE = 5
@@ -41,7 +34,6 @@ class NoticeListView(APIView):
             "status": "success",
             "message": "Problem List Info",
             "data": article_list,
-            "user": user.to_json()
         }
 
         return Response(response_data)
@@ -53,9 +45,6 @@ class FAQListView(APIView):
         GET     : id, problem_title, algorithm_field, level
     """
     def get(self, request):
-        if not request.user.is_authenticated:
-            return Response(get_fail_res("user is not authenticated"))
-        user = User.objects.get(id=request.user.id)
         page = request.GET.get('page', 1)
         page = int(page)
         PAGE_SIZE = 5
@@ -72,7 +61,6 @@ class FAQListView(APIView):
             "status": "success",
             "message": "Problem List Info",
             "data": article_list,
-            "user": user.to_json()
         }
 
         return Response(response_data)
