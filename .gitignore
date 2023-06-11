@@ -1,11 +1,45 @@
+# Django
+*.log
+*.pot
+*.pyc
 __pycache__/
+media/
+staticfiles/
+.staticfiles/
+
+# Virtual Environments
 venv
 .venv
 env
 .env
 myenv/
-media/
+
+#Secret
 secret.json
-*.log
+
+# Oracle DB
 *.sso
 *.ora
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# macOS metadata file for developers with macOS
+.DS_store
