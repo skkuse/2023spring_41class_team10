@@ -125,7 +125,7 @@ function HomePage() {
                 {recentLecture.map((lecture, index) => (
                   <Lectures
                     key={index}
-                    id={lecture.id}
+                    id={lecture.lecture_id}
                     youtubeLink={lecture.lecture_link}
                     title={lecture.lecture_title}
                     datetime={lecture.create_at}
@@ -165,7 +165,7 @@ function HomePage() {
                     id={lecture.lecture_id}
                     youtubeLink={lecture.lecture_link}
                     title={lecture.lecture_title}
-                    memo={lecture.memo}
+                    memo={lecture.memo ? lecture.memo : 'ChatGPT 한줄평이 아직 작성되지 않았습니다.'}
                   />
                 ))}
               </LectureList>

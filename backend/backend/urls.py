@@ -28,7 +28,6 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='github_login'),
     path('login/github/callback/', views.GitHubLoginView.as_view(), name='github_login_callback'),
     path('problems/', include('problems.urls')),
-    # path('HomePage/', include('HomePage.urls')),
     path('users/', include('users.urls')),
     path('codes/', include('codes.urls')),
     path('boards/', include('boards.urls')),
